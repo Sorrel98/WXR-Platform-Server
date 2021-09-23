@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script> var uname = '<%= uname %>'; var wid = <%= wid %>; var roleId = <%= rid %>; var wname = '<%= wname %>'; var created = '<%= created %>'; var canWrite = <%= canWrite %>; var canInvite = <%= canInvite %>;</script>
+    <script src="/library/jquery-1.11.3.min.js"></script>
+    <script src="/library/adapter.js"></script>
+	<script src="/library/aframe-v1.2.0.min.js"></script>
+    <script src="/library/THREE.TransformControls.js"></script>
+    <script src="/library/THREE.PCDLoader.js"></script>
+	<script src="/library/socket.io.js"></script>
+    <!--<script src="https://unpkg.com/aframe-html-shader@0.2.0/dist/aframe-html-shader.min.js"></script>-->
+	<script src="/library/animation-mixer.js"></script>
+    <script src="/library/cube-env-map.js"></script>
+	<script src="/library/stack.js"></script>
+    <script src="/library/list.js"></script>
+	<script src="/components/event-capturer.js"></script>
+	<script src="/components/flag+trigger.js"></script>
+    <script src="/primitives/a-flag.js"></script>
+    <script src="/primitives/a-trigger.js"></script>
+	<script src="/components/position-observer.js"></script>
+	<script src="/components/rotation-observer.js"></script>
+	<script src="/components/scale-observer.js"></script>
+	<script src="/components/collision-observer.js"></script>
+	<script src="/components/two-state-animation.js"></script>
+    <script src="/components/two-state-embedded-animation.js"></script>
+	<script src="/components/transparency.js"></script>
+	<script src="/components/vr-slide.js"></script>
+	<script src="/components/vr-1axis-hinge.js"></script>
+	<script src="/components/vr-snap.js"></script>
+    <script src="/components/point-cloud.js"></script>
+    <script src="/primitives/a-point-cloud.js"></script>
+    <script src="/primitives/a-group.js"></script>
+    <script src="/components/binder.js"></script>
+    <script src="/components/hinge-animation.js"></script>
+	<script src="/components/avatar.js"></script>
+	<script src="/primitives/a-user.js"></script>
+    <script src="/components/interaction-manger.js"></script>
+    <script src="/components/thd-mode-controls.js"></script>
+    <script src="/components/vr-mode-controls.js"></script>
+	<script src="/components/ar-mode-controls.js"></script>
+    <script src="/components/sync.js"></script>
+    <script src="/components/mode-changer.js"></script>
+    <script src="/components/target.js"></script>
+    <script src="/components/active-marker.js"></script>
+    <script src="/primitives/a-marker.js"></script>
+    <script src="/components/base-marker.js"></script>
+    <script src="/primitives/a-base.js"></script>
+    <script src="/components/color-scroll-material.js"></script>
+	<script src="/components/property-setter.js"></script>
+	
+    <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+    <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+    <a-scene sync id="root" interaction-manger thd-mode-controls vr-mode-controls="<%- vrOptions %>" ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
+        <%- data %>
+    </a-scene>
+    <div id="modeChangerLayer">
+        <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
+        <img id="_ARButton" src="/img/icon/AR in circle.svg"/>
+        <img id="_3DButton" src="/img/icon/3D in circle.svg"/>
+    </div>
+</body>
+</html>

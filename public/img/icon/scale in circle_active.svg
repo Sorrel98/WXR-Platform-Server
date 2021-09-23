@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.0.4, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#BFD3E2;}
+	.st1{fill:none;stroke:#FFFFFF;stroke-miterlimit:10;}
+	.st2{fill:#FFFFFF;stroke:#FFFFFF;stroke-miterlimit:10;}
+</style>
+<circle class="st0" cx="50" cy="50" r="48"/>
+<g>
+	<g>
+		<g transform="translate(50 50) scale(0.69 0.69) rotate(0) translate(-50 -50)">
+			<title>КУБ</title>
+			<polygon class="st1" points="68.2,51.7 50.6,41.6 32.8,51.7 32.8,72.1 50.6,82.4 68.2,72.1 			"/>
+			<line class="st1" x1="32.8" y1="51.7" x2="50.6" y2="62"/>
+			<line class="st1" x1="50.6" y1="62" x2="68.2" y2="51.7"/>
+			<line class="st1" x1="50.6" y1="62" x2="50.6" y2="82.4"/>
+		</g>
+	</g>
+	<line class="st1" x1="50.4" y1="25.8" x2="50.4" y2="43.9"/>
+	<line class="st1" x1="62.5" y1="65" x2="78" y2="74.3"/>
+	<line class="st1" x1="38.2" y1="65.2" x2="22.4" y2="74.1"/>
+</g>
+<circle class="st2" cx="50.4" cy="25.8" r="2.5"/>
+<circle class="st2" cx="22.1" cy="74.2" r="2.5"/>
+<circle class="st2" cx="77.9" cy="74.2" r="2.5"/>
+</svg>

@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
+    <script src="/library/jquery-1.11.3.min.js"></script>
+	<script src="/library/jquery.blockUI.js"></script>
+	<script src="/library/aframe-v1.0.4.min.js"></script>
+    <script src="/library/THREE.TransformControls.js"></script>
+    <script src="/library/THREE.PCDLoader.js"></script>
+	<script src="/library/animation-mixer.js"></script>
+    <script src="/library/cube-env-map.js"></script>
+	<script src="/library/stack.js"></script>
+    <script src="/library/list.js"></script>
+	<script src="/components/event-capturer.js"></script>
+	<script src="/components/flag+trigger.js"></script>
+    <script src="/primitives/a-flag.js"></script>
+    <script src="/primitives/a-trigger.js"></script>
+	<script src="/components/position-observer.js"></script>
+	<script src="/components/rotation-observer.js"></script>
+	<script src="/components/scale-observer.js"></script>
+	<script src="/components/collision-observer.js"></script>
+	<script src="/components/two-state-animation.js"></script>
+    <script src="/components/two-state-embedded-animation.js"></script>
+	<script src="/components/transparency.js"></script>
+	<script src="/components/vr-slide.js"></script>
+	<script src="/components/vr-1axis-hinge.js"></script>
+	<script src="/components/vr-snap.js"></script>
+    <script src="/components/point-cloud.js"></script>
+    <script src="/primitives/a-point-cloud.js"></script>
+    <script src="/primitives/a-group.js"></script>
+    <script src="/components/binder.js"></script>
+    <script src="/components/hinge-animation.js"></script>
+	<script src="/components/avatar.js"></script>
+	<script src="/primitives/a-user.js"></script>
+    <script src="/components/interaction-manger.js"></script>
+    <script src="/components/thd-mode-controls.js"></script>
+    <script src="/components/vr-mode-controls.js"></script>
+	<script src="/components/ar-mode-controls.js"></script>
+    <script src="/components/mode-changer.js"></script>
+    <script src="/components/target.js"></script>
+    <script src="/components/active-marker.js"></script>
+    <script src="/primitives/a-marker.js"></script>
+    <script src="/components/base-marker.js"></script>
+    <script src="/primitives/a-base.js"></script>
+    <script src="/components/color-scroll-material.js"></script>
+	<script src="/components/property-setter.js"></script>
+	
+    <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+    <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+	
+	<style>
+		.tutorialMessage {
+			position : absolute;
+			z-index : 10000;
+			background : black;
+			opacity : 0.5;
+			top : 50px;
+			pointer-events : none;
+		}
+		.horizontal {
+			width : 400px;
+			height : 200px;
+			left : calc(50% - 200px);
+		}
+		.vertical {
+			width : 300px;
+			height : 260px;
+			left : calc(50% - 150px);
+		}
+		.tutorialMessageContent {
+			position : absolute;
+			width : calc(100% - 20px);
+			height : calc(100% - 50px);
+			left : 10px;
+			top : 10px;
+			color : white;
+		}
+		.tutorialButtonPrev {
+			position : absolute;
+			width : 50px;
+			height : 25px;
+			top : calc(100% - 30px);
+			left : calc(100% - 110px);
+			pointer-events : auto;
+			cursor : default;
+		}
+		.tutorialButtonNext {
+			position : absolute;
+			width : 50px;
+			height : 25px;
+			top : calc(100% - 30px);
+			left : calc(100% - 55px);
+			pointer-events : auto;
+			cursor : default;
+		}
+	</style>
+	
+	<script>
+		var step = 0;
+		var messages = [
+			'Click the AR button and select \'marker based\' option as the spatial computing method to enter AR mode.',
+			'The spatial computing method may have several options depending on the execution environment. In general, \'marker based\' and \'plane detect based\' are provided.',
+			'\'plane detect based\' is a method in which the AR engine tracks the camera pose based on the recognition of the surrounding plane.',
+			'\'marker based\' uses the base marker. The base marker is a marker that promises not to actually move, and tracks the camera\'s pose based on the view of the base marker seen by the camera.',
+			'In this tutorial, we will experience AR interaction with a base marker.',
+			'AR mode is divided into half session mode and full session mode.',
+			'In half session mode, the scene is not writeable, only read. This is useful when you want to overlap the real and virtual scene and observe them together.',
+			'Full session mode is a mode that allows both reading and writing to the scene. You can move the real thing directly so that it is reflected in the virtual scene.',
+			'There is an image with the letter A written on it that you have printed. This image is registered as an active marker in this tutorial scene.',
+			'If you move the active marker in front of the camera, you can see all the objects move together as it moves.',
+			'This time, keep the active marker still and move the camera. You can observe the scene from different angles.',
+			'In fact, the two cases are not different. The objects in the scene did not move, only the pose of the scene camera was updated.',
+			'In order to actually interact with the scene, not only the active marker, but also the base marker must be on the camera.',
+			'When two markers are tracked simultaneously, AR operates in full session mode. Look at the image with the letter B and the image with the letter A on the camera at the same time.',
+			'Move the image with the letter A written on it. The cuboid will move separately.',
+			'When AR operates in half session mode, it displays a yellow guide line at the position of the active marker, and does not show the guide line when operating in full session mode.',
+			'Depending on the execution environment, the base marker may be tracked even if it is off the camera frame. If it is difficult to put both base and active markers in the camera frame at the same time, Give it a try.',
+			'If \'plane detection based\' is selected as the method of special computing, AR module always operates in full session mode with active markers, but its accuracy may be slightly reduced.',
+			'Click the 3D button to return to 3D mode. Check the components of each object to learn how to configure the AR scene.',
+			'View \'activeMarker\' and \'baseMarker\' through the edit window. You can see that url for marker feature is entered.',
+			'It doesn\'t matter how baseMarker transforms, but activeMarker transforms are important.',
+			'The reason why \'box\' was placed in the \'activeMarker\' position when augmented is because the transform of \'activeMarker\' is set to that pose in the scene.',
+			'To assist with this adjustment, the active marker displays a yellow guide box.',
+			'One more thing to note is that \'box\' is not a child of \'activeMarker\'. In WXR, there is a component that allow you to transform as if it\'s object is a child of another object based on a reference.',
+			'Look at the \'box\' in the edit window. You can view the \'target\' component. The id is entered for \'activeMarker\' reference.',
+			'So far, we\'ve learned the basic ways to experience AR scenes and make up scenes. Create a workspace on the main page and experience it in personally.'
+		];
+		var tutorialMessage;
+		function next() {
+			if(step === messages.length - 1) return;
+			tutorialMessage.children[0].innerHTML = messages[++step];
+		}
+		function prev() {
+			if(step === 0) return;
+			tutorialMessage.children[0].innerHTML = messages[--step];
+		}
+		function init()
+		{
+			tutorialMessage = document.createElement('div');
+			$(tutorialMessage).addClass('tutorialMessage');
+			if(window.innerHeight <= window.innerWidth) {
+				$(tutorialMessage).addClass('horizontal');
+			}
+			else {
+				$(tutorialMessage).addClass('vertical');
+			}
+			document.body.appendChild(tutorialMessage);
+			let messageContent = document.createElement('span');
+			$(messageContent).addClass('tutorialMessageContent');
+			tutorialMessage.appendChild(messageContent);
+			let buttonPrev = document.createElement('button');
+			buttonPrev.innerHTML = '<<';
+			buttonPrev.onclick = prev;
+			$(buttonPrev).addClass('tutorialButtonPrev');
+			tutorialMessage.appendChild(buttonPrev);
+			let buttonNext = document.createElement('button');
+			buttonNext.innerHTML = '>>';
+			buttonNext.onclick = next;
+			$(buttonNext).addClass('tutorialButtonNext');
+			tutorialMessage.appendChild(buttonNext);
+			tutorialMessage.children[0].innerHTML = messages[step];
+			window.addEventListener('resize', (e)=> {
+				if(window.innerHeight <= window.innerWidth) {
+					if($(tutorialMessage).hasClass('vertical')) {
+						$(tutorialMessage).removeClass('vertical');
+						$(tutorialMessage).addClass('horizontal');
+					}
+				}
+				else {
+					if($(tutorialMessage).hasClass('horizontal')) {
+						$(tutorialMessage).removeClass('horizontal');
+						$(tutorialMessage).addClass('vertical');
+					}
+				}
+			});
+		}
+	</script>
+</head>
+<body onload="init();">
+    <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
+		<a-group id="group" position="0 1.5 0" scale="0.1 0.1 0.1">
+			<a-box id="box" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" material geometry target="marker:#activeMarker"></a-box>
+			<a-sphere id="sphere" position="0 1.25 -5" radius="1.25" color="#EF2D5E" material geometry></a-sphere>
+			<a-cylinder id="cylinder" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" material geometry></a-cylinder>
+			<a-plane id="plane" position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4" material geometry></a-plane>
+		</a-group>
+		<a-base id="baseMarker" base-marker="src:/tutorial/baseMarker"></a-base>
+		<a-marker id="activeMarker" position="-0.06442432527531143 1.5498364186522497 -0.26463716440012536" rotation="90 45 0" active-marker="src:/tutorial/activeMarker"></a-marker>
+		<a-sky id="sky" visible="true" material="src:/tutorial/background.png;" geometry="primitive:sphere;radius:500;">
+		</a-sky>
+	</a-scene>
+    <div id="modeChangerLayer" class="buttonUI">
+        <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
+        <img id="_ARButton" src="/img/icon/AR in circle.svg"/>
+        <img id="_3DButton" src="/img/icon/3D in circle.svg"/>
+    </div>
+</body>
+</html>

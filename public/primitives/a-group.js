@@ -1,0 +1,2 @@
+﻿AFRAME.registerPrimitive('a-group', {
+});

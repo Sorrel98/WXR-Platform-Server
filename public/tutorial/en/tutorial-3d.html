@@ -1,0 +1,354 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
+    <script src="/library/jquery-1.11.3.min.js"></script>
+	<script src="/library/jquery.blockUI.js"></script>
+	<script src="/library/aframe-v1.0.4.min.js"></script>
+    <script src="/library/THREE.TransformControls.js"></script>
+    <script src="/library/THREE.PCDLoader.js"></script>
+	<script src="/library/animation-mixer.js"></script>
+    <script src="/library/cube-env-map.js"></script>
+	<script src="/library/stack.js"></script>
+    <script src="/library/list.js"></script>
+	<script src="/components/event-capturer.js"></script>
+	<script src="/components/flag+trigger.js"></script>
+    <script src="/primitives/a-flag.js"></script>
+    <script src="/primitives/a-trigger.js"></script>
+	<script src="/components/position-observer.js"></script>
+	<script src="/components/rotation-observer.js"></script>
+	<script src="/components/scale-observer.js"></script>
+	<script src="/components/collision-observer.js"></script>
+	<script src="/components/two-state-animation.js"></script>
+    <script src="/components/two-state-embedded-animation.js"></script>
+	<script src="/components/transparency.js"></script>
+	<script src="/components/vr-slide.js"></script>
+	<script src="/components/vr-1axis-hinge.js"></script>
+	<script src="/components/vr-snap.js"></script>
+    <script src="/components/point-cloud.js"></script>
+    <script src="/primitives/a-point-cloud.js"></script>
+    <script src="/primitives/a-group.js"></script>
+    <script src="/components/binder.js"></script>
+    <script src="/components/hinge-animation.js"></script>
+	<script src="/components/avatar.js"></script>
+	<script src="/primitives/a-user.js"></script>
+    <script src="/components/interaction-manger.js"></script>
+    <script src="/components/thd-mode-controls.js"></script>
+    <script src="/components/vr-mode-controls.js"></script>
+	<script src="/components/ar-mode-controls.js"></script>
+    <script src="/components/mode-changer.js"></script>
+    <script src="/components/target.js"></script>
+    <script src="/components/active-marker.js"></script>
+    <script src="/primitives/a-marker.js"></script>
+    <script src="/components/base-marker.js"></script>
+    <script src="/primitives/a-base.js"></script>
+    <script src="/components/color-scroll-material.js"></script>
+	<script src="/components/property-setter.js"></script>
+	
+    <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+    <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+	
+	<style>
+		.tutorialBox {
+			position : fixed;
+			z-index : 10000;
+			border-style : solid;
+			border-width : 3px;
+			border-color : red;
+			pointer-events : none;
+		}
+		.tutorialMessageVert {
+			position : relative;
+			background : black;
+			opacity : 0.5;
+			width : 200px;
+			height : 300px;
+			pointer-events : auto;
+			cursor : default;
+		}
+		.tutorialMessageHori {
+			position : relative;
+			background : black;
+			opacity : 0.5;
+			width : 300px;
+			height : 150px;
+			pointer-events : auto;
+			cursor : default;
+		}
+		.tutorialMessageContent {
+			position : absolute;
+			width : calc(100% - 20px);
+			height : calc(100% - 50px);
+			left : 10px;
+			top : 10px;
+			color : white;
+			word-wrap:break-word;
+		}
+		.tutorialButtonPrev {
+			position : absolute;
+			width : 50px;
+			height : 25px;
+			top : calc(100% - 30px);
+			left : calc(100% - 110px);
+			cursor : default;
+		}
+		.tutorialButtonNext {
+			position : absolute;
+			width : 50px;
+			height : 25px;
+			top : calc(100% - 30px);
+			left : calc(100% - 55px);
+			cursor : default;
+		}
+	</style>
+	
+	<script>
+		var step = 0;
+		var messages = [
+			'The left panel consists of three tabbed documents: hierarchy, peer, and flags. There is a title for each tabbed document in bold at the top, and you can switch documents by clicking on it.',
+			'The hierarchy document shows the hierarchy of 3D scene in this workspace. The scene has a tree structure, and nodes with children have + or - button on the left. Click the + button to expand child nodes, and press the - button to fold and hide.',
+			'Each node is represented by a tag name indicating its type and ID, which is a unique identifier. When you create a new workspace, there is an A-SCENE type root node and some A-ENTITY nodes that do not have IDs as child nodes.',
+			'These are the basic elements of the scene and cannot be edited or deleted. Each Node may or may not have meshes that are rendered into the scene. The basic elements described above are nodes that do not have a mesh.',
+			'You can select a node by clicking on it, and the subtree of the selected node is shaded red. Node selection is responsible for designating targets for insert, delete, edit, and other interactions.',
+			'Select root and press the insert key (or ctrl + i). A window for adding a new object will pop up. Enter \'background\' in the id field, select a-sky for primitive, and click OK.',
+			'The newly created object is added to the hierarchy tree view, and a new window pops up where you can modify transforms, component properties, etc. Enter \'/tutorial/background.png\' for the material src and click OK.',
+			'From now on, the background image will be shown in the viewport. Let\'s add another object. First press ESC to deselect \'background\' object or click on \'root\' in the hierarchy tree view.',
+			'As just before, pree the insert key (or ctrl + i). And Enter \'box\' in the id field, select a-box for primitive, and click OK.',
+			'In the edit window that appears, enter \'yellow\' for the material color and click the OK button.',
+			'If the box object you just created is outside the camera\'s view frustum, it will not be visible.',
+			'You can rotate the camera by dragging the mouse in the viewport and move the camera by pushing wasd keys. Move it yourself so that the box is visible.',
+			'Now press the insert key with the box selected. Then, enter \'sphere\' in the id field, select a-sphere in the primitive, and click the OK button. This will create a sphere as a child of the box.',
+			'Next, enter \'blue\' as the color and click OK. If you have already closed the editing window, you can open it again by selecting a node in the hierarchy and pressing the enter key.',
+			'The sphere and the box overlapped, so the box would be invisible. Select the sphere, open the edit window, and enter \'3 0 0\' in the position field to change the position.',
+			'You can also change the parent by dragging and dropping nodes in the hierarchy tree view. Drag and drop from the sphere to the root to change the parent to the root.',
+			'At this point, the local transform is updated accordingly so that the transform in the world coordinate system is maintained.',
+			'The next tab, the peer document, shows other users currently connected to the workspace. This tutorial page is a space for you to experience alone, so, unfortunately, you cannot see other users.',
+			'The next tab, flags document, shows a tree of triggers and flags. Triggers and flags are tools that allow scene authors to create responsive scenarios.',
+			'Flag is a boolean variable that can be automatically updated by a specific object\'s transform or collision state.',
+			'Triggers can have flags or triggers as children, and like flags, have boolean variables themselves.',
+			'This value is automatically updated when the values of the children are updated, and one subtree can be viewed as representing one Boolean algebraic expression.',
+			'If you press the insert key while the flags tab is open, a pop-up window appears as before, but there are only two options: a-flag and a-trigger in primitive. Select a-trigger, enter \'t1\' in the id field, and click OK.',
+			'When the edit window pops up, enter \'t1up\' in risingEdgeEvent and \'t1down\' in fallingEdgeEvent and click OK button.',
+			'The moment the boolean variable of this trigger goes from false to true, the \'t1up\' event will emit, and the moment it goes from true to false, the \'t1down\' event will emit.',
+			'If you check the flags tab, you can see the flag to the right of t1. This means that the boolean variable value of the t1 trigger is true. This trigger is a trigger of and type and has no children, so it is true.',
+			'With t1 selected, press the insert key again, enter \'f1\' in the id field, and select a-flag for the primitive to create a flag. Enter \'fn1\' for the name. This name is shown in parentheses after the id. This flag can now be referenced through the name \'fn1\'.',
+			'You can see six buttons on the top right.',
+			'Click this button to copy the content source to the clipboard. This feature can be used to clone the current scene by saving it as a template or pasting it into the content source of a scene in another workspace.',
+			'Clicking this button saves the current state of the content. This page is a temporary tutorial page, so it cannot be used.',
+			'This button functions like the insert key and the ctrl + i keys. It opens a pop-up window that creates children for the currently selected node. However, if nothing is selected, it is treated as creating a child of root.',
+			'This button functions like the enter key. Select the box node in the hierarchy tab and click this button.',
+			'Let\'s take a closer look at the editing window.',
+			'In the edit window, the components of the object and sub-properties of each component are displayed. Among components, there are single property components that do not have sub-properties such as visible.',
+			'If you scroll down and look at the bottom, you can see \'Add attribute\'. Enter \'collidable\' in the first field and click the Add button. You can see the \'collidable\' component is added.',
+			'\'collidable\' component acts as a filter for collisions. This component must be attached in order to pick in the viewport with the mouse or interact with the controller in VR.',
+			'It is also needed for the collision-observer to work. Let\'s create this by testing the flags and triggers we created earlier. Enter \'collision-observer\' in the first field of \'Add attribute\' and click the \'Add\' button.',
+			'The collision-observer component has two sub-properties: \'target\' and \'flagName\'. You can edit it in the field next to the property name, but this time let\'s do it a little differently.',
+			'Enter \'collision-observer\' in the first field of the Add attribute, \'target\' in the second field, and \'#sphere\' in the third field and click the Add button.',
+			'This way, when adding a component, you can also specify the value of the sub-property. In \'flagName\', enter \'fn1\', the name of the flag you just created, and click OK.',
+			'Now, if there is a collision with the sphere the \'fn1\' flag will be on. However, in order for two objects to collide with each other, each must have a \'collidable\' component.',
+			'Select the sphere and open the edit window to add a \'collidable\' component. Now, the box and the sphere can collide, and when they collide, the \'t1up\' event occurs when they enter the collision, and the \'t1down\' event occurs when they exit the collision.',
+			'Now let\'s use this event to change the color of the sphere dynamically. Add the \'animation__up\' component and the \'animation__down\' component to the sphere.',
+			'The animation component is a component that can be attached to multiple objects, and each component instance can be classified by adding __[delimited string] after the component name.',
+			'In both animation components, enter \'false\' for the autoplay property and \'0\' for the dur property. Also, enter \'components.material.material.color\' for the property and \'color\' for the type.',
+			'Then for animation__up, enter \'t1up\' for startsEvents and \'red\' for to. And for animation__down, enter \'t1down\' for startsEvents and \'blue\' for to.',
+			'Click OK to close the window, select the box or sphere, then drag the red axis of the gizmo to make the two objects collide. Contrary to expectations, there is no response because the event is not being captured.',
+			'In order for an object to receive an event occurring in a trigger, the event to be captured must be specified with the event_capturer component.',
+			'Open the sphere\'s editing window again and enter \'event-capturer\', \'targetEvent\', \'t1up, t1down\' in the three fields of Add attribute in turn.',
+			'You can now listen to the t1up and t1down events. Close the window and try to collide the two objects once more. You can see that the color of the sphere turns red at the moment of collision and turns blue as it moves away.',
+			'Clicking this button deletes the currently selected node. You can perform the same function with the delete key or ctrl + d keys.',
+			'This button opens a page that tells you the shortcut keys.',
+			'You will see four buttons in the lower center. These buttons are buttons related to the gizmo for manipulating the transform of the object.',
+			'This button toggles the world coordinate system and the local coordinate system.',
+			'The world coordinate system is an absolute coordinate system used regardless of the object\'s hierarchy.',
+			'And the local coordinate system is the coordinate system originating from the parent of the selected object.',
+			'From this button, the three buttons, in turn, change the control mode of the gizmo, and only one of the three is activated.',
+			'This button indicates the translation mode and allows you to adjust the position of the selected object.',
+			'This button indicates the rotation mode and allows you to adjust the orientation of the selected object.',
+			'This button indicates the scale mode and allows you to scale the selected object.',
+			'There are two buttons on the bottom left.',
+			'This button is a undo button that undoes the most recent action.',
+			'This button is a redo button that does the undo operation again.',
+			'At the bottom right, you can see two buttons. These are buttons to change the interaction mode.',
+			'There are three interaction modes, 3D mode, VR mode, and AR mode, and buttons for both modes except the active mode are displayed.'
+		];
+		var buttonUIs = [null];
+		var buttonUIsIdx = 0;
+		var buttonDescChangeSteps = [28, 29, 30, 31, 50, 51, 52, 53, 56, 58, 59, 60, 61, 62, 63];
+		var tutorialBoxs = new Array(5);
+		var tutorialBoxsChangeSteps = [27, 52, 60, 63];
+		var tutorialBoxIdx = 0;
+		
+		function next() {
+			if(step === messages.length - 1) return;
+			++step;
+			if(buttonDescChangeSteps[buttonUIsIdx] === step) {
+				if(buttonUIs[buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).block({message:null});
+				if(buttonUIs[++buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).unblock();
+			}
+			if(tutorialBoxsChangeSteps[tutorialBoxIdx] === step) {
+				hideTutorialBox(tutorialBoxIdx);
+				showTutorialBox(++tutorialBoxIdx);
+			}
+			let messageP = tutorialBoxs[tutorialBoxIdx].children[0].children[0];
+			messageP.innerHTML = messages[step];
+		}
+		
+		function prev() {
+			if(step === 0) return;
+			if(buttonDescChangeSteps[buttonUIsIdx - 1] === step) {
+				if(buttonUIs[buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).block({message:null});
+				if(buttonUIs[--buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).unblock();
+			}
+			if(tutorialBoxsChangeSteps[tutorialBoxIdx - 1] === step) {
+				hideTutorialBox(tutorialBoxIdx);
+				showTutorialBox(--tutorialBoxIdx);
+			}
+			--step;
+			let messageP = tutorialBoxs[tutorialBoxIdx].children[0].children[0];
+			messageP.innerHTML = messages[step];
+		}
+		
+		function init()
+		{
+			for(let i = 0; i < 5; ++i) {
+				tutorialBoxs[i] = document.createElement('div');
+				$(tutorialBoxs[i]).addClass('tutorialBox');
+				tutorialBoxs[i].style.display = 'none';
+				document.body.appendChild(tutorialBoxs[i]);
+				let boxMessage = document.createElement('div');
+				tutorialBoxs[i].appendChild(boxMessage);
+				let p = document.createElement('span');
+				$(p).addClass('tutorialMessageContent');
+				boxMessage.appendChild(p);
+				let buttonprev = document.createElement('button');
+				buttonprev.innerHTML = '<<'
+				buttonprev.onclick = prev;
+				$(buttonprev).addClass('tutorialButtonPrev');
+				boxMessage.appendChild(buttonprev);
+				let buttonnext = document.createElement('button');
+				buttonnext.innerHTML = '>>';
+				buttonnext.onclick = next;
+				$(buttonnext).addClass('tutorialButtonNext');
+				boxMessage.appendChild(buttonnext);
+			}
+			
+			let boxMessage;
+			boxMessage = tutorialBoxs[0].children[0];
+			$(boxMessage).addClass('tutorialMessageVert');
+			boxMessage.style.left = 'calc(100% + 10px)';
+			boxMessage.style.top = '0px';
+			
+			boxMessage = tutorialBoxs[1].children[0];
+			$(boxMessage).addClass('tutorialMessageVert');
+			boxMessage.style.left = '0px';
+			boxMessage.style.top = 'calc(100% + 10px)';
+			
+			boxMessage = tutorialBoxs[2].children[0];
+			$(boxMessage).addClass('tutorialMessageHori');
+			boxMessage.style.left = '0px';
+			boxMessage.style.top = '-160px';
+			
+			boxMessage = tutorialBoxs[3].children[0];
+			$(boxMessage).addClass('tutorialMessageHori');
+			boxMessage.style.left = '0px';
+			boxMessage.style.top  = '-160px';
+			
+			boxMessage = tutorialBoxs[4].children[0];
+			$(boxMessage).addClass('tutorialMessageVert');
+			boxMessage.style.left = '-210px';
+			boxMessage.style.top  = 'calc(100% - 300px)';
+			
+			buttonUIs.push(document.getElementById('CopyButtonUI'));
+			buttonUIs.push(document.getElementById('SaveButtonUI'));
+			buttonUIs.push(document.getElementById('InsertButtonUI'));
+			buttonUIs.push(document.getElementById('EnterButtonUI'));
+			buttonUIs.push(document.getElementById('DeleteButtonUI'));
+			buttonUIs.push(document.getElementById('HelpButtonUI'));
+			buttonUIs.push(null);
+			buttonUIs.push(document.getElementById('CoordinatesButtonUI'));
+			buttonUIs.push(document.getElementById('TranslateButtonUI'));
+			buttonUIs.push(document.getElementById('RotateButtonUI'));
+			buttonUIs.push(document.getElementById('ScaleButtonUI'));
+			buttonUIs.push(null);
+			buttonUIs.push(document.getElementById('UndoButtonUI'));
+			buttonUIs.push(document.getElementById('RedoButtonUI'));
+			buttonUIs.push(document.getElementById('modeChangerLayer'));
+			
+			$('.buttonUI').block({message:null});
+			showTutorialBox(tutorialBoxIdx);
+			tutorialBoxs[tutorialBoxIdx].children[0].children[0].innerHTML = messages[step];
+		}		
+		
+		function showTutorialBox(num) {
+			if(isNaN(num) || num < 0 || num > 5)
+				return;
+			let target;
+			if(num == 0) {
+				target = document.getElementById('leftSideWindow');
+			}
+			else if(num == 4){
+				target = document.getElementById('modeChangerLayer');
+			}
+			else {
+				target = document.getElementById('UIGroup' + num);
+			}
+			
+			let tutorialBox = tutorialBoxs[num];
+			if(target.style.left !== '')
+				tutorialBox.style.left = target.style.left;
+			else if(target.style.right !== '')
+				tutorialBox.style.right = target.style.right;
+			else
+				tutorialBox.style.left = '0px';
+			if(target.style.top !== '')
+				tutorialBox.style.top = target.style.top;
+			else if(target.style.bottom !== '')
+				tutorialBox.style.bottom = target.style.bottom;
+			else
+				tutorialBox.style.top = '0px';
+			tutorialBox.style.display = 'inline-block';
+
+			tutorialBox.style.width = 'calc(' + target.style.width + ' - 6px)';
+			tutorialBox.style.height = 'calc(' + target.style.height + ' - 6px)';
+		}
+		
+		function hideTutorialBox(num) {
+			if(isNaN(num) || num < 0 || num > 5)
+				return;
+			let tutorialBox = tutorialBoxs[num];
+			tutorialBox.style.display = 'none';
+		}
+		
+		
+		
+	</script>
+</head>
+<body onload="init();">
+    <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
+    </a-scene>
+    <div id="modeChangerLayer" class="buttonUI">
+        <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
+        <img id="_ARButton" src="/img/icon/AR in circle.svg"/>
+        <img id="_3DButton" src="/img/icon/3D in circle.svg"/>
+    </div>
+</body>
+</html>

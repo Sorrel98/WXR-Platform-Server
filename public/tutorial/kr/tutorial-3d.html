@@ -1,0 +1,356 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
+    <script src="/library/jquery-1.11.3.min.js"></script>
+	<script src="/library/jquery.blockUI.js"></script>
+	<script src="/library/aframe-v1.0.4.min.js"></script>
+    <script src="/library/THREE.TransformControls.js"></script>
+    <script src="/library/THREE.PCDLoader.js"></script>
+	<script src="/library/animation-mixer.js"></script>
+    <script src="/library/cube-env-map.js"></script>
+	<script src="/library/stack.js"></script>
+    <script src="/library/list.js"></script>
+	<script src="/components/event-capturer.js"></script>
+	<script src="/components/flag+trigger.js"></script>
+    <script src="/primitives/a-flag.js"></script>
+    <script src="/primitives/a-trigger.js"></script>
+	<script src="/components/position-observer.js"></script>
+	<script src="/components/rotation-observer.js"></script>
+	<script src="/components/scale-observer.js"></script>
+	<script src="/components/collision-observer.js"></script>
+	<script src="/components/two-state-animation.js"></script>
+    <script src="/components/two-state-embedded-animation.js"></script>
+	<script src="/components/transparency.js"></script>
+	<script src="/components/vr-slide.js"></script>
+	<script src="/components/vr-1axis-hinge.js"></script>
+	<script src="/components/vr-snap.js"></script>
+    <script src="/components/point-cloud.js"></script>
+    <script src="/primitives/a-point-cloud.js"></script>
+    <script src="/primitives/a-group.js"></script>
+    <script src="/components/binder.js"></script>
+    <script src="/components/hinge-animation.js"></script>
+	<script src="/components/avatar.js"></script>
+	<script src="/primitives/a-user.js"></script>
+    <script src="/components/interaction-manger.js"></script>
+    <script src="/components/thd-mode-controls.js"></script>
+    <script src="/components/vr-mode-controls.js"></script>
+	<script src="/components/ar-mode-controls.js"></script>
+    <script src="/components/mode-changer.js"></script>
+    <script src="/components/target.js"></script>
+    <script src="/components/active-marker.js"></script>
+    <script src="/primitives/a-marker.js"></script>
+    <script src="/components/base-marker.js"></script>
+    <script src="/primitives/a-base.js"></script>
+    <script src="/components/color-scroll-material.js"></script>
+	<script src="/components/property-setter.js"></script>
+	
+    <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+    <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+	
+	<style>
+		.tutorialBox {
+			position : fixed;
+			z-index : 10000;
+			border-style : solid;
+			border-width : 3px;
+			border-color : red;
+			pointer-events : none;
+		}
+		.tutorialMessageVert {
+			position : relative;
+			background : black;
+			opacity : 0.5;
+			width : 200px;
+			height : 300px;
+			pointer-events : auto;
+			cursor : default;
+		}
+		.tutorialMessageHori {
+			position : relative;
+			background : black;
+			opacity : 0.5;
+			width : 300px;
+			height : 150px;
+			pointer-events : auto;
+			cursor : default;
+		}
+		.tutorialMessageContent {
+			position : absolute;
+			width : calc(100% - 20px);
+			height : calc(100% - 50px);
+			left : 10px;
+			top : 10px;
+			color : white;
+			word-wrap:break-word;
+		}
+		.tutorialButtonPrev {
+			position : absolute;
+			width : 50px;
+			height : 25px;
+			top : calc(100% - 30px);
+			left : calc(100% - 110px);
+			cursor : default;
+		}
+		.tutorialButtonNext {
+			position : absolute;
+			width : 50px;
+			height : 25px;
+			top : calc(100% - 30px);
+			left : calc(100% - 55px);
+			cursor : default;
+		}
+	</style>
+	
+	<script>
+		var step = 0;
+		var messages = [
+			'좌측 패널은 hierarchy, peer, flags 세 개의 탭 문서로 이루어져 있습니다. 상단에 굵은 글씨로 각 탭 문서의 제목이 있고 이것을 클릭하여 문서를 전환할 수 있습니다.',
+			'hierarchy 문서는 이 워크스페이스에 있는 3D 씬의 계층 구조를 보여줍니다. 씬은 트리 구조로 되어있고 자식을 가지는 노드는 좌측에 + 또는 - 버튼이 표시됩니다. +버튼을 누르면 자식 노드를 펼쳐볼 수 있고 -버튼을 누르면 접어서 가릴 수 있습니다.',
+			'각 노드는 타입을 나타내는 태그명과 유일한 식별자인 ID로 표시됩니다. 새로운 워크스페이스를 생성하면 A-SCENE 타입의 root노드가 있고 그 자식 노드로서 ID를 가지지 않는 몇몇 A-ENTITY노드가 있습니다.',
+			'이는 씬을 구성하는 기본 요소로서 편집하거나 삭제할 수 없습니다. 각각의 노드는 씬에 렌더링되는 메쉬를 가지고 있을 수도 그렇지 않을 수도 있습니다. 앞서 설명한 기본 요소들은 메쉬를 가지지 않는 노드입니다.',
+			'클릭을 통해 노드를 선택할 수 있는데 선택된 노드의 서브 트리는 빨간 음영으로 표시됩니다. 노드 선택은 삽입, 삭제, 편집 등의 상호작용을 위한 대상을 지정하는 역할을 합니다.',
+			'root를 선택하고 insert 키(또는 ctrl + i)를 눌러보세요. 새로운 오브젝트를 추가하기 위한 창이 팝업됩니다. id란에 \'background\'를 입력하고 primitive에서 a-sky를 선택하여 OK 버튼을 누르세요.',
+			'hierarchy 트리뷰에 새로운 엔티티가 추가되고 그것의 트랜스폼, 컴포넌트 등을 수정할 수 있는 에딧창이 팝업됩니다. material의 src에 \'/tutorial/background.png\'를 입력하고 OK 버튼을 누르세요.',
+			'이제부터 뷰포트에 배경이 그려집니다. 다른 오브젝트도 추가해봅시다. 먼저 esc키를 눌러 \'background\' 오브젝트를 선택해제하거나 hierarchy 트리뷰에서 \'root\' 오브젝트를 선택하세요.',
+			'방금 전과 같이 insert 키(또는 ctrl + i)를 누르고 id란에 \'box\'를 입력하고 primitive에서는 a-box를 선택하여 OK 버튼을 누르세요.',
+			'이어서 나타나는 에딧 창에서는 material의 color에 \'yellow\'를 입력하고 OK 버튼을 누르세요.',
+			'방금 생성한 box 오브젝트가 카메라의 뷰프러스텀을 벗어나 있다면 뷰포트에 보이지 않을 것입니다.',
+			'뷰포트에서 마우스 드래그를 통해 카메라의 방향을 돌리거나 wasd 키를 이용하여 카메라를 움직일 수 있습니다. box가 보이도록 직접 움직여보세요.',
+			'이번엔 box가 선택된 상태에서 insert 키를 눌러보세요. 그리고 id란에 \'sphere\'를 입력하고 primitive에서 a-sphere를 선택하여 OK 버튼을 누릅니다. 이렇게 하면 box의 자식으로 sphere가 생성되는 것을 확인할 수 있습니다.',
+			'이번엔 color로 \'blue\'를 입력하고 OK를 눌러보세요. 만약 편집 창을 이미 닫아버렸다면 hierarchy에서 노드를 선택하고 enter 키를 눌러 다시 열 수 있습니다.',
+			'sphere와 box가 겹쳐져서 box가 보이지 않게 되었을 겁니다. sphere를 선택하고 편집 창을 열어 position에 \'3 0 0\'을 입력하여 위치를 바꿔줍니다.',
+			'hierarchy 트리 뷰에서 노드를 드래그 앤 드롭하여 부모를 변경할 수도 있습니다. sphere에서 root로 드래그 앤 드롭하여 부모를 root로 바꿔보세요.',
+			'이때 월드 좌표계 상에서의 트랜스폼이 유지되도록 로컬 트랜스폼이 적절히 갱신됩니다.',
+			'다음 탭인 peer 문서에서는 현재 워크스페이스에 접속 중인 다른 사용자를 보여줍니다. 이 튜토리얼 페이지는 혼자 체험하는 공간이어서 아쉽게도 다른 사용자는 확인할 수 없습니다.',
+			'다음 탭인 flags 문서는 trigger와 flag로 이루어진 트리를 보여줍니다. trigger와 flag는 씬 저작자가 반응형 시나리오를 작성할 수 있게 해주는 도구입니다.',
+			'Flag는 특정 오브젝트의 트랜스폼이나 충돌 상태 등에 의해 자동적으로 갱신될 수 있는 부울 변수입니다.',
+			'Trigger는 flag 또는 trigger를 자식으로 가질 수 있고 flag와 마찬가지로 부울 변수를 가지고 있습니다.',
+			'이 값은 자식들의 값이 갱신될 때 자동으로 갱신되며 하나의 서브트리는 하나의 부울 대수 식을 나타낸다고 볼 수 있습니다.',
+			'flags 탭이 열린 상태에서 insert 키를 눌러보면 이전과 같이 팝업창이 뜨는데 primitive에는 a-flag와 a-trigger 두 가지 옵션만 존재합니다. a-trigger를 선택하고 id란에 \'t1\'을 입력한 뒤 OK를 누릅니다.',
+			'편집 창이 팝업되면 risingEdgeEvent에 \'t1up\'을 fallingEdgeEvent에 \'t1down\'을 입력하고 OK 버튼을 누릅니다.',
+			'이 트리거가 가진 부울 변수가 false에서 true가 되는 순간 t1up 이벤트가, true에서 false가 되는 순간 t1down 이벤트가 발생할 것입니다.',
+			'flags 탭을 확인해보면 t1 오른쪽 깃발이 표시된 것을 볼 수 있습니다. 이것은 t1 트리거의 부울 변수 값이 true인 상태를 의미합니다. 이 트리거는 and 타입의 트리거인데 자식이 하나도 없으므로 true인 상태입니다.',
+			't1을 선택한 상태로 다시 insert 키를 누르고 id란에 \'f1\' 입력하고 primitive는 a-flag를 선택하여 플래그를 만듭니다. name으로 \'fn1\'를 입력합니다. 이 이름은 id 뒤에 괄호와 함께 표기됩니다. 이 플래그는 이제 \'fn1\'이라는 이름을 통해 참조 가능합니다.',
+			'우측 상단에 버튼 6개가 보입니다.',
+			'이 버튼을 누르면 컨텐트 소스를 클립보드로 복사합니다. 이 기능은 현재 씬을 템플릿으로서 저장하거나 다른 워크스페이스의 씬의 콘텐츠 소스에 붙여넣기 하여 복제를 할 때 사용할 수 있습니다.',
+			'이 버튼을 누르면 컨텐트의 현재 상태를 저장합니다. 이 페이지에서는 임시적인 튜토리얼 페이지이기 때문에 사용할 수 없습니다.',
+			'이 버튼은 insert 키 및 ctrl + i 키와 같은 기능을 합니다. 현재 선택된 노드에 대해 자식을 생성하는 팝업 창을 엽니다. 단 아무것도 선택되지 않은 상태에서 누르면 root의 자식을 생성하는 것으로 취급합니다.',
+			'이 버튼은 enter 키와 같은 기능을 합니다. hierarchy 탭에서 box노드를 선택하고 이 버튼을 눌러봅시다.',
+			'편집 창에 좀 더 살펴보겠습니다.',
+
+			
+			'편집창에서는 해당 오브젝트가 가진 컴포넌트들과 각 컴포넌트의 하위 프로퍼티들이 표시됩니다. 컴포넌트 중에는 visible과 같이 하위 프로퍼티가 없는 싱글 프로퍼티 컴포넌트도 존재합니다.',
+			'스크롤을 내려 가장 아래를 보면 Add attribute가 보입니다. 첫번째 입력란에 \'collidable\'을 입력하고 Add 버튼을 누르세요. collidable 컴포넌트가 추가되는 것을 볼 수 있습니다.',
+			'collidable은 충돌을 위한 필터 역할을 합니다. 뷰포트에서 마우스로 픽킹을 하거나 또는 VR에서 컨트롤러로 상호작용을 하기 위해서는 이 컴포넌트가 붙어있어야 합니다.',
+			'또한 collision-observer의 작동을 위해서도 필요합니다. 앞서 만든 플래그와 트리거를 테스트해볼겸 만들어봅시다. Add attribute의 첫번째 입력란에 \'collision-observer\'를 입력하고 Add 버튼을 누릅니다.',
+			'collision-observer 컴포넌트에는 target과 flagName 두 개의 하위 프로퍼티가 있습니다. 프로퍼티 이름 옆의 입력란에서 수정을 할 수도 있지만 이번엔 조금 다르게 해보겠습니다.',
+			'Add attribute의 첫번째 입력란에는 \'collision-observer\'를 두번째 입력란에는 \'target\'을 세번째 입력란에는 \'#sphere\'를 입력하고 Add 버튼을 누릅니다.',
+			'이렇게 하면 컴포넌트를 추가할 때 하위 프로퍼티의 값을 함께 지정할 수도 있습니다. flagName에는 조금 전 만들었던 플래그의 이름 \'fn1\'을 입력해주고 OK 버튼을 누르세요.',
+			'이제 shpere와의 충돌이 발생할 경우 fn1 플래그가 올라갈 것입니다. 그러나 두 오브젝트가 서로 충돌하기 위해서는 각각 collidable 컴포넌트를 가져야 합니다.',
+			'sphere를 선택하고 편집 창을 열어 collidable 컴포넌트를 추가해줍니다. 이제 box와 sphere가 충돌할 수 있게 되었고 충돌할 때 충돌 진입시 t1up이벤트가, 충돌 해소시 t1down이벤트가 발생하게 됩니다.',
+			'이제 이 이벤트를 이용해 sphere의 색이 동적으로 변하도록 해보겠습니다. sphere에 \'animation__up\'컴포넌트와 \'animation__down\'컴포넌트를 추가합니다.',
+			'animation컴포넌트는 한 오브젝트에 여러 개 붙일 수 있는 컴포넌트이고 컴포넌트 이름 뒤에 __[구분되는 문자열]을 붙여 각 컴포넌트 인스턴스를 분류할 수 있습니다.',
+			'두 animation 컴포넌트에서 autoplay 프로퍼티에는 \'false\'를 입력하고 dur 프로퍼티에는 \'0\'을 입력해줍니다. 그리고 property에는 \'components.material.material.color\'를 입력하고 type에는 \'color\'를 입력합니다.',
+			'그다음 animation__up에서는 startsEvents에 \'t1up\'을 입력하고 to에는 \'red\'를 입력합니다. 그리고 animation__down에서는 startsEvents에 \'t1down\'을 입력하고 to에는 \'blue\'를 입력합니다.',
+			'OK를 눌러 창을 닫고 box나 sphere를 선택한 다음 기즈모의 빨간 축을 드래그하여 두 물체가 부딪히도록 해봅시다. 기대와 달리 아무 반응이 없는데 이는 이벤트 캡처링이 되지 않기 때문입니다.',
+			'어떤 오브젝트가 트리거에서 발생하는 이벤트를 수신하기 위해서는 event_capturer 컴포넌트를 붙여 캡처링할 이벤트를 명시해야합니다.',
+			'sphere의 편집 창을 다시 열고 Add attribute의 세 입력란에 차례로 \'event-capturer\', \'targetEvent\', \'t1up, t1down\'을 입력하세요.',
+			'이제 t1up 이벤트와 t1down 이벤트를 수신할 수 있게 됐습니다. 창을 닫고 다시 한번 두 물체를 부딪혀봅니다. 부딪히는 순간 sphere의 색이 빨간색으로 바뀌고 다시 멀어지면 파란색으로 바뀌는 것을 확인할 수 있습니다.',
+			'이 버튼을 누르면 현재 선택된 노드를 삭제합니다. delete 키 또는 ctrl + d 키로 같은 기능을 수행할 수 있습니다.',
+			'이 버튼은 단축 키를 알려주는 페이지를 엽니다.',
+			'중앙 하단에 버튼 4개가 보입니다. 이 버튼들은 오브젝트의 트랜스폼 조작을 위한 기즈모와 관련된 버튼들 입니다.',
+			'이 버튼은 월드 좌표계와 로컬 좌표계를 토글합니다.',
+			'월드 좌표계는 오브젝트의 계층과 관계없이 통용되는 절대적 좌표계입니다.',
+			'그리고 로컬 좌표계는 선택된 오브젝트의 부모를 기준으로 하는 좌표계입니다.',
+			'이 버튼부터 차례로 3개의 버튼은 기즈모의 컨트롤 모드를 변경하는 버튼으로 셋 중 하나만 활성화 됩니다.',
+			'이 버튼은 translation 모드를 나타내고 선택한 오브젝트의 포지션을 조절할 수 있습니다.',
+			'이 버튼은 rotation 모드를 나타내고 선택한 오브젝트의 오리엔테이션을 조절 할 수 있습니다.',
+			'이 버튼은 scale 모드를 나타내고 선택한 오브젝트의 스케일을 조절 할 수 있습니다.',
+			'좌측 하단에 버튼 2개가 있습니다.',
+			'이 버튼은 undo버튼으로 최근에 한 작업을 되돌립니다.',
+			'이 버튼은 redo버튼으로 undo로 되돌렸던 작업을 다시 수행합니다.',
+			'우측 하단에는 2개의 버튼이 보입니다. 이 버튼들은 인터랙션 모드를 변경합니다.',
+			'인터랙션 모드는 3D모드, VR모드, AR모드 3가지가 있고 활성화된 모드를 제외한 두 모드에 대한 버튼이 표시됩니다.'
+		];
+		var buttonUIs = [null];
+		var buttonUIsIdx = 0;
+		var buttonDescChangeSteps = [28, 29, 30, 31, 50, 51, 52, 53, 56, 58, 59, 60, 61, 62, 63];
+		var tutorialBoxs = new Array(5);
+		var tutorialBoxsChangeSteps = [27, 52, 60, 63];
+		var tutorialBoxIdx = 0;
+		
+		function next() {
+			if(step === messages.length - 1) return;
+			++step;
+			if(buttonDescChangeSteps[buttonUIsIdx] === step) {
+				if(buttonUIs[buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).block({message:null});
+				if(buttonUIs[++buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).unblock();
+			}
+			if(tutorialBoxsChangeSteps[tutorialBoxIdx] === step) {
+				hideTutorialBox(tutorialBoxIdx);
+				showTutorialBox(++tutorialBoxIdx);
+			}
+			let messageP = tutorialBoxs[tutorialBoxIdx].children[0].children[0];
+			messageP.innerHTML = messages[step];
+		}
+		
+		function prev() {
+			if(step === 0) return;
+			if(buttonDescChangeSteps[buttonUIsIdx - 1] === step) {
+				if(buttonUIs[buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).block({message:null});
+				if(buttonUIs[--buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).unblock();
+			}
+			if(tutorialBoxsChangeSteps[tutorialBoxIdx - 1] === step) {
+				hideTutorialBox(tutorialBoxIdx);
+				showTutorialBox(--tutorialBoxIdx);
+			}
+			--step;
+			let messageP = tutorialBoxs[tutorialBoxIdx].children[0].children[0];
+			messageP.innerHTML = messages[step];
+		}
+		
+		function init()
+		{
+			for(let i = 0; i < 5; ++i) {
+				tutorialBoxs[i] = document.createElement('div');
+				$(tutorialBoxs[i]).addClass('tutorialBox');
+				tutorialBoxs[i].style.display = 'none';
+				document.body.appendChild(tutorialBoxs[i]);
+				let boxMessage = document.createElement('div');
+				tutorialBoxs[i].appendChild(boxMessage);
+				let p = document.createElement('span');
+				$(p).addClass('tutorialMessageContent');
+				boxMessage.appendChild(p);
+				let buttonprev = document.createElement('button');
+				buttonprev.innerHTML = '<<'
+				buttonprev.onclick = prev;
+				$(buttonprev).addClass('tutorialButtonPrev');
+				boxMessage.appendChild(buttonprev);
+				let buttonnext = document.createElement('button');
+				buttonnext.innerHTML = '>>';
+				buttonnext.onclick = next;
+				$(buttonnext).addClass('tutorialButtonNext');
+				boxMessage.appendChild(buttonnext);
+			}
+			
+			let boxMessage;
+			boxMessage = tutorialBoxs[0].children[0];
+			$(boxMessage).addClass('tutorialMessageVert');
+			boxMessage.style.left = 'calc(100% + 10px)';
+			boxMessage.style.top = '0px';
+			
+			boxMessage = tutorialBoxs[1].children[0];
+			$(boxMessage).addClass('tutorialMessageVert');
+			boxMessage.style.left = '0px';
+			boxMessage.style.top = 'calc(100% + 10px)';
+			
+			boxMessage = tutorialBoxs[2].children[0];
+			$(boxMessage).addClass('tutorialMessageHori');
+			boxMessage.style.left = '0px';
+			boxMessage.style.top = '-160px';
+			
+			boxMessage = tutorialBoxs[3].children[0];
+			$(boxMessage).addClass('tutorialMessageHori');
+			boxMessage.style.left = '0px';
+			boxMessage.style.top  = '-160px';
+			
+			boxMessage = tutorialBoxs[4].children[0];
+			$(boxMessage).addClass('tutorialMessageVert');
+			boxMessage.style.left = '-210px';
+			boxMessage.style.top  = 'calc(100% - 300px)';
+			
+			buttonUIs.push(document.getElementById('CopyButtonUI'));
+			buttonUIs.push(document.getElementById('SaveButtonUI'));
+			buttonUIs.push(document.getElementById('InsertButtonUI'));
+			buttonUIs.push(document.getElementById('EnterButtonUI'));
+			buttonUIs.push(document.getElementById('DeleteButtonUI'));
+			buttonUIs.push(document.getElementById('HelpButtonUI'));
+			buttonUIs.push(null);
+			buttonUIs.push(document.getElementById('CoordinatesButtonUI'));
+			buttonUIs.push(document.getElementById('TranslateButtonUI'));
+			buttonUIs.push(document.getElementById('RotateButtonUI'));
+			buttonUIs.push(document.getElementById('ScaleButtonUI'));
+			buttonUIs.push(null);
+			buttonUIs.push(document.getElementById('UndoButtonUI'));
+			buttonUIs.push(document.getElementById('RedoButtonUI'));
+			buttonUIs.push(document.getElementById('modeChangerLayer'));
+			
+			$('.buttonUI').block({message:null});
+			showTutorialBox(tutorialBoxIdx);
+			tutorialBoxs[tutorialBoxIdx].children[0].children[0].innerHTML = messages[step];
+		}		
+		
+		function showTutorialBox(num) {
+			if(isNaN(num) || num < 0 || num > 5)
+				return;
+			let target;
+			if(num == 0) {
+				target = document.getElementById('leftSideWindow');
+			}
+			else if(num == 4){
+				target = document.getElementById('modeChangerLayer');
+			}
+			else {
+				target = document.getElementById('UIGroup' + num);
+			}
+			
+			let tutorialBox = tutorialBoxs[num];
+			if(target.style.left !== '')
+				tutorialBox.style.left = target.style.left;
+			else if(target.style.right !== '')
+				tutorialBox.style.right = target.style.right;
+			else
+				tutorialBox.style.left = '0px';
+			if(target.style.top !== '')
+				tutorialBox.style.top = target.style.top;
+			else if(target.style.bottom !== '')
+				tutorialBox.style.bottom = target.style.bottom;
+			else
+				tutorialBox.style.top = '0px';
+			tutorialBox.style.display = 'inline-block';
+
+			tutorialBox.style.width = 'calc(' + target.style.width + ' - 6px)';
+			tutorialBox.style.height = 'calc(' + target.style.height + ' - 6px)';
+		}
+		
+		function hideTutorialBox(num) {
+			if(isNaN(num) || num < 0 || num > 5)
+				return;
+			let tutorialBox = tutorialBoxs[num];
+			tutorialBox.style.display = 'none';
+		}
+		
+		
+		
+	</script>
+</head>
+<body onload="init();">
+    <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
+    </a-scene>
+    <div id="modeChangerLayer" class="buttonUI">
+        <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
+        <img id="_ARButton" src="/img/icon/AR in circle.svg"/>
+        <img id="_3DButton" src="/img/icon/3D in circle.svg"/>
+    </div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+	<link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+	<link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="/library/jquery-1.11.3.min.js"></script>
+	<script>
+	function onSubmit() {
+		const fm = document.getElementById('makeForm');
+		const params = $(fm).serialize();
+		$.ajax({
+			url: fm.action,
+			type: fm.method,
+			data: params,
+			success: ()=>{
+				location.href = '/';
+			},
+			error: (err)=>{
+				alert("Code: " + err.status +"\n" + err.responseText);
+			}
+		});
+		return false;
+	};
+	function codeImportFromURI() {
+		let uri = document.getElementById('codeURI').value;
+		if(uri.length === 0) return;
+		$.ajax({
+			url: uri,
+			type: 'GET',
+			success: (data)=>{
+				document.getElementById('source').value = data;
+			},
+			error:(err)=>{
+				alert("Code: " + err.status +"\n" + err.responseText);
+			}
+		});
+		document.getElementById('codeURI').value = '';
+	};
+	function codeImportFromFile() {
+		let files = document.getElementById('codeFile').files;
+		if(files.length !== 1) return;
+		let selectedFile = files[0];
+		let reader = new FileReader();
+		reader.onload = function(evt) {
+			document.getElementById('source').value = evt.target.result;
+		};
+		reader.readAsText(selectedFile);
+	};
+	</script>
+	<style>
+	html,
+	body {
+	  height: 100%;
+	}
+	body {
+	  display: -ms-flexbox;
+	  display: flex;
+	  -ms-flex-align: center;
+	  align-items: center;
+	  padding-top: 40px;
+	  padding-bottom: 40px;
+	  background-color: #f5f5f5;
+	}
+	.form {
+	  width: 100%;
+	  max-width: 1024px;
+	  padding: 15px;
+	  margin: auto;
+	}
+
+	.form .form-control:focus {
+	  z-index: 2;
+	}
+	</style>
+</head>
+<body class="text-center">
+    <form class="form" id="makeForm" action="/make" method="post" onsubmit="return onSubmit();">
+        <fieldset class="form-group">
+            <legend class="mb-3 font-weight-normal">Create workspace</legend>
+            <div class="form-row mb-2">
+                <div class="col-md-9">
+                    <input class="form-control" id="wname" name="workspaceName" type="text" maxlength="45" required autofocus placeholder="Workspace name"></input>
+                </div>
+                <div class="col-md-3">
+                    <input class="form-control" id="tags" name="tags" type="text" placeholder="tag1, tag2, ..." pattern="(^(\s*[A-Za-z0-9]{1,45}\s*,)*\s*[A-Za-z0-9]{1,45}\s*$)"></input>
+                </div>
+            </div>
+            <div class="mb-4">
+                <textarea class="form-control" name="description" placeholder="Description..."></textarea>
+            </div>
+			
+			<div class="input-group input-group-sm">
+				<div class="input-group-prepend">
+					<span class="input-group-text" id="prependURI">URI</span>
+				</div>
+				<input type="text" class="form-control" id="codeURI" aria-describedby="prependURI">
+				<div class="input-group-append">
+					<button class="btn btn-outline-secondary" type="button" id="codeImportFromURIBtn" onclick="codeImportFromURI();">Import</button>
+				</div>
+			</div>
+			<div class="input-group input-group-sm">
+				<div class="custom-file">
+					<input type="file" class="custom-file-input" id="codeFile" aria-describedby="codeImportBtn">
+					<label class="custom-file-label" for="codeFile">Choose file</label>
+				</div>
+				<div class="input-group-append">
+					<button class="btn btn-outline-secondary" type="button" id="codeImportFromFileBtn" onclick="codeImportFromFile();">Import</button>
+				</div>
+			</div>
+			<div class="input-group input-group-sm mb-3">
+				<div class="input-group-prepend">
+					<span class="input-group-text">Content Source</span>
+				</div>
+				<textarea class="form-control" style="height:400px;" aria-label="Content Source" id="source" name="source"></textarea>
+			</div>
+			
+            <button class="btn btn-lg btn-primary btn-block my-2" type="submit">Submit</button>
+        </fieldset>
+    </form>
+</body>
+</html>
