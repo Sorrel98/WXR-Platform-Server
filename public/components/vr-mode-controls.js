@@ -69,8 +69,6 @@ AFRAME.registerComponent('vr-mode-controls', {
 		right.addEventListener('triggerup', onTriggerUp, false);
 		right.addEventListener('gripdown', onGripDown, false);
 		right.addEventListener('gripup', onGripUp, false);
-		right.addEventListener('triggertouchstart', gestureHandler, false);
-		right.addEventListener('triggertouchend', gestureHandler, false);
 		right.addEventListener('abuttondown', _aButtonDown, false);
 		right.addEventListener('bbuttondown', _bButtonDown, false);
 		right.addEventListener('abuttonup', onTopButtonUp, false);
@@ -185,8 +183,6 @@ AFRAME.registerComponent('vr-mode-controls', {
 		};
 		
 		function onGripDown(event) {
-			gestureHandler(event);
-
 			if(this.state !== 0) return;
 
 			writeGestureIfChanged.bind(this)(this.gesture | (1 << 1));
