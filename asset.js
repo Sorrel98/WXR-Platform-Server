@@ -1,16 +1,9 @@
-var mariadb = require('mariadb/callback');
-
 var express = require('express');
 
-var router = express.Router();
+// get DBpool module
+var dbPool = require('./DBpool').dbPool;
 
-var dbConfig = {
-    host : 'localhost',
-    user : 'wxrDBadmin',
-    password: 'dbpasswd',
-    database: 'wxr_server'
-};
-var dbPool = mariadb.createPool(dbConfig);
+var router = express.Router();
 
 router.get('/assetInfo', function(request, response){ 
     let uid = request.session.uid;
