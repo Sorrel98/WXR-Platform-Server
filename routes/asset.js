@@ -1,7 +1,7 @@
 var express = require('express');
 
 // get DBpool module
-var dbPool = require('./DBpool').dbPool;
+var dbPool = require('../DBpool').dbPool;
 
 var router = express.Router();
 

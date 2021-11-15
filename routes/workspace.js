@@ -3,7 +3,7 @@ var fs = require('fs');
 var ejs = require('ejs');
 
 // get DBpool module
-var dbPool = require('./DBpool').dbPool;
+var dbPool = require('../DBpool').dbPool;
 
 var router = express.Router();
 
