@@ -62,6 +62,21 @@ app.get('/loginPage', function(request, response) {
     });
 });
 
+app.get('/360video', function(request, response){
+
+    fs.readFile(__dirname + '/public/360video.html', 'utf8', (error, data)=> {
+        if(!error) {
+            response.writeHead(200, {'Content-Type': 'text/html'});
+            response.end(data);
+        }
+        else {
+            response.writeHead(500);
+            response.end('Internal Server Error');
+            console.log(error);
+        }
+    });
+});
+
 app.post('/register', function(request, response) {
     let name = request.body.name;
     let email = request.body.email;

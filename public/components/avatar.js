@@ -20,6 +20,7 @@ AFRAME.registerComponent('avatar', {
     },
   
     update: function (oldData) {
+		console.log(oldData);
 		if(this.data.modelPath !== oldData.modelPath) {
 			let gltfLoader = new THREE.GLTFLoader();
 			gltfLoader.load(this.data.modelPath, (gltf)=>{
@@ -33,7 +34,7 @@ AFRAME.registerComponent('avatar', {
 			this.makeNameTag(this.data.name);
 		}
 		if(this.data.enableHand !== oldData.enableHand) {
-			if (this.data.enableHand) {
+			if (!this.data.enableHand) {
 				this.makeHands();
 			}
 			else {
@@ -109,25 +110,30 @@ AFRAME.registerComponent('avatar', {
 		});
 	},
 
-	makeHands: function() {
+	makeHands: function(){
 		let gltfLoader = new THREE.GLTFLoader();
 		gltfLoader.load('/models/hand_left.glb', (gltf)=>{
-			this.leftHand = gltf.scene || gltf.scenes[0];
-			let mesh = this.el.object3DMap['mesh'];
-			mesh.add(this.leftHand);
-			this.leftHand.visible = false;
-			this.leftHand.animations = gltf.animations;
-			this.leftHand._animMixer = new THREE.AnimationMixer(this.leftHand);
-			this.leftHand.lastClip = null;
+			console.log('makes left hand');
+				this.leftHand = gltf.scene || gltf.scenes[0];
+				console.log(this.leftHand)
+				let mesh = this.el.object3DMap['mesh'];
+				mesh.add(this.leftHand);
+				console.log(mesh);
+				this.leftHand.visible = false;
+				this.leftHand.animations = gltf.animations;
+				this.leftHand._animMixer = new THREE.AnimationMixer(this.leftHand);
+				this.leftHand.lastClip = null;
+			
 		});
 		gltfLoader.load('/models/hand_right.glb', (gltf)=>{
-			this.rightHand = gltf.scene || gltf.scenes[0];
-			let mesh = this.el.object3DMap['mesh'];
-			mesh.add(this.rightHand);
-			this.rightHand.visible = false;
-			this.rightHand.animations = gltf.animations;
-			this.rightHand._animMixer = new THREE.AnimationMixer(this.rightHand);
-			this.rightHand.lastClip = null;
+			console.log('makes right hand');
+				this.rightHand = gltf.scene || gltf.scenes[0];
+				let mesh = this.el.object3DMap['mesh'];
+				mesh.add(this.rightHand);
+				this.rightHand.visible = false;
+				this.rightHand.animations = gltf.animations;
+				this.rightHand._animMixer = new THREE.AnimationMixer(this.rightHand);
+				this.rightHand.lastClip = null;
 		});
 	},
 
