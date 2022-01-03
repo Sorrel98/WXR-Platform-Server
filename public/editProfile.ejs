@@ -35,6 +35,7 @@
                         document.getElementById('new_name').placeholder = profile.name;
                         document.getElementById('new_email').placeholder = profile.email;
 						document.getElementById('new_avatar').options.selectedIndex = profile.avatar_id;
+            
                         let activedRadio;
                         if (profile.vr_hand_sync.data[0] == true) {
                             activedRadio = document.getElementById('vrHandGestureSyncRadio').children[0];
@@ -154,7 +155,7 @@
 					<select class="form-control" id="new_avatar" name="avatar">
 						<script>
 							for(let avatar_info of avatar_infos) {
-								document.write("<option value = " + avatar_info.id + ">" + avatar_info.name + "</option>");
+								document.write("<option value =" + avatar_info.id + ">" + avatar_info.name + "</option>");
 							}
 						</script>
 					</select>

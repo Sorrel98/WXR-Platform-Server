@@ -463,6 +463,7 @@ app.get('/editProfile', function(request, response) {
 });
 
 app.get('/profile', function(request, response) {
+    //여기는 입력하는 게 아니라 DB에서 프로필 가져오는 곳
     let uid = request.session.uid;
     if(!uid) {
         response.writeHead(401);
@@ -474,6 +475,7 @@ app.get('/profile', function(request, response) {
             conn.query("select name, email, avatar_id, vr_hand_sync from t_user where id = ?", uid, (err1, result1)=>{
                 if(!err1) {
                     if(result1.length === 1) {
+                        console.log(result1[0].avatar_id);
 						response.status(200).json({'name': result1[0].name, 'email': result1[0].email, 'avatar_id': result1[0].avatar_id, 'vr_hand_sync': result1[0].vr_hand_sync});
                     }
                     else {
@@ -539,7 +541,7 @@ app.post('/alterUser', function(request, response) {
                             });
                         }
                         else {
-                            conn.query("update t_user set name=?, email=? where id=?", [name, email, uid], (err2, result2)=>{
+                            conn.query("update t_user set name=?, email=?, avatar_id=? where id=?", [name, email, avatar_id, uid], (err2, result2)=>{
                                 if(!err2) {
                                     response.writeHead(200);
                                     response.end();
@@ -552,6 +554,8 @@ app.post('/alterUser', function(request, response) {
                                 conn.release();
                             });
                         }
+                        return;
+                        //여기서 메인 페이지로 돌아갈 수 있게 수정해야 한다.
                     }
                     else {
                         conn.release();
