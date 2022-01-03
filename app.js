@@ -12,15 +12,15 @@ var uuidv4 = require('uuid').v4;
 
 //server certification
 var httpOptions = {
-	key: fs.readFileSync("certificate/private.key"),
-    cert: fs.readFileSync("certificate/certificate.crt"),
-	ca : fs.readFileSync("rootCA/certificate.crt"),
+	key: fs.readFileSync("server.key"),
+    cert: fs.readFileSync("server.crt"),
+	ca : fs.readFileSync("rootca.crt"),
 	agent: false
 }
 var dbConfig = {
     host : 'localhost',
-    user : 'wxrDBadmin',
-    password: 'dbpasswd',
+    user : 'root',
+    password: 'dnflrkwhr1',
     database: 'wxr_server'
 };
 var dbPool = mariadb.createPool(dbConfig);
@@ -3001,7 +3001,7 @@ app.get('/assets/:path([^/]+(?:/[^/]+)*)', function(request, response) {
 
 //For redirect http to https, Check the redirect location
 var httpServer = http.createServer(function (request, response) {
-	response.writeHead(302, {'Location': 'https://192.168.1.51'});
+	response.writeHead(302, {'Location': 'https://192.168.1.141'});
 	response.end();
 }).listen(80, function() {
 	console.log('Redirect server running');
