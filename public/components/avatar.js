@@ -109,28 +109,26 @@ AFRAME.registerComponent('avatar', {
 		});
 	},
 
-	makeHands: function(){
+	makeHands: function() {
 		let gltfLoader = new THREE.GLTFLoader();
 		gltfLoader.load('/models/hand_left.glb', (gltf)=>{
-			console.log('makes left hand');
-				this.leftHand = gltf.scene || gltf.scenes[0];
-				let mesh = this.el.object3DMap['mesh'];
-				mesh.add(this.leftHand);
-				this.leftHand.visible = false;
-				this.leftHand.animations = gltf.animations;
-				this.leftHand._animMixer = new THREE.AnimationMixer(this.leftHand);
-				this.leftHand.lastClip = null;
+			this.leftHand = gltf.scene || gltf.scenes[0];
+			let mesh = this.el.object3DMap['mesh'];
+			mesh.add(this.leftHand);
+			this.leftHand.visible = false;
+			this.leftHand.animations = gltf.animations;
+			this.leftHand._animMixer = new THREE.AnimationMixer(this.leftHand);
+			this.leftHand.lastClip = null;
 			
 		});
 		gltfLoader.load('/models/hand_right.glb', (gltf)=>{
-			console.log('makes right hand');
-				this.rightHand = gltf.scene || gltf.scenes[0];
-				let mesh = this.el.object3DMap['mesh'];
-				mesh.add(this.rightHand);
-				this.rightHand.visible = false;
-				this.rightHand.animations = gltf.animations;
-				this.rightHand._animMixer = new THREE.AnimationMixer(this.rightHand);
-				this.rightHand.lastClip = null;
+			this.rightHand = gltf.scene || gltf.scenes[0];
+			let mesh = this.el.object3DMap['mesh'];
+			mesh.add(this.rightHand);
+			this.rightHand.visible = false;
+			this.rightHand.animations = gltf.animations;
+			this.rightHand._animMixer = new THREE.AnimationMixer(this.rightHand);
+			this.rightHand.lastClip = null;
 		});
 	},
 
