@@ -87,3 +87,5 @@ typings/
 
 # certificate
 certificate/
+*.key
+*.crt
