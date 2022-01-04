@@ -41,18 +41,7 @@ AFRAME.registerComponent('interaction-manager', {
                 }
             }
         };
-        onEnterAR = onEnterAR.bind(this);
-
-        let onEnter360 = ()=> {
-            if (this.interactionMode !== 3) {
-                this.interactionMode = 3;
-                let syncComp = this.el.components['sync'];
-                if(syncComp) {
-                    syncComp.writeInteractionModeChange(3);
-                }
-            }
-        };
-        onEnter360 = onEnter360.bind(this);
+        onEnterAr = onEnterAR.bind(this);
 
         /**
          * Stringify the data of components with multiple properties.
@@ -492,8 +481,6 @@ AFRAME.registerComponent('interaction-manager', {
         this.el.addEventListener('exit-ar', onEnter3D, false);
         this.el.addEventListener('enter-vr', onEnterVR, false);
         this.el.addEventListener('exit-vr', onEnter3D, false);
-        this.el.addEventListener('enter-360', onEnter360, false);
-        this.el.addEventListener('exit-360', onEnter3D, false);
         
     },
     play: function() {

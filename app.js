@@ -62,21 +62,6 @@ app.get('/loginPage', function(request, response) {
     });
 });
 
-app.get('/360video', function(request, response){
-
-    fs.readFile(__dirname + '/public/360video.html', 'utf8', (error, data)=> {
-        if(!error) {
-            response.writeHead(200, {'Content-Type': 'text/html'});
-            response.end(data);
-        }
-        else {
-            response.writeHead(500);
-            response.end('Internal Server Error');
-            console.log(error);
-        }
-    });
-});
-
 app.post('/register', function(request, response) {
     let name = request.body.name;
     let email = request.body.email;
@@ -539,7 +524,7 @@ app.post('/alterUser', function(request, response) {
                             });
                         }
                         else {
-                            conn.query("update t_user set name=?, email=?, avatar_id=? where id=?", [name, email, avatar_id, uid], (err2, result2)=>{
+                            conn.query("update t_user set name=?, email=? where id=?", [name, email, uid], (err2, result2)=>{
                                 if(!err2) {
                                     response.writeHead(200);
                                     response.end();
@@ -552,7 +537,6 @@ app.post('/alterUser', function(request, response) {
                                 conn.release();
                             });
                         }
-                        return;
                     }
                     else {
                         conn.release();
