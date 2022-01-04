@@ -119,7 +119,6 @@ AFRAME.registerComponent('mode-changer', {
         console.log(this.el)
         this.el.removeChild(el);
 		el.destroy();
-
     },
 
     update: function (oldData) {
@@ -237,7 +236,7 @@ AFRAME.registerComponent('mode-changer', {
  * @returns {Element} Wrapper <div>.
  */
 
- function createEnter360Button (onClick) {
+function createEnter360Button (onClick) {
     var Button360;
     var wrapper;
   
@@ -262,7 +261,6 @@ AFRAME.registerComponent('mode-changer', {
     return wrapper;
   }
   
-
 function createEnterVRButton (onClick) {
   var vrButton;
   var wrapper;
