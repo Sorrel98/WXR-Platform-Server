@@ -93,7 +93,7 @@ AFRAME.registerComponent('mode-changer', {
             this.el.exitAR();
         }
     },
-  
+    
     update: function (oldData) {
         let data = this.data;
         let sceneEl = this.el;
