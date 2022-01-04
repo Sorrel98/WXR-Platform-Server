@@ -33,7 +33,7 @@ AFRAME.registerComponent('avatar', {
 			this.makeNameTag(this.data.name);
 		}
 		if(this.data.enableHand !== oldData.enableHand) {
-			if (!this.data.enableHand) {
+			if (this.data.enableHand) {
 				this.makeHands();
 			}
 			else {
