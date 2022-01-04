@@ -93,7 +93,6 @@ AFRAME.registerComponent('mode-changer', {
             this.el.exitAR();
         }
     },
-
     update: function (oldData) {
         let data = this.data;
         let sceneEl = this.el;
@@ -121,13 +120,13 @@ AFRAME.registerComponent('mode-changer', {
                 this.layer.style.zIndex = 9999;
                 this.layer.style.width = Math.floor(this.el.sceneEl.offsetWidth * 0.04) + 'px';
                 this.layer.style.minWidth = '40px';
-                this.layer.style.height = (this.layer.offsetWidth * 3.15) + 'px';
+                this.layer.style.height = (this.layer.offsetWidth * 2) + 'px';
                 this.layer.style.left = this.el.sceneEl.offsetLeft + this.el.sceneEl.offsetWidth - this.layer.offsetWidth - 2 + 'px';
                 this.layer.style.top = this.el.sceneEl.offsetTop + this.el.sceneEl.offsetHeight - this.layer.offsetHeight - 2 + 'px';
                 this.layer.display = 'inline';
 				window.addEventListener('resize', (e) => {
 					this.layer.style.width = Math.floor(this.el.sceneEl.offsetWidth * 0.04) + 'px';
-					this.layer.style.height = (this.layer.offsetWidth * 3.15) + 'px';
+					this.layer.style.height = (this.layer.offsetWidth * 2) + 'px';
 					this.layer.style.left = this.el.sceneEl.offsetLeft + this.el.sceneEl.offsetWidth - this.layer.offsetWidth - 2 + 'px';
 					this.layer.style.top = this.el.sceneEl.offsetTop + this.el.sceneEl.offsetHeight - this.layer.offsetHeight - 2 + 'px';
 				});
