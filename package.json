@@ -12,7 +12,7 @@
     "aframe-watcher": "^1.2.0",
     "body-parser": "^1.19.0",
     "ejs": "^2.7.1",
-    "express": "^4.16.4",
+    "express": "^4.17.2",
     "express-session": "^1.15.6",
     "express-socket.io-session": "^1.3.5",
     "gun": "^0.2019.331",
@@ -30,7 +30,6 @@
     "socket.io": "^3.1.0",
     "three": "^0.127.0"
   },
-  "devDependencies": {},
   "author": "",
   "license": "ISC"
 }

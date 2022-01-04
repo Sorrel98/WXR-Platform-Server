@@ -70,8 +70,12 @@ AFRAME.registerComponent('avatar', {
     },
   
     remove: function () {
-		this.leftHand._animMixer.stopAllAction();
-		this.rightHand._animMixer.stopAllAction();
+		if(this.leftHand){
+			this.leftHand._animMixer.stopAllAction();
+		}
+		if(this.rightHand){
+			this.rightHand._animMixer.stopAllAction();
+		}
     },
 	
 	makeNameTag: function (name) {
@@ -132,10 +136,14 @@ AFRAME.registerComponent('avatar', {
 	},
 
 	destroyHands: function() {
-		this.leftHand.parent.remove(this.leftHand);
-		this.leftHand = null;
-		this.rightHand.parent.remove(this.rightHand);
-		this.rightHand = null;
+		if(this.leftHand){
+			this.leftHand.parent.remove(this.leftHand);
+			this.leftHand = null;
+		}
+		if(this.rightHand){
+			this.rightHand.parent.remove(this.rightHand);
+			this.rightHand = null;
+		}
 	},
 
 	setVisibleHandsIfExist: function(visible) {
