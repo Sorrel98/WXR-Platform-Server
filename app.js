@@ -12,15 +12,15 @@ var uuidv4 = require('uuid').v4;
 
 //server certification
 var httpOptions = {
-	key: fs.readFileSync("server.key"),
-    cert: fs.readFileSync("server.crt"),
-	ca : fs.readFileSync("rootca.crt"),
+	key: fs.readFileSync("certificate/private.key"),
+    cert: fs.readFileSync("certificate/certificate.crt"),
+	ca : fs.readFileSync("rootCA/certificate.crt"),
 	agent: false
 }
 var dbConfig = {
     host : 'localhost',
-    user : 'root',
-    password: 'dnflrkwhr1',
+    user : 'wxrDBadmin',
+    password: 'dbpasswd',
     database: 'wxr_server'
 };
 var dbPool = mariadb.createPool(dbConfig);

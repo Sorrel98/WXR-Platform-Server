@@ -121,7 +121,6 @@ AFRAME.registerComponent('avatar', {
 			this.leftHand.animations = gltf.animations;
 			this.leftHand._animMixer = new THREE.AnimationMixer(this.leftHand);
 			this.leftHand.lastClip = null;
-			
 		});
 		gltfLoader.load('/models/hand_right.glb', (gltf)=>{
 			this.rightHand = gltf.scene || gltf.scenes[0];
