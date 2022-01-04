@@ -37,7 +37,9 @@ AFRAME.registerComponent('avatar', {
 				this.makeHands();
 			}
 			else {
-				this.destroyHands();
+				if(this.leftHand && this.rightHand){
+					this.destroyHands();
+				}
 			}
 		}
     },
