@@ -524,7 +524,7 @@ app.post('/alterUser', function(request, response) {
                             });
                         }
                         else {
-                            conn.query("update t_user set name=?, email=?, avatar_id where id=?", [name, email, avatar_id, uid], (err2, result2)=>{
+                            conn.query("update t_user set name=?, email=? where id=?", [name, email, uid], (err2, result2)=>{
                                 if(!err2) {
                                     response.writeHead(200);
                                     response.end();
@@ -537,7 +537,6 @@ app.post('/alterUser', function(request, response) {
                                 conn.release();
                             });
                         }
-                        return;
                     }
                     else {
                         conn.release();
