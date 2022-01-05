@@ -2,14 +2,14 @@
  * This component loads the avatar model and creates a name tag.
  */
 
-AFRAME.registerComponent('avatar', {
-	schema: {
-		modelPath: { type: 'string' },
-		name: { type: 'string' },
-		enableHand: { default: false }
+ AFRAME.registerComponent('avatar', {
+    schema: {
+		modelPath : {type : 'string'},
+		name : {type : 'string'},
+		enableHand : {default: false}
 	},
 
-	init: function () {
+    init: function () {
 		let mesh = new THREE.Group();
 		this.el.setObject3D('mesh', mesh);
 		let username = new THREE.Group();
@@ -17,22 +17,22 @@ AFRAME.registerComponent('avatar', {
 		this.leftHand = null;
 		this.rightHand = null;
 		this.actions = ["Open", "Hold", "Point + Thumb", "Thumb Up", null, "Grip", "Point", "Fist"]
-	},
-
-	update: function (oldData) {
-		if (this.data.modelPath !== oldData.modelPath) {
+    },
+  
+    update: function (oldData) {
+		if(this.data.modelPath !== oldData.modelPath) {
 			let gltfLoader = new THREE.GLTFLoader();
-			gltfLoader.load(this.data.modelPath, (gltf) => {
+			gltfLoader.load(this.data.modelPath, (gltf)=>{
 				let model = gltf.scene || gltf.scenes[0];
 				model.scale.multiplyScalar(0.25);
 				let mesh = this.el.object3DMap['mesh'];
 				mesh.add(model);
 			});
 		}
-		if (this.data.name !== oldData.name) {
+		if(this.data.name !== oldData.name) {
 			this.makeNameTag(this.data.name);
 		}
-		if (this.data.enableHand !== oldData.enableHand) {
+		if(this.data.enableHand !== oldData.enableHand) {
 			if (this.data.enableHand) {
 				this.makeHands();
 			}
@@ -40,20 +40,20 @@ AFRAME.registerComponent('avatar', {
 				this.destroyHands();
 			}
 		}
-	},
-
-	play: function () {
-	},
-
-	pause: function () {
-	},
-
-	tick: function (t, dt) {
+    },
+  
+    play: function() {
+    },
+  
+    pause: function() {
+    },
+  
+    tick: function (t, dt) {
 		let nameMesh = this.el.object3DMap['username'];
 		let cameraPos = this.el.sceneEl.camera.parent.position;
 		let thisWorldPos = new THREE.Vector3();
 		this.el.object3D.getWorldPosition(thisWorldPos);
-		if (thisWorldPos.sub(cameraPos).lengthSq() > 100) {
+		if(thisWorldPos.sub(cameraPos).lengthSq() > 100) {
 			nameMesh.visible = false;
 		}
 		else {
@@ -61,27 +61,27 @@ AFRAME.registerComponent('avatar', {
 			nameMesh.lookAt(cameraPos);
 		}
 
-		if (this.data.enableHand) {
+		if(this.data.enableHand) {
 			if (this.leftHand && this.leftHand.visible && this.leftHand._animMixer && !isNaN(dt))
 				this.leftHand._animMixer.update(dt / 1000);
 			if (this.rightHand && this.rightHand.visible && this.leftHand._animMixer && !isNaN(dt))
 				this.rightHand._animMixer.update(dt / 1000);
 		}
-	},
-
-	remove: function () {
-		if (this.leftHand) {
+    },
+  
+    remove: function () {
+		if(this.leftHand){
 			this.leftHand._animMixer.stopAllAction();
 		}
-		if (this.rightHand) {
+		if(this.rightHand){
 			this.rightHand._animMixer.stopAllAction();
 		}
-	},
-
+    },
+	
 	makeNameTag: function (name) {
 		let username = this.el.object3DMap['username'];
 		let fontLoader = new THREE.FontLoader();
-		fontLoader.load('/fonts/Courier New_Regular.json', (font) => {
+		fontLoader.load('/fonts/Courier New_Regular.json', (font)=>{
 			let textGeo = new THREE.TextGeometry(name, {
 				font: font,
 				size: 1,
@@ -94,28 +94,28 @@ AFRAME.registerComponent('avatar', {
 
 			// textGeo = new THREE.BufferGeometry().fromGeometry( textGeo );
 			textGeo.center();
-			let textMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true });
-			let textMesh = new THREE.Mesh(textGeo, textMaterial);
-			username.add(textMesh);
-
+			let textMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
+			let textMesh = new THREE.Mesh( textGeo,  textMaterial);
+			username.add( textMesh );
+			
 			let width = 0.2 + textGeo.boundingBox.max.x - textGeo.boundingBox.min.x;
 			let height = 0.2 + textGeo.boundingBox.max.y - textGeo.boundingBox.min.y;
 			let bgPlaneGeo = new THREE.PlaneGeometry(width, height);
-			let bgPlaneMaterial = new THREE.MeshPhongMaterial({ color: 0x000000, opacity: 0.5, flatShading: true });
+			let bgPlaneMaterial = new THREE.MeshPhongMaterial({color: 0x000000, opacity: 0.5, flatShading: true});
 			let bgPlaneMesh = new THREE.Mesh(bgPlaneGeo, bgPlaneMaterial);
 			bgPlaneMesh.position.z = -0.05;
 			username.add(bgPlaneMesh);
-
+			
 			username.position.set(0, 0.5, 0);
 			username.rotation.x = 0;
 			username.rotation.y = Math.PI;
-			username.scale.multiplyScalar(0.3);
+			username.scale.multiplyScalar(0.3);			
 		});
 	},
 
-	makeHands: function () {
+	makeHands: function() {
 		let gltfLoader = new THREE.GLTFLoader();
-		gltfLoader.load('/models/hand_left.glb', (gltf) => {
+		gltfLoader.load('/models/hand_left.glb', (gltf)=>{
 			this.leftHand = gltf.scene || gltf.scenes[0];
 			let mesh = this.el.object3DMap['mesh'];
 			mesh.add(this.leftHand);
@@ -124,7 +124,7 @@ AFRAME.registerComponent('avatar', {
 			this.leftHand._animMixer = new THREE.AnimationMixer(this.leftHand);
 			this.leftHand.lastClip = null;
 		});
-		gltfLoader.load('/models/hand_right.glb', (gltf) => {
+		gltfLoader.load('/models/hand_right.glb', (gltf)=>{
 			this.rightHand = gltf.scene || gltf.scenes[0];
 			let mesh = this.el.object3DMap['mesh'];
 			mesh.add(this.rightHand);
@@ -135,24 +135,24 @@ AFRAME.registerComponent('avatar', {
 		});
 	},
 
-	destroyHands: function () {
-		if (this.leftHand) {
+	destroyHands: function() {
+		if(this.leftHand){
 			this.leftHand.parent.remove(this.leftHand);
 			this.leftHand = null;
 		}
-		if (this.rightHand) {
+		if(this.rightHand){
 			this.rightHand.parent.remove(this.rightHand);
 			this.rightHand = null;
 		}
 	},
 
-	setVisibleHandsIfExist: function (visible) {
-		if (this.leftHand === null || this.leftHand === undefined) return;
+	setVisibleHandsIfExist: function(visible) {
+		if(this.leftHand === null || this.leftHand === undefined) return;
 		this.leftHand.visible = visible;
 		this.rightHand.visible = visible;
 	},
 
-	setHandPose: function (worldPose) {
+	setHandPose: function(worldPose) {
 		let pos = new THREE.Vector3().fromArray(worldPose.left.pos);
 		let quat = new THREE.Quaternion().fromArray(worldPose.left.rot);
 		let scl = new THREE.Vector3(1, 1, 1);
@@ -167,13 +167,13 @@ AFRAME.registerComponent('avatar', {
 		mat.decompose(this.rightHand.position, this.rightHand.quaternion, this.rightHand.scale);
 	},
 
-	setHandGesture: function (handSide, gesture) {
+	setHandGesture: function(handSide, gesture) {
 		let hand = (handSide === 0 ? this.leftHand : this.rightHand);
-		if (hand && hand.visible) {
+		if(hand && hand.visible) {
 			hand._animMixer.stopAllAction();
 			let actionName = this.actions[gesture];
 			if (actionName) {
-				let clip = THREE.AnimationClip.findByName(hand.animations, actionName);
+				let clip = THREE.AnimationClip.findByName( hand.animations, actionName );
 				hand._animMixer.time = 0;
 				hand._animMixer.timeScale = 1;
 				let action = hand._animMixer.clipAction(clip);
