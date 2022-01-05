@@ -537,7 +537,6 @@ app.post('/alterUser', function(request, response) {
                                 conn.release();
                             });
                         }
-                        return;
                     }
                     else {
                         conn.release();
@@ -3002,7 +3001,6 @@ app.get('/assets/:path([^/]+(?:/[^/]+)*)', function(request, response) {
 
 //For redirect http to https, Check the redirect location
 var httpServer = http.createServer(function (request, response) {
-	response.writeHead(302, {'Location': 'https://192.168.1.51'});
 	response.end();
 }).listen(80, function() {
 	console.log('Redirect server running');
