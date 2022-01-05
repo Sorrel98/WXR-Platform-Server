@@ -4,7 +4,7 @@
     <script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
     <script src="/library/jquery-1.11.3.min.js"></script>
 	<script src="/library/jquery.blockUI.js"></script>
-	<script src="/library/aframe-v1.0.4.min.js"></script>
+	<script src="/library/aframe-v1.2.0.min.js"></script>
     <script src="/library/THREE.TransformControls.js"></script>
     <script src="/library/THREE.PCDLoader.js"></script>
 	<script src="/library/animation-mixer.js"></script>
@@ -299,10 +299,12 @@
 		}		
 		
 		function showTutorialBox(num) {
+			console.log("num"+num);
 			if(isNaN(num) || num < 0 || num > 5)
 				return;
 			let target;
 			if(num == 0) {
+				console
 				target = document.getElementById('leftSideWindow');
 			}
 			else if(num == 4){
@@ -311,8 +313,9 @@
 			else {
 				target = document.getElementById('UIGroup' + num);
 			}
-			
+			console.log("target "+target);
 			let tutorialBox = tutorialBoxs[num];
+			console.log("target.style.left"+target.style.left);
 			if(target.style.left !== '')
 				tutorialBox.style.left = target.style.left;
 			else if(target.style.right !== '')
@@ -342,9 +345,22 @@
 		
 	</script>
 </head>
-<body onload="init();">
+<body>
     <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
     </a-scene>
+	<script>
+		var scene = document.querySelector('a-scene');
+
+		if (scene.hasLoaded) {
+			run();
+		} else {
+			scene.addEventListener('loaded', run);
+		}
+
+		function run() {
+			init();
+		}
+	</script>
     <div id="modeChangerLayer" class="buttonUI">
         <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
         <img id="_ARButton" src="/img/icon/AR in circle.svg"/>
