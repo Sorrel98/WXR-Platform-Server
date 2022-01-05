@@ -7,6 +7,8 @@ var ENTER_AR_CLASS = 'a-enter-ar';
 var ENTER_AR_BTN_CLASS = 'a-enter-ar-button';
 var ENTER_VR_CLASS = 'a-enter-vr';
 var ENTER_VR_BTN_CLASS = 'a-enter-vr-button';
+var ENTER_360_CLASS = 'a-enter-360';
+var ENTER_360_BTN_CLASS = 'a-enter-360-button';
 var HIDDEN_CLASS = 'a-hidden';
 var ORIENTATION_MODAL_CLASS = 'a-orientation-modal';
 
@@ -25,6 +27,7 @@ AFRAME.registerComponent('mode-changer', {
         this.enter3DEl = null;
         this.enterVREl = null;
         this.enterAREl = null;
+        this.enter360El = null;
         this.orientationModalEl = null;
         this.bindMethods();
 
@@ -32,6 +35,8 @@ AFRAME.registerComponent('mode-changer', {
         sceneEl.addEventListener('exit-ar', this.set3DInterface);
         sceneEl.addEventListener('enter-vr', this.setVRInterface);
         sceneEl.addEventListener('exit-vr', this.set3DInterface);
+        sceneEl.addEventListener('enter-360', this.set360Interface);
+        sceneEl.addEventListener('exit-360', this.set3DInterface);
 
         window.addEventListener('message', function (event) {
             if (event.data.type === 'loaderReady') {
@@ -48,9 +53,11 @@ AFRAME.registerComponent('mode-changer', {
         this.onEnterARButtonClick = bind(this.onEnterARButtonClick, this);
         this.onEnterVRButtonClick = bind(this.onEnterVRButtonClick, this);
         this.onEnter3DButtonClick = bind(this.onEnter3DButtonClick, this);
+        this.onEnter360ButtonClick = bind(this.onEnter360ButtonClick, this);
         this.setARInterface = bind(this.setARInterface, this);
         this.set3DInterface = bind(this.set3DInterface, this);
         this.setVRInterface = bind(this.setVRInterface, this);
+        this.set360Interface = bind(this.set360Interface, this);
         this.toggleOrientationModalIfNeeded = bind(this.toggleOrientationModalIfNeeded, this);
         this.onModalClick = bind(this.onModalClick, this);
     },
@@ -94,6 +101,26 @@ AFRAME.registerComponent('mode-changer', {
         }
     },
   
+    onEnter360ButtonClick: function () {
+        if(this.el.is('vr-mode')) {
+            this.el.exitVR();
+        }
+        else if(this.el.is('ar-mode')) {
+            this.el.exitAR();
+        }
+        let tdModeControlsComp = this.el.components['thd-mode-controls'];
+        if (tdModeControlsComp.transformControls.object !== null) {
+            const oldTarget = tdModeControlsComp.transformControls.object;
+            tdModeControlsComp.transformControls.detach();
+            tdModeControlsComp.el.emit('target-detached', { el: oldTarget }, false);
+        }
+        console.log('1 +'+ this.el);
+        location.href = '/360video';
+        console.log(this.el)
+        this.el.removeChild(el);
+		el.destroy();
+    },
+
     update: function (oldData) {
         let data = this.data;
         let sceneEl = this.el;
@@ -111,9 +138,11 @@ AFRAME.registerComponent('mode-changer', {
                 this.enter3DEl = this.layer.children['_3DButton'];
                 this.enterVREl = this.layer.children['_VRButton'];
                 this.enterAREl = this.layer.children['_ARButton'];
+                this.enter360El = this.layer.children['_360Button'];
                 this.enter3DEl.addEventListener('click', this.onEnter3DButtonClick);
                 this.enterVREl.addEventListener('click', this.onEnterVRButtonClick);
                 this.enterAREl.addEventListener('click', this.onEnterARButtonClick);
+                this.enter360El.addEventListener('click', this.onEnter360ButtonClick);
                 this.orientationModalEl = createOrientationModal(this.onModalClick);
                 sceneEl.appendChild(this.orientationModalEl);
                 this.enter3DEl.classList.add(HIDDEN_CLASS);
@@ -121,13 +150,13 @@ AFRAME.registerComponent('mode-changer', {
                 this.layer.style.zIndex = 9999;
                 this.layer.style.width = Math.floor(this.el.sceneEl.offsetWidth * 0.04) + 'px';
                 this.layer.style.minWidth = '40px';
-                this.layer.style.height = (this.layer.offsetWidth * 2) + 'px';
+                this.layer.style.height = (this.layer.offsetWidth * 3.15) + 'px';
                 this.layer.style.left = this.el.sceneEl.offsetLeft + this.el.sceneEl.offsetWidth - this.layer.offsetWidth - 2 + 'px';
                 this.layer.style.top = this.el.sceneEl.offsetTop + this.el.sceneEl.offsetHeight - this.layer.offsetHeight - 2 + 'px';
                 this.layer.display = 'inline';
 				window.addEventListener('resize', (e) => {
 					this.layer.style.width = Math.floor(this.el.sceneEl.offsetWidth * 0.04) + 'px';
-					this.layer.style.height = (this.layer.offsetWidth * 2) + 'px';
+					this.layer.style.height = (this.layer.offsetWidth * 3.15) + 'px';
 					this.layer.style.left = this.el.sceneEl.offsetLeft + this.el.sceneEl.offsetWidth - this.layer.offsetWidth - 2 + 'px';
 					this.layer.style.top = this.el.sceneEl.offsetTop + this.el.sceneEl.offsetHeight - this.layer.offsetHeight - 2 + 'px';
 				});
@@ -140,6 +169,9 @@ AFRAME.registerComponent('mode-changer', {
                 this.enterAREl.style.cursor = 'pointer';
 				this.enterAREl.style.padding = '2px';
                 this.enterAREl.style.width = 'calc(100% - 4px)';
+                this.enter360El.style.cursor = 'pointer';
+				this.enter360El.style.padding = '2px';
+                this.enter360El.style.width = 'calc(100% - 4px)';
             }
         }
         this.orientationModalEl.classList.add(HIDDEN_CLASS);
@@ -147,7 +179,7 @@ AFRAME.registerComponent('mode-changer', {
     },
 
     remove: function () {
-        [this.enter3DEl, this.enterVREl, this.enterAREl, this.orientationModalEl].forEach(function (uiElement) {
+        [this.enter3DEl, this.enterVREl, this.enterAREl, this.enter360El, this.orientationModalEl].forEach(function (uiElement) {
             if (uiElement && uiElement.parentNode) {
                 uiElement.parentNode.removeChild(uiElement);
             }
@@ -160,6 +192,7 @@ AFRAME.registerComponent('mode-changer', {
         sceneEl.components['thd-mode-controls'].toggleUIDisplay(false);
         this.enter3DEl.classList.remove(HIDDEN_CLASS);
         this.enterVREl.classList.remove(HIDDEN_CLASS);
+        this.enter360El.classList.remove(HIDDEN_CLASS);
         this.enterAREl.classList.add(HIDDEN_CLASS);
     },
     
@@ -170,6 +203,7 @@ AFRAME.registerComponent('mode-changer', {
         this.enter3DEl.classList.add(HIDDEN_CLASS);
         this.enterVREl.classList.remove(HIDDEN_CLASS);
         this.enterAREl.classList.remove(HIDDEN_CLASS);
+        this.enter360El.classList.remove(HIDDEN_CLASS);
     },
     
     setVRInterface: function () {
@@ -179,6 +213,17 @@ AFRAME.registerComponent('mode-changer', {
         this.enter3DEl.classList.remove(HIDDEN_CLASS);
         this.enterVREl.classList.add(HIDDEN_CLASS);
         this.enterAREl.classList.remove(HIDDEN_CLASS);
+        this.enter360El.classList.remove(HIDDEN_CLASS);
+    },
+
+    set360Interface: function () {
+        let sceneEl = this.el;
+        if(!this.enter360El) { return; }
+        sceneEl.components['thd-mode-controls'].toggleUIDisplay(false);
+        this.enter3DEl.classList.remove(HIDDEN_CLASS);
+        this.enter360El.classList.add(HIDDEN_CLASS);
+        this.enterAREl.classList.remove(HIDDEN_CLASS);
+        this.enterVREl.classList.remove(HIDDEN_CLASS);
     },
 });
 
@@ -190,6 +235,32 @@ AFRAME.registerComponent('mode-changer', {
  * @param {function} onClick - click event handler
  * @returns {Element} Wrapper <div>.
  */
+
+function createEnter360Button (onClick) {
+    var Button360;
+    var wrapper;
+  
+    // Create elements.
+    wrapper = document.createElement('div');
+    wrapper.classList.add(ENTER_360_CLASS);
+    wrapper.setAttribute('aframe-injected', '');
+    Button360 = document.createElement('button');
+    Button360.id = '_360Button';
+    Button360.className = ENTER_360_BTN_CLASS;
+    Button360.setAttribute('title',
+      'Enter 360 mode with a headset or fullscreen mode on a desktop. ' +
+      'Visit https://webvr.rocks or https://webvr.info for more information.');
+      Button360.setAttribute('aframe-injected', '');
+  
+    // Insert elements.
+    wrapper.appendChild(Button360);
+    Button360.addEventListener('click', function (evt) {
+      onClick();
+      evt.stopPropagation();
+    });
+    return wrapper;
+  }
+  
 function createEnterVRButton (onClick) {
   var vrButton;
   var wrapper;

@@ -2999,6 +2999,21 @@ app.get('/assets/:path([^/]+(?:/[^/]+)*)', function(request, response) {
     });
 });
 
+app.get('/360video', function(request, response){
+
+    fs.readFile(__dirname + '/public/360video.html', 'utf8', (error, data)=> {
+        if(!error) {
+            response.writeHead(200, {'Content-Type': 'text/html'});
+            response.end(data);
+        }
+        else {
+            response.writeHead(500);
+            response.end('Internal Server Error');
+            console.log(error);
+        }
+    });
+});
+
 //For redirect http to https, Check the redirect location
 var httpServer = http.createServer(function (request, response) {
 	response.writeHead(302, {'Location': 'https://192.168.1.51'});
