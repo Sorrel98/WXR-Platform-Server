@@ -299,12 +299,10 @@
 		}		
 		
 		function showTutorialBox(num) {
-			console.log("num"+num);
 			if(isNaN(num) || num < 0 || num > 5)
 				return;
 			let target;
 			if(num == 0) {
-				console
 				target = document.getElementById('leftSideWindow');
 			}
 			else if(num == 4){
@@ -313,9 +311,7 @@
 			else {
 				target = document.getElementById('UIGroup' + num);
 			}
-			console.log("target "+target);
 			let tutorialBox = tutorialBoxs[num];
-			console.log("target.style.left"+target.style.left);
 			if(target.style.left !== '')
 				tutorialBox.style.left = target.style.left;
 			else if(target.style.right !== '')

@@ -2,7 +2,7 @@
  * This component loads the avatar model and creates a name tag.
  */
 
- AFRAME.registerComponent('avatar', {
+AFRAME.registerComponent('avatar', {
     schema: {
 		modelPath : {type : 'string'},
 		name : {type : 'string'},
