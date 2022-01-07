@@ -348,12 +348,9 @@
 	<script>
 		var scene = document.querySelector('a-scene');
 		if (scene.hasLoaded) {
-			run();
-		} else {
-			scene.addEventListener('loaded', run);
-		}
-		function run() {
 			init();
+		} else {
+			scene.addEventListener('loaded', init);
 		}
 	</script>
     <div id="modeChangerLayer" class="buttonUI">
