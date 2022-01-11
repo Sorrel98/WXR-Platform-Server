@@ -66,6 +66,18 @@ AFRAME.registerComponent('sync', {
 		this.receivedAudioEl.autoplay = true;
 		rtcDiv.appendChild(this.receivedAudioEl);
 
+		this.video360 = document.createElement('a-videosphere');
+		this.video360.setAttribute('side','double');
+		this.video360.setAttribute('src','');
+		this.el.appendChild(this.video360);
+
+		this.videoasset = document.createElement('video');
+		this.videoasset.id = 'video';
+		this.videoasset.setAttribute('autoplay', true);
+		this.videoasset.setAttribute('controls', true);
+		this.videoasset.srcObject = new MediaStream();
+		this.el.appendChild(this.videoasset);
+		
 		let rtcButtonCss = `
 		margin-right: 5px;
 		width: 70px;
@@ -112,6 +124,30 @@ AFRAME.registerComponent('sync', {
 			}
 		}
 		rtcDiv.appendChild(this.videoReceiveButton);
+
+		this.video360Receiving = false;
+		this.video360ReceiveButton = document.createElement('button');
+		this.video360ReceiveButton.style.cssText = rtcButtonCss;
+		this.video360ReceiveButton.innerHTML = '360 video receive';
+		this.video360ReceiveButton.onclick = () => {
+			if (!this.video360Receiving) {
+				this.video360.setAttribute('src', '#video');
+				this.video360Receiving = true;
+				if (this.receivedArStreamPC && this.receivedArStreamPC.videoTrack) {
+					this.receivedArStreamPC.videoTrack.enabled = true;
+				}
+				this.video360ReceiveButton.innerHTML = 'stop receiving';
+			} else {
+				this.video360.setAttribute('src', "");
+				this.video360Receiving = false;
+				if (this.receivedArStreamPC && this.receivedArStreamPC.videoTrack) {
+					this.receivedArStreamPC.videoTrack.enabled = false;
+				}
+				this.videoReceiveButton.disabled = false;
+				this.video360ReceiveButton.innerHTML = '360 video receive';
+			}
+		}
+		rtcDiv.appendChild(this.video360ReceiveButton);
 
 		/**
 		 * Get an audio stream from the local device's microphone
@@ -239,6 +275,9 @@ AFRAME.registerComponent('sync', {
 			pc.ontrack = (event)=> {
 				this.receivedArStreamPC.videoTrack = event.track;
 				this.receivedVideoEl.srcObject.addTrack(event.track);
+				if(event.streams[0].id=='screen_sharing'){
+					this.videoasset.srcObject = event.streams[0];
+				}
 			};
 			let desc = new RTCSessionDescription(sdp);
 			pc.setRemoteDescription(desc).then(()=>{
@@ -263,6 +302,7 @@ AFRAME.registerComponent('sync', {
 			if(this.receivedArStreamPC.videoTrack) {
 				this.receivedArStreamPC.videoTrack.stop();
 				this.receivedVideoEl.srcObject.removeTrack(this.receivedArStreamPC.videoTrack);
+				this.videoasset.srcObject.removeTrack(this.receivedArStreamPC.videoTrack);
 			}
 			this.receivedArStreamPC = null;
 		});
