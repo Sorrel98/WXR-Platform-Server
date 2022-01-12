@@ -65,6 +65,11 @@ AFRAME.registerComponent('sync', {
 		this.receivedAudioEl.hidden = true;
 		this.receivedAudioEl.autoplay = true;
 		rtcDiv.appendChild(this.receivedAudioEl);
+		
+		this.video360 = document.createElement('a-videosphere');
+		this.video360.id = '360videotest';
+		this.video360.setAttribute('src', "");
+		this.el.appendChild(this.video360);
 
 		let rtcButtonCss = `
 		margin-right: 5px;
@@ -95,6 +100,7 @@ AFRAME.registerComponent('sync', {
 		this.videoReceiveButton.style.cssText = rtcButtonCss;
 		this.videoReceiveButton.innerHTML = 'video receive';
 		this.videoReceiveButton.onclick = () => {
+			this.video360ReceiveButton.disabled = true;
 			if (!this.videoReceiving) {
 				this.videoReceiving = true;
 				if(this.receivedArStreamPC && this.receivedArStreamPC.videoTrack) {
@@ -107,11 +113,36 @@ AFRAME.registerComponent('sync', {
 				if(this.receivedArStreamPC && this.receivedArStreamPC.videoTrack) {
 					this.receivedArStreamPC.videoTrack.enabled = false;
 				}
+				this.video360ReceiveButton.disabled = false;
 				this.receivedVideoEl.style.display = 'none';
 				this.videoReceiveButton.innerHTML = 'video receive';
 			}
 		}
 		rtcDiv.appendChild(this.videoReceiveButton);
+
+		this.video360Receiving = false;
+		this.video360ReceiveButton = document.createElement('button');
+		this.video360ReceiveButton.style.cssText = rtcButtonCss;
+		this.video360ReceiveButton.innerHTML = '360 video receive';
+		this.video360ReceiveButton.onclick = () => {
+			if (!this.video360Receiving) {
+				this.video360Receiving = true;
+				this.video360.setAttribute('src', "test2.mp4");
+				if(this.receivedArStreamPC && this.receivedArStreamPC.videoTrack) {
+					this.receivedArStreamPC.videoTrack.enabled = true;
+				}
+				this.video360ReceiveButton.innerHTML = 'stop receiving';
+			} else {
+				this.video360.setAttribute('src', "");
+				this.video360Receiving = false;
+				if(this.receivedArStreamPC && this.receivedArStreamPC.videoTrack) {
+					this.receivedArStreamPC.videoTrack.enabled = false;
+				}
+				this.videoReceiveButton.disabled = false;
+				this.video360ReceiveButton.innerHTML = '360 video receive';
+			}
+		}
+		rtcDiv.appendChild(this.video360ReceiveButton);
 
 		/**
 		 * Get an audio stream from the local device's microphone
