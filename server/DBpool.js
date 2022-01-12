@@ -6,8 +6,8 @@ var mariadb_callback = require('mariadb/callback');
 
 var dbConfig = {
     host : 'localhost',
-    user : 'wxrDBadmin',
-    password: 'dbpasswd',
+    user : 'hyb',
+    password: '1234',
     database: 'wxr_server'
 };
 
