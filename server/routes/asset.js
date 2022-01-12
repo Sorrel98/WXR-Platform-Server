@@ -1,11 +1,12 @@
 var express = require('express');
 
 // get DBpool module
+var dbPool_callback = require('../DBpool').dbPool_callback;
 var dbPool = require('../DBpool').dbPool;
 
 var router = express.Router();
 
-router.get('/assetInfo', function(request, response){ 
+router.get('/assetInfo', async function(request, response, next){ 
     let uid = request.session.uid;
     let id = null;
     if(!uid) {
@@ -21,7 +22,8 @@ router.get('/assetInfo', function(request, response){
             return;
         }
     }
-    dbPool.getConnection((error, conn)=>{
+
+    dbPool_callback.getConnection((error, conn)=>{
         if(!error) {
             conn.query("select * from t_asset_item where parent_dir " + (id ? "= " + id : "is NULL") + " and (owner_id is NULL or owner_id = ?)", uid, (err1, result1)=>{
                 if(!err1) {
@@ -183,7 +185,7 @@ router.post('/makeDirectory', function(request, response){
 		response.end();
 		return;
 	}
-	dbPool.getConnection((error, conn)=>{
+	dbPool_callback.getConnection((error, conn)=>{
         if(!error) {
             conn.query("select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0", [parentId, uid], (err1, result1)=>{
                 if(!err1) {
@@ -243,7 +245,7 @@ router.post('/makeBinaryFromURI', function(request, response){
 		response.end();
 		return;
 	}
-	dbPool.getConnection((error, conn)=>{
+	dbPool_callback.getConnection((error, conn)=>{
 		if(!error) {
 			conn.query("select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0", [parentId, uid], (err1, result1)=>{
                 if(!err1) {
@@ -356,7 +358,7 @@ router.post('/makeBinaryFromUpload', function(request, response){
 			response.end();
 			return;
 		}
-		dbPool.getConnection((error, conn)=>{
+		dbPool_callback.getConnection((error, conn)=>{
 			if(!error) {
 				conn.query("select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0", [parentId, uid], (err1, result1)=>{
 					if(!err1) {
@@ -441,7 +443,7 @@ router.post('/makeTarget', function(request, response){
 		response.end();
 		return;
 	}
-	dbPool.getConnection((error, conn)=>{
+	dbPool_callback.getConnection((error, conn)=>{
         if(!error) {
             conn.query("select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0", [parentId, uid], (err1, result1)=>{
                 if(!err1) {
@@ -516,7 +518,7 @@ router.post('/makeTargetGeneralFeature', function(request, response){
 			response.end();
 			return;
 		}
-		dbPool.getConnection((error, conn)=>{
+		dbPool_callback.getConnection((error, conn)=>{
 			if(!error) {
 				conn.query("select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 1", [targetId, uid], (err1, result1)=>{
 					if(!err1) {
@@ -619,7 +621,7 @@ router.post('/makeTargetVuforiaFeature', function(request, response){
 				response.end();
 				return;
 			}
-			dbPool.getConnection((error, conn)=>{
+			dbPool_callback.getConnection((error, conn)=>{
 				if(!error) {
 					conn.query("select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 1", [targetId, uid], (err1, result1)=>{
 						if(!err1) {
@@ -711,7 +713,7 @@ router.post('/makeTemplate', function(request, response){
 		response.end();
 		return;
 	}
-	dbPool.getConnection((error, conn)=>{
+	dbPool_callback.getConnection((error, conn)=>{
         if(!error) {
             conn.query("select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0", [parentId, uid], (err1, result1)=>{
                 if(!err1) {
@@ -795,7 +797,7 @@ router.post('/commitContent', function(request, response){
 	let contentSource = request.body.source;
 	contentSource = contentSource.replace(/'/g, '"');
 	//todo : Check content source validation
-	dbPool.getConnection((error, conn)=>{
+	dbPool_callback.getConnection((error, conn)=>{
 		if(!error) {
 			conn.query("update t_template set data = ?, verified = b'1' where id = ?", [contentSource, astId], (err1, result1)=>{
 				if(!err1) {
@@ -831,7 +833,7 @@ router.post('/removeAsset', function(request, response){
         response.end();
         return;
     }
-    dbPool.getConnection((error, conn)=> {
+    dbPool_callback.getConnection((error, conn)=> {
         if(!error) {
             conn.query("delete from t_asset_item where id = ? and parent_dir is not null and (owner_id is null or owner_id = ?)", [astId, uid], (err1, result1)=>{
                 if(!err1) {
@@ -875,7 +877,7 @@ router.post('/renameAsset', function(request, response){
         response.end();
         return;
     }
-    dbPool.getConnection((error, conn)=> {
+    dbPool_callback.getConnection((error, conn)=> {
         if(!error) {
             conn.query("update t_asset_item set name = ? where id = ? and parent_dir is not null and (owner_id is null or owner_id = ?)", [astName, astId, uid], (err1, result1)=>{
                 if(!err1) {
@@ -927,7 +929,7 @@ router.post('/shareAsset', function(request, response){
         response.end();
         return;
     }
-    dbPool.getConnection((error, conn)=> {
+    dbPool_callback.getConnection((error, conn)=> {
         if(!error) {
             conn.query("select count(*) as canShare from t_asset_item where id = ? and owner_id = ?", [astId, uid], (err1, result1)=>{
                 if(!err1) {
@@ -1013,7 +1015,7 @@ router.post('/unshareAsset', function(request, response){
         response.end();
         return;
     }
-    dbPool.getConnection((error, conn)=> {
+    dbPool_callback.getConnection((error, conn)=> {
         if(!error) {
             conn.query("select count(*) as canShare from t_asset_item where id = ? and owner_id = ?", [astId, uid], (err1, result1)=>{
                 if(!err1) {
@@ -1073,7 +1075,7 @@ router.get('/assetRawData', function(request, response) {
 		response.end();
 		return;
 	}
-	dbPool.getConnection((error, conn)=> {
+	dbPool_callback.getConnection((error, conn)=> {
 		if(!error) {
 			let bottomUpAuthAndRead = (id, auth) => {
 				if(id === null) {
@@ -1209,7 +1211,7 @@ router.get('/assets/:path([^/]+(?:/[^/]+)*)', function(request, response) {
     let pathStr = request.params.path;
     // If it is target feature, A suffix such as /general or /vuforia is appended to the passed path
     let pathArr = pathStr.split('/');
-    dbPool.getConnection((error, conn)=> {
+    dbPool_callback.getConnection((error, conn)=> {
         if(!error) {
             //It is assumed that the home directory cannot be shared.
             conn.query("select id, (owner_id is null or owner_id = ?) as auth from t_asset_item where parent_dir is null and name = ?", [uid, pathArr[0]], (err1, result1)=>{

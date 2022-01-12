@@ -53,7 +53,7 @@ AFRAME.registerComponent('vr-mode-controls', {
 			right.topButtonDownCount = 0;
 			rig.appendChild(right);
 		}
-		
+
 		left.addEventListener('triggerdown', onTriggerDown, false);
 		left.addEventListener('triggerup', onTriggerUp, false);
 		left.addEventListener('gripdown', onGripDown, false);
@@ -121,7 +121,7 @@ AFRAME.registerComponent('vr-mode-controls', {
 			if(++this.topButtonDownCount == 1)
 				writeGestureIfChanged.bind(this)(this.gesture | (1 << 2));
 
-            this.emit('bButtonDown');
+			this.emit('bButtonDown');
         };
         
 		//undo

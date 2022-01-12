@@ -2,8 +2,10 @@ var express = require('express');
 var fs = require('fs');
 var ejs = require('ejs');
 
+var sessionManager = require('../session').sessionManager;
+
 // get DBpool module
-var dbPool = require('../DBpool').dbPool;
+var dbPool = require('../DBpool').dbPool_callback;
 
 var router = express.Router();
 
@@ -14,7 +16,7 @@ router.get('/makePage', function(request, response) {
         response.end();
         return;
     }
-    fs.readFile(__dirname + '/public/makePage.html', 'utf8', (fsErr, data) => {
+    fs.readFile(__dirname + '/../../public/makePage.html', 'utf8', (fsErr, data) => {
 		if(!fsErr) {
 			response.writeHead(200, {'Content-Type': 'text/html'});
 			response.end(data);
@@ -630,7 +632,7 @@ router.get('/manage', function(request, response) {
 													if(!err4) {
 														conn.query("select * from t_role", (err5, result5)=> {
 															if(!err5) {
-																fs.readFile(__dirname + '/public/manage.ejs', 'utf8', (fsErr, manage)=>{
+																fs.readFile(__dirname + '/../../public/manage.ejs', 'utf8', (fsErr, manage)=>{
 																	if(!fsErr) {
 																		response.writeHead(200, {'Content-Type': 'text/html'});
 																		response.end(ejs.render(manage, {authority: authArr, spaceInform: result2[0], tags: tags, participant: result4, roleInform: result5}));
@@ -709,7 +711,7 @@ router.get('/manage', function(request, response) {
     });
 });
 
-router.post('/alter', function(request, response){ //todo: Check the content source validation
+router.post('/alter', function(request, response){ //todo: Check the content source validation\
     let uid = request.session.uid;
     if(!uid) {
         response.writeHead(401);
