@@ -14,6 +14,15 @@ var app = server.app;
 //router module
 var workspace = require('./routes/workspace');
 var asset = require('./routes/asset');
+const { SqlError } = require('mariadb/callback');
+
+// error class
+class DB_Error extends Error {
+    constructor(message, statusCode){
+        super(message);
+        this.statusCode = statusCode;
+    }
+}
 
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
@@ -79,8 +88,10 @@ app.post('/register', async function(request, response, next) {
         conn.commit();
         conn.release();
     } catch(error) {
-        conn.rollback();
-        conn.release();
+        if (conn){
+            conn.rollback();
+            conn.release();    
+        }
         next(error);
     }
 });
@@ -101,7 +112,9 @@ app.post('/removeAccount', async function(request, response, next) {
         response.end();
         conn.release();
     } catch (error) {
-        conn.release();
+        if (conn){
+            conn.release();    
+        }
         next(error);
     }
 });
@@ -125,31 +138,35 @@ app.post('/login', async function(request, response, next) {
     try {
         var conn = await dbPool.getConnection();
         var res1 = await conn.query("select * from t_user where " + field + " = ?", [id]);
-        if(res1.length === 1) {
-            var res2 = await conn.query("select SHA2(?, 256) as val", [pw])
-            let pwHashResult = res2[0];
-            if(res1[0].passwd === pwHashResult.val) {
-                let sess = request.session;
-                sess.uid = res1[0].id;
-                sess.name = res1[0].name;
-                sess.email = res1[0].email;
-                sess.is_admin = res1[0].is_admin;
-                response.writeHead(200);
-                response.end();
-                console.log('[' + id + '] login');
-            }
-            else {
-                response.writeHead(406);
-                response.end('Fail : Wrong password');
-            }       
+        if(res1.length !== 1) {
+            throw new DB_Error('Fail : Nonexistent id', 406);
+            // response.writeHead(406);
+            // response.end('Fail : Nonexistent id');
         }
-        else {
-            response.writeHead(406);
-            response.end('Fail : Nonexistent id');
+
+        var res2 = await conn.query("select SHA2(?, 256) as val", [pw])
+        let pwHashResult = res2[0];
+
+        if(res1[0].passwd !== pwHashResult.val) {
+            throw new DB_Error('Fail : Wrong password', 406);
+            // response.writeHead(406);
+            // response.end('Fail : Wrong password');
         }
+
+        let sess = request.session;
+        sess.uid = res1[0].id;
+        sess.name = res1[0].name;
+        sess.email = res1[0].email;
+        sess.is_admin = res1[0].is_admin;
+        response.writeHead(200);
+        response.end();
+        console.log('[' + id + '] login');
+    
         conn.release();
     } catch (error) {
-        conn.release();
+        if (conn){
+            conn.release();    
+        }
         next(error);
     }
 });
@@ -197,7 +214,9 @@ app.get('/editProfile', async function(request, response, next) {
         });
         conn.release();
     } catch (error) {
-        conn.release();
+        if (conn){
+            conn.release();    
+        }
         next(error);
     }
 });
@@ -222,7 +241,9 @@ app.get('/profile', async function(request, response, next) {
         }
         conn.release();
     } catch (error) {
-        conn.release();
+        if (conn){
+            conn.release();    
+        }
         next(error);
     }
 });
@@ -271,7 +292,9 @@ app.post('/alterUser', async function(request, response, next) {
         }
         conn.release();
     } catch (error) {
-        conn.release();
+        if (conn){
+            conn.release();    
+        }
         next(error);
     }
 });
@@ -290,7 +313,9 @@ app.get('/invitationList', async function(request, response, next) {
         response.status(200).json(res1);
         conn.release();
     } catch (error) {
-        conn.release();
+        if (conn){
+            conn.release();    
+        }
         next(error);
     }
 });
@@ -377,7 +402,9 @@ app.get('/workspace', async function(request, response, next) {
         }
         conn.release();
     } catch (error) {
-        conn.release();
+        if (conn){
+            conn.release();    
+        }
         next(error);
     }
 });
@@ -403,7 +430,18 @@ app.get('/manageAssets', function(request, response) {
 });
 
 // Error Handle
-app.use(function dbPoolErrorHandler(error, request, response, next) {
+app.use(function dbErrorHandler(error, request, response, next){
+    if(!(error instanceof DB_Error)){
+        next(error);
+    }
+    response.writeHead(error.statusCode);
+    response.end(error.message);    
+})
+
+app.use(function dbPoolAPIErrorHandler(error, request, response, next) {
+    if(!(error instanceof SqlError)){
+        next(error)
+    }
     let errno = error.errno;
     
     response.writeHead(500);
