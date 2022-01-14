@@ -17,6 +17,8 @@ var asset = require('./routes/asset');
 const { SqlError } = require('mariadb/callback');
 
 // error class
+// When there is no error in MariaDB API but, try to deal with improper data in Nodejs,
+// Create DB_Error.
 class DB_Error extends Error {
     constructor(message, statusCode){
         super(message);
@@ -232,13 +234,19 @@ app.get('/profile', async function(request, response, next) {
     try {
         var conn = await dbPool.getConnection();
         var res1 = await conn.query("select name, email, avatar_id, vr_hand_sync from t_user where id = ?", uid);
-        if(res1.length === 1) {
-            response.status(200).json({'name': res1[0].name, 'email': res1[0].email, 'avatar_id': res1[0].avatar_id, 'vr_hand_sync': res1[0].vr_hand_sync});
+        if(res1.length !== 1){
+            throw new DB_Error('Removed account', 412);
         }
-        else {
-            response.writeHead(412);
-            response.end('Removed account');
-        }
+
+        response.status(200).json({'name': res1[0].name, 'email': res1[0].email, 'avatar_id': res1[0].avatar_id, 'vr_hand_sync': res1[0].vr_hand_sync});
+
+        // if(res1.length === 1) {
+        //     response.status(200).json({'name': res1[0].name, 'email': res1[0].email, 'avatar_id': res1[0].avatar_id, 'vr_hand_sync': res1[0].vr_hand_sync});
+        // }
+        // else {
+        //     response.writeHead(412);
+        //     response.end('Removed account');
+        // }
         conn.release();
     } catch (error) {
         if (conn){
@@ -274,22 +282,21 @@ app.post('/alterUser', async function(request, response, next) {
     try {
         var conn = await dbPool.getConnection()
         var res1 = await conn.query("select SHA2(?, 256) = (select passwd from t_user where id=?) as valid", [pw, uid])
-        if(res1[0].valid === 1) {
-            if(new_pw) {
-                await conn.query("update t_user set name=?, email=?, passwd=SHA2(?, 256), avatar_id=?, vr_hand_sync=b'" + vrHandSync + "' where id=?", [name, email, new_pw, avatar_id, uid])
-                response.writeHead(200);
-                response.end();
-            }
-            else {
-                await conn.query("update t_user set name=?, email=? where id=?", [name, email, uid])
-                response.writeHead(200);
-                response.end();
-            }
+        if(res1[0].valid !== 1) {
+            throw new DB_Error('Nonexistent account or wrong password', 403);
+        }
+
+        if(new_pw) {
+            await conn.query("update t_user set name=?, email=?, passwd=SHA2(?, 256), avatar_id=?, vr_hand_sync=b'" + vrHandSync + "' where id=?", [name, email, new_pw, avatar_id, uid])
+            response.writeHead(200);
+            response.end();
         }
         else {
-            response.writeHead(403);
-            response.end('Nonexistent account or wrong password');
+            await conn.query("update t_user set name=?, email=? where id=?", [name, email, uid])
+            response.writeHead(200);
+            response.end();
         }
+
         conn.release();
     } catch (error) {
         if (conn){
@@ -357,49 +364,92 @@ app.get('/workspace', async function(request, response, next) {
     try {
         var conn = await dbPool.getConnection();
         var res1 = await conn.query("select u.name, p.rid from (select id, name from t_user where id = ?) as u join t_participation as p on p.uid = u.id where p.wid = ?", [uid, wid])
-        if(res1.length === 1) {
-            var res2 = await conn.query("select id, name, created_date, content, vr_options from t_workspace where id = ?", wid)
-            if(res2.length === 1) {
-                var res3 = await conn.query("select * from t_auth_role_relation where rid = ?", res1[0].rid)
-                if(res3.length !== 0) {
-                    let content = '<a-entity><a-camera></a-camera></a-entity>' + res2[0].content;
-                    let wname = res2[0].name;
-                    let wcdate = res2[0].created_date;
-                    let rid = res3[0].rid;
-                    let canWrite = false;
-                    let canInvite = false;
-                    for(let r of res3) {
-                        if(r.aid === 5)
-                            canWrite = true;
-                        else if(r.aid === 2)
-                            canInvite = true;
-                    }
-                    fs.readFile(__dirname + '/../public/workspace.ejs', 'utf8', async (fsErr, workspace)=>{
-                        if(!fsErr) {
-                            response.writeHead(200, {'Content-Type': 'text/html'});
-                            response.end(ejs.render(workspace, {uname: res1[0].name, wid: wid, wname: wname, created: wcdate, rid: rid, canWrite: canWrite, canInvite: canInvite, vrOptions: res2[0].vr_options, data: content}));
-                            await conn.query("update t_participation set access_date = NOW() where uid = ? and wid = ?", [uid, wid]);
-                        }
-                        else {
-                            response.writeHead(500);
-                            response.end('Internal Server Error');
-                            console.log(fsErr);
-                        }
-                    });
-                }
-                else {
-                    response.writeHead(403);
-                    response.end();
-                }
-            } else {
-                response.writeHead(500);
-                response.end('DB query error');
+
+        if(res1.length !== 1){
+            throw new DB_Error('', 403);
+        }
+
+        var res2 = await conn.query("select id, name, created_date, content, vr_options from t_workspace where id = ?", wid);
+        
+        if(res2.length !== 1) {
+            throw new DB_Error('DB query error', 500);
+        }
+
+        var res3 = await conn.query("select * from t_auth_role_relation where rid = ?", res1[0].rid)
+
+        if(res3.length === 0) {
+            throw new DB_Error('', 403);
+        }
+
+        let content = '<a-entity><a-camera></a-camera></a-entity>' + res2[0].content;
+        let wname = res2[0].name;
+        let wcdate = res2[0].created_date;
+        let rid = res3[0].rid;
+        let canWrite = false;
+        let canInvite = false;
+        for(let r of res3) {
+            if(r.aid === 5)
+                canWrite = true;
+            else if(r.aid === 2)
+                canInvite = true;
+        }
+
+        fs.readFile(__dirname + '/../public/workspace.ejs', 'utf8', async (fsErr, workspace)=>{
+            if(!fsErr) {
+                response.writeHead(200, {'Content-Type': 'text/html'});
+                response.end(ejs.render(workspace, {uname: res1[0].name, wid: wid, wname: wname, created: wcdate, rid: rid, canWrite: canWrite, canInvite: canInvite, vrOptions: res2[0].vr_options, data: content}));
+                await conn.query("update t_participation set access_date = NOW() where uid = ? and wid = ?", [uid, wid]);
             }
-        }
-        else {
-            response.writeHead(403);
-            response.end();
-        }
+            else {
+                response.writeHead(500);
+                response.end('Internal Server Error');
+                console.log(fsErr);
+            }
+        });     
+        
+        // if(res1.length === 1) {
+        //     var res2 = await conn.query("select id, name, created_date, content, vr_options from t_workspace where id = ?", wid)
+        //     if(res2.length === 1) {
+        //         var res3 = await conn.query("select * from t_auth_role_relation where rid = ?", res1[0].rid)
+        //         if(res3.length !== 0) {
+        //             let content = '<a-entity><a-camera></a-camera></a-entity>' + res2[0].content;
+        //             let wname = res2[0].name;
+        //             let wcdate = res2[0].created_date;
+        //             let rid = res3[0].rid;
+        //             let canWrite = false;
+        //             let canInvite = false;
+        //             for(let r of res3) {
+        //                 if(r.aid === 5)
+        //                     canWrite = true;
+        //                 else if(r.aid === 2)
+        //                     canInvite = true;
+        //             }
+        //             fs.readFile(__dirname + '/../public/workspace.ejs', 'utf8', async (fsErr, workspace)=>{
+        //                 if(!fsErr) {
+        //                     response.writeHead(200, {'Content-Type': 'text/html'});
+        //                     response.end(ejs.render(workspace, {uname: res1[0].name, wid: wid, wname: wname, created: wcdate, rid: rid, canWrite: canWrite, canInvite: canInvite, vrOptions: res2[0].vr_options, data: content}));
+        //                     await conn.query("update t_participation set access_date = NOW() where uid = ? and wid = ?", [uid, wid]);
+        //                 }
+        //                 else {
+        //                     response.writeHead(500);
+        //                     response.end('Internal Server Error');
+        //                     console.log(fsErr);
+        //                 }
+        //             });
+        //         }
+        //         else {
+        //             response.writeHead(403);
+        //             response.end();
+        //         }
+        //     } else {
+        //         response.writeHead(500);
+        //         response.end('DB query error');
+        //     }
+        // }
+        // else {
+        //     response.writeHead(403);
+        //     response.end();
+        // }
         conn.release();
     } catch (error) {
         if (conn){
