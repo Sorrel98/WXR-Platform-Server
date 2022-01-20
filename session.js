@@ -1,15 +1,11 @@
-var sharedSession = require('express-socket.io-session');
-var uuidv4 = require('uuid').v4;
+const uuidv4 = require('uuid').v4;
 
-var httpsServer = require('./server').httpsServer;
-var app = require('./server').app;
+const dbPool = require('./lib/DBpool').dbPool;
 
-var io = require('socket.io')(httpsServer);
-io.use(sharedSession(app.session, {autosave: true}));
 
 class WSSession {
 	constructor(wid) {
-		console.log("New WSSession on " + wid);
+		console.log(`New WSSession on ${wid}`);
 		this.wid = wid;
 		this.participantSocketsFromSessionName = new Map(); // {key:sessionName, value: socket}
 		/*
@@ -32,7 +28,7 @@ class WSSession {
 
 	onSaved() {
 		this.workHistory = [];
-		console.log('Workspace ' + this.wid + ' was saved');
+		console.log(`'Workspace ${this.wid} was saved'`);
 		io.to(this.wid).emit('saved');
 	}
 
@@ -40,7 +36,7 @@ class WSSession {
 		socket.to(this.wid).emit('broadcasting', elId, typeNo, data);
 	}
 
-	join(socket, name, avatarPath, enableSyncVRHand){
+	async join(socket, name, avatarPath, enableSyncVRHand){
         //For voice chat
 		socket.on('voiceAnswer', (target, sdp)=>{
 			let receiverSocket = this.participantSocketsFromSessionName.get(target);
@@ -93,7 +89,7 @@ class WSSession {
         //For synchronize someone else's avatar
         socket.on('changeInteractionMode', (mode)=> {
             socket.userData.mode = mode;
-            console.log(socket.userData.sessionName + ' mode : ' + mode);
+            console.log(`${socket.userData.sessionName} mode : ${mode}`);
             socket.to(this.wid).emit('userInteractionMode', {sessionName: socket.userData.sessionName, mode: mode});
         });
 		socket.on('moving', (pose)=> {
@@ -120,7 +116,7 @@ class WSSession {
 				this.token = uuidv4();
 				this.streamerOwner = socket.userData.sessionName;
 				socket.emit('token', this.token);
-				console.log('Issued token(' + this.token + ') to ' + this.streamerOwner);
+				console.log(`Issued token(${this.token}) to ${this.streamerOwner}`);
 			}
 		});
 
@@ -175,31 +171,23 @@ class WSSession {
 		socket.emit('sessionJoined', sessionName, enableSyncVRHand);
 		
         //Check the new user has write auth
-        this.checkWrireAuth();
-	}
-
-    async checkWrireAuth(){
+        let conn, res1;
         try {
-            var conn = await dbPool.getConnection();
-            var res1 = await conn.query('select aid from t_auth_role_relation where rid = (select rid from t_participation where uid = ? and wid = ?)', [socket.handshake.session.uid, this.wid]);
-            for(let record of res1) {
-                if(record.aid === 5) {
-                    socket.userData.canWrite = true;
-                    break;
-                }
-            }
-        } catch (error) {
-            if (error) {
-                console.log(err1);
-            } else if (error) {
-                console.log(error);
-            }
-            
-            console.log("err in WSSession");
-        } finally {
+            conn = await dbPool.getConnection();
+            res1 = await conn.query('select aid from t_auth_role_relation where rid = (select rid from t_participation where uid = ? and wid = ?)', [socket.handshake.session.uid, this.wid]);
+        } catch (err) {
+            console.log(`err in WSSession: ${err}`);
+            return;
+        }
+        if (conn) {
             conn.release();
         }
-    }
+
+        if (res1.some( record => record.aid === 5 )) {
+            socket.userData.canWrite = true;
+        }
+
+	}
 
     //Join as dummy user for AR Streaming
 	joinAsStreamer(socket, token) {
@@ -246,74 +234,94 @@ class WSSession {
 	}
 };
 
+
+// global variable of this module.
+var io;
 class SessionManager {
-	constructor() {
-		let getWSSessionByWID = new Map(); // {key : wid, value : WSSession}
-		this.isLiveSession = (wid)=>{
-			if(getWSSessionByWID.get(wid))
+
+    // Initialize this instance with io.
+    init(_io) {
+		io = _io;
+		
+        const getWSSessionByWID = new Map(); // {key : wid, value : WSSession}
+		
+        this.isLiveSession = (wid) => {
+
+			if(getWSSessionByWID.get(wid)){
 				return true;
+            }
+
 			return false;
 		};
-		this.onSaved = (uid, wid)=>{
-			let sess = getWSSessionByWID.get(wid);
+		
+        this.onSaved = (uid, wid) => {
+
+			const sess = getWSSessionByWID.get(wid);
 			if(sess) {
 				sess.onSaved();
 			}
 		};
-		io.on('connection', async function(socket) {
-			let uid = socket.handshake.session.uid;
-			if(!uid || uid === '') {
+		
+        io.on('connection', async (socket) => {
+			
+            const uid = socket.handshake.session.uid;
+			if(!uid) {
 				socket.disconnect(true);
 				return;
 			}
 
+            let conn, res1;
             try {
-                var conn = await dbPool.getConnection();
-                var res1 = await conn.query("select t_user.name as name, model_path, vr_hand_sync from t_user join t_avatar on t_user.avatar_id = t_avatar.id where t_user.id = ?", uid)
-                
-                let name = res1[0].name;
-                let avatarPath = res1[0].model_path;
-                let wsSession = null;
-                let enableSyncVRHand = (res1[0].vr_hand_sync[0] == 1);
-                console.log('Socket connected : ' + name);
-                
-                socket.on('joinWS', (wid) => {
-                    wsSession = getWSSessionByWID.get(wid);
-                    if(!wsSession) {
-                        wsSession = new WSSession('' + wid);
-                        getWSSessionByWID.set(wid, wsSession);
-                    }
-                    wsSession.join(socket, name, avatarPath, enableSyncVRHand);
-                });
-                socket.on('joinWSasStreamer', (wid, token) => {
-                    wsSession = getWSSessionByWID.get(wid);
-                    name = token;
-                    if(!wsSession || !wsSession.joinAsStreamer(socket, token)) {
-                        socket.disconnect(true);
-                        wsSession = null;
-                    }
-                });
-                socket.on('disconnect', () => {
-                    console.log('socket disconnected : ' + name);
-                    if(wsSession) {
-                        console.log('Leave ' + name + ' from ' + wsSession.wid);
-                        wsSession.leave(socket);
-                        if(wsSession.getPartNum() === 0) {
-                            getWSSessionByWID.delete(parseInt(wsSession.wid));
-                            wsSession = null;
-                        }
-                    }
-                });
-            } catch (error) {
-                if (error) {
-					console.log(error);
-                } else if (error) {
-                    console.log(err1);
-                }
-            } finally {
+                conn = await dbPool.getConnection();
+                res1 = await conn.query(`select t_user.name as name, model_path as avatarPath, vr_hand_sync as vrHandSync from t_user join t_avatar on t_user.avatar_id = t_avatar.id where t_user.id = ?`, uid);
+            } catch (err) {
+                console.log(err);
+                return;
+            }
+            if(conn){
                 conn.release();
             }
+
+            let wsSession = null;
+            const { name, avatarPath, vrHandSync } = res1[0];
+            const enableSyncVRHand = (vrHandSync == 1);
+            console.log(`Socket connected : ${name}`);
+            
+            socket.on('joinWS', async (wid) => {
+                // socket.userData.wsSession = getWSSessionByWID.get(wid);
+                wsSession = getWSSessionByWID.get(wid);
+                if(!wsSession) {
+                    wsSession = new WSSession('' + wid);
+                    getWSSessionByWID.set(wid, wsSession);
+                }
+                await wsSession.join(socket, name, avatarPath, enableSyncVRHand);
+            });
+
+            socket.on('joinWSasStreamer', (wid, token) => {
+                // socket.userData.wsSession = getWSSessionByWID.get(wid);
+                wsSession = getWSSessionByWID.get(wid);
+                // name = token;    // ???????????? 뭐임??
+                if(!wsSession || !wsSession.joinAsStreamer(socket, token)) {
+                    socket.disconnect(true);
+                    wsSession = null;
+                }
+            });
+
+            socket.on('disconnect', () => {
+                console.log(`socket disconnected : ${name}`);
+                if(wsSession) {
+                    console.log(`Leave ${name} from ${wsSession.wid}`);
+                    wsSession.leave(socket);
+                    if(wsSession.getPartNum() === 0) {
+                        getWSSessionByWID.delete(parseInt(wsSession.wid));
+                        wsSession = null;
+                    }
+                }
+            });
+            
 		});
+
+        return this;
 	}
 };
 

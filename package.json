@@ -2,7 +2,7 @@
   "name": "wxr-library",
   "version": "1.6.0",
   "description": "",
-  "main": "./server/app.js",
+  "main": "./app.js",
   "scripts": {
     "start": "nodemon ./",
     "debug": "set DEBUG=express:* & nodemon ./",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "aframe-watcher": "^1.2.0",
+    "axios": "^0.24.0",
     "body-parser": "^1.19.0",
     "ejs": "^2.7.1",
     "express": "^4.16.4",
@@ -29,7 +30,6 @@
     "socket.io": "^3.1.0",
     "three": "^0.127.0"
   },
-  "devDependencies": {},
   "author": "",
   "license": "ISC"
 }
