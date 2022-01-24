@@ -6,6 +6,7 @@ const router = express.Router();
 const ejs = require('ejs');
 
 const dbPool = require('../lib/DBpool').dbPool;
+const { DBError } = require('../lib/errors');
 
 
 router.get('/', (request, response) => {
