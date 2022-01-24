@@ -191,7 +191,7 @@
 		}
 	</script>
 </head>
-<body onload="init();">
+<body>
     <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
 		<a-group id="group" position="0 1.5 0" scale="0.1 0.1 0.1">
 			<a-box id="box" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" material geometry target="marker:#activeMarker"></a-box>
@@ -204,6 +204,14 @@
 		<a-sky id="sky" visible="true" material="src:/tutorial/background.png;" geometry="primitive:sphere;radius:500;">
 		</a-sky>
 	</a-scene>
+	<script>
+		var scene = document.querySelector('a-scene');
+			if (scene.hasLoaded) {
+				init();
+			} else {
+				scene.addEventListener('loaded', init);
+			}
+	</script>
     <div id="modeChangerLayer" class="buttonUI">
         <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
         <img id="_ARButton" src="/img/icon/AR in circle.svg"/>

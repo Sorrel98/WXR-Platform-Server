@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 
 const express = require('express');
 const app = express();
@@ -31,10 +31,12 @@ app.session = session({
 app.use(app.session);
 app.use(express.static(__dirname + '/public'));
 
+
 // add routers
 app.use('/', require('./routes/root'));
 app.use('/', require('./routes/workspace'));
 app.use('/', require('./routes/asset'));
+
 
 //For redirect http to https, Check the redirect location
 const httpServer = http.createServer(function (request, response) {

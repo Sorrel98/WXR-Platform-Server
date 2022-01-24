@@ -200,7 +200,7 @@
 		
 	</script>
 </head>
-<body onload="init();">
+<body>
     <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
 		<a-entity>
 			<a-camera position-observer="goal:0 0 -5;tolerance:2;flagName:fn1;onWorldCoordinate:true">
@@ -243,6 +243,14 @@
 		<a-sky id="sky" material="src:/tutorial/background.png;" geometry="primitive:sphere;radius:500;">
 		</a-sky>
 	</a-scene>
+	<script>
+		var scene = document.querySelector('a-scene');
+			if (scene.hasLoaded) {
+				init();
+			} else {
+				scene.addEventListener('loaded', init);
+			}
+	</script>
     <div id="modeChangerLayer" class="buttonUI">
         <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
         <img id="_ARButton" src="/img/icon/AR in circle.svg"/>

@@ -342,9 +342,17 @@
 		
 	</script>
 </head>
-<body onload="init();">
+<body>
     <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
     </a-scene>
+	<script>
+		var scene = document.querySelector('a-scene');
+		if (scene.hasLoaded) {
+			init();
+		} else {
+			scene.addEventListener('loaded', init);
+		}
+	</script>
     <div id="modeChangerLayer" class="buttonUI">
         <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
         <img id="_ARButton" src="/img/icon/AR in circle.svg"/>
