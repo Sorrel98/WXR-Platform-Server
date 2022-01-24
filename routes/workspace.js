@@ -15,10 +15,7 @@ router.get('/makePage', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
     let data;
