@@ -2,7 +2,7 @@
   "name": "wxr-library",
   "version": "1.6.0",
   "description": "",
-  "main": "app.js",
+  "main": "./app.js",
   "scripts": {
     "start": "nodemon ./",
     "debug": "set DEBUG=express:* & nodemon ./",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "aframe-watcher": "^1.2.0",
+    "axios": "^0.24.0",
     "body-parser": "^1.19.0",
     "ejs": "^2.7.1",
     "express": "^4.17.2",
@@ -21,7 +22,6 @@
     "jquery-ui": "^1.12.1",
     "mariadb": "^2.1.2",
     "multiparty": "^4.2.1",
-    "node-webcrypto-ossl": "^1.0.42",
     "nodemon": "^1.17.5",
     "npm-check-updates": "^11.1.1",
     "passport": "^0.4.0",
