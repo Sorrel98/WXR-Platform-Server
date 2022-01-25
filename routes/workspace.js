@@ -65,7 +65,7 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
             const values = tagArr.map( tag => [res1.insertId, tag] );
             await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
         }
-        
+
         conn.commit();
         conn.release();
 
@@ -86,24 +86,16 @@ router.post('/removeWorkspace', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        return next(new DBError("Session has no uid.", 401));
     }
 
     const wid = request.body.wid;
     if(!wid) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        return next(new DBError("There is no wid", 400));
     }
 	if(sessionManager.isLiveSession(parseInt(wid))) {
-        // return next(new AuthError(400));
-		response.writeHead(400);
-		response.end('There is a running session');
-		return;
+        // 정확한 상태코드 확인 필요
+        return next(new DBError(`This Workspace(${wid}) is running in other session`, 401));
 	}
 
     let conn;
@@ -112,7 +104,7 @@ router.post('/removeWorkspace', async (request, response, next) => {
 
         const res1 = await conn.query(`select owner from t_workspace where id = ?`, wid);
         if(res1.length !== 1 || res1[0].owner !== uid) {
-            throw new DBError('Unauthorized access', 403);     // The owner can remove only
+            throw new DBError(`You are not owner of this workspace (or There is no such workspace(wid:${wid})` , 403);     // The owner can remove only
         }
 
         await conn.query(`delete from t_workspace where id = ?`, wid);
