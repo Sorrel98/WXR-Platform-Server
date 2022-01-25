@@ -276,18 +276,12 @@ router.post('/join', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const iid = request.body.inviteId;
     if(!iid) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no inviteId.", 400));
     }
 
     let conn;
@@ -298,8 +292,8 @@ router.post('/join', async (request, response, next) => {
         if(res1.length !== 1) {
             throw new DBError('Unauthorized access', 412);     // You haven't been invited
         }
-
-        const wid = result1[0].workspace_id;
+        
+        const wid = res1[0].workspace_id;
         await conn.beginTransaction();
 
         await conn.query(`insert into t_participation(uid, wid, rid, bookmark) values(?, ?, 5, b'0')`, [uid, wid, iid]);
@@ -426,7 +420,7 @@ router.get('/manage', async (request, response, next) => {
     }
 
     response.writeHead(200, {'Content-Type': 'text/html'});
-    response.end(ejs.render(manage, { authority, spaceInform, tags, participant, roleInform }));
+    response.end(ejs.render(manage, { authority, spaceInform, tags, participant, roleInform })); // audience인 workspace를 manage하려할때 에러 발생하면서 서버 닫힘
 });
 
 router.post('/alter', async (request, response, next) => { //todo: Check the content source validation
