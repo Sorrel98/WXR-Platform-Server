@@ -128,19 +128,13 @@ router.post('/setBookmark', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        return next(new DBError("Session has no uid.", 401));
     }
 
     const wid = parseInt(request.body.wid);
     const val = parseInt(request.body.val);
     if(isNaN(wid) || isNaN(val) || val > 1 || val < 0) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        return next(new DBError(`There is no such workspace(${wid}) or Invalid value is in 'val' variable ('val' variable indicate bookmark)`, 400));
     }
 
     let conn;
@@ -148,8 +142,8 @@ router.post('/setBookmark', async (request, response, next) => {
         conn = await dbPool.getConnection();
         
         const res1 = await conn.query(`update t_participation set bookmark=? where uid=? and wid=?`, [val, uid, wid]);
-        if(res1.affectedRows !== 0) {
-            throw new DBError('Unauthorized access', 412);     // You are not participant
+        if(res1.affectedRows === 0) {
+            throw new DBError("Try to change bookmark state that you doesn't participate", 412);     // You are not participant
         }
         
         conn.release();
