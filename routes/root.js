@@ -152,10 +152,8 @@ router.post('/logout', (request, response) => {
     
     const id = request.session.uid;
     if(!id) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
     // await util.promisify(request.session.destroy)();
