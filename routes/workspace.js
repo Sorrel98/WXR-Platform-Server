@@ -164,8 +164,7 @@ router.get('/wsList', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
-        return next(err);
+        return next(new DBError("Session has no uid.", 401));
     }
 
     const parseBoolean = (x) => {
@@ -178,8 +177,9 @@ router.get('/wsList', async (request, response, next) => {
     [page, rows, order] = [page, rows, order].map( x => parseInt(x) );
     [desc, bmonly] = [desc, bmonly].map(parseBoolean);
     if(isNaN(page) || isNaN(rows) || isNaN(order) || order > 3 || desc === undefined || bmonly === undefined) {
-        const err = new BadRequestError(`Invalid parameters - parameters: ${util.inspect({ page, rows, order, desc, bmonly, keyword }, true, 2, true)}`);
-        return next(err);
+        next(new DBError(`Invalid parameters - parameters: ${util.inspect({ page, rows, order, desc, bmonly, keyword }, true, 2, true)}`, 400))
+        // const err = new BadRequestError(`Invalid parameters - parameters: ${util.inspect({ page, rows, order, desc, bmonly, keyword }, true, 2, true)}`);
+        // return next(err);
     }
     
     const orderCols = ['name', 'size', 'access_date', 'owner_name'];
