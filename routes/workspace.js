@@ -164,7 +164,7 @@ router.get('/wsList', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        return next(new DBError("Session has no uid.", 401));
+        next(new DBError("Session has no uid.", 401));
     }
 
     const parseBoolean = (x) => {
@@ -227,18 +227,12 @@ router.post('/invite', async (request, response, next) => {
     
     const senderId = request.session.uid;
     if(!senderId) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const { receiver, message, workspaceId } = request.body;
     if(!receiver || !workspaceId) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no input for receiver or workspace.", 400));
     }
     
     let conn;
