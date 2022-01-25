@@ -162,9 +162,8 @@ router.post('/logout', (request, response) => {
             response.status(200).end();
         }
         else {
-            response.writeHead(500);
-            response.end('Internal Server Error');
-            console.log(err);
+            //internal server : destroy error(500)
+            return next(err);
         }
     });
 });
