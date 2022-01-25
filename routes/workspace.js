@@ -361,7 +361,7 @@ router.get('/manage', async (request, response, next) => {
 
     const wid = request.query.id;
     if(!wid) {
-        next(new DBError("There is no inviteId.", 400));
+        next(new DBError("There is no wid.", 400));
     }
 
     let conn;
@@ -393,6 +393,8 @@ router.get('/manage', async (request, response, next) => {
 
             const fileName = path.join(__dirname, '../public/manage.ejs');
             manage = await fsp.readFile(fileName, { encoding: 'utf8' });
+        } else {
+            throw new DBError("Doesn't have authority to manage workspace", 401);
         }
 
         conn.release();
@@ -408,7 +410,7 @@ router.get('/manage', async (request, response, next) => {
     }
 
     response.writeHead(200, {'Content-Type': 'text/html'});
-    response.end(ejs.render(manage, { authority, spaceInform, tags, participant, roleInform })); // audience인 workspace를 manage하려할때 에러 발생하면서 서버 닫힘
+    response.end(ejs.render(manage, { authority, spaceInform, tags, participant, roleInform }));
 });
 
 router.post('/alter', async (request, response, next) => { //todo: Check the content source validation
