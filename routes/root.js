@@ -234,19 +234,15 @@ router.post('/alterUser', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
     let { name, email, pw, new_pw, avatar, vrHandSync } = request.body;
     const avatar_id = parseInt(avatar);
     if(!name || !email || !pw || !vrHandSync || isNaN(avatar_id)) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        const err = new BadRequestError(`Some insertbox is empty`);
+        return next(err);
     }
 
     vrHandSync == (vrHandSync == 'true') ? 1 : 0;
