@@ -15,7 +15,8 @@ router.get('/makePage', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
+        return next(new DBError("Session has no uid", 401));
+        // return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
     let data;
@@ -35,18 +36,12 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
     
     let { workspaceName, tags, source } = request.body;
     if(!workspaceName) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        return next(new BadRequestError(`There is no Workspace name. request.body: ${util.inspect(request.body, true, 2, true)}`));
     }
 
     let tagArr = tags.split(',').map(tag => tag.trim());
@@ -66,7 +61,12 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
         // Array of [wid, tag] pair
         const values = tagArr.map( tag => [res1.insertId, tag] );
         await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
-        
+
+        // for(let tag of tagArr) {
+        //     await conn.batch("insert into t_tag(wid, name) values(" + res1.insertId + ", ?)", tag);
+        //     // await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, [res1.insertId, tag]);
+        // }
+
         conn.commit();
         conn.release();
 
