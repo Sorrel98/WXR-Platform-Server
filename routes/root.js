@@ -107,10 +107,8 @@ router.post('/login', async (request, response, next) => {
     const id = request.body.id;
     const pw = request.body.pw;
     if(!id || !pw) {
-        // return next(new AuthError(401));
-        response.writeHead(400);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`ID or PW is empty.`);
+        return next(err);
     }
 
     const field = (id.indexOf('@') == -1) ? 'name' : 'email';
