@@ -36,12 +36,14 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
     
     const uid = request.session.uid;
     if(!uid) {
-        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
+        return next(new DBError("Session has no uid.", 401));
+        // return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
     
     let { workspaceName, tags, source } = request.body;
     if(!workspaceName) {
-        return next(new BadRequestError(`There is no Workspace name. request.body: ${util.inspect(request.body, true, 2, true)}`));
+        return next(new DBError("There is no Workspace name.", 400));
+        // return next(new BadRequestError(`There is no Workspace name. request.body: ${util.inspect(request.body, true, 2, true)}`));
     }
 
     let tagArr = tags.split(',').map(tag => tag.trim());
@@ -59,14 +61,11 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
         const res2 = await conn.query(`insert into t_participation(uid, wid, rid, bookmark, access_date) values(?, ?, 1, b'0', NULL)`, [uid, res1.insertId]);
 
         // Array of [wid, tag] pair
-        const values = tagArr.map( tag => [res1.insertId, tag] );
-        await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
-
-        // for(let tag of tagArr) {
-        //     await conn.batch("insert into t_tag(wid, name) values(" + res1.insertId + ", ?)", tag);
-        //     // await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, [res1.insertId, tag]);
-        // }
-
+        if(tagArr.length > 0){
+            const values = tagArr.map( tag => [res1.insertId, tag] );
+            await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
+        }
+        
         conn.commit();
         conn.release();
 
