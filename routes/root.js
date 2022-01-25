@@ -412,10 +412,8 @@ router.get('/manageAssets', async (request, response) => {
 
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
     let data;
