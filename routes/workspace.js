@@ -356,18 +356,12 @@ router.get('/manage', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const wid = request.query.id;
     if(!wid) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no inviteId.", 400));
     }
 
     let conn;
