@@ -238,7 +238,7 @@ router.post('/alterUser', async (request, response, next) => {
         return next(err);
     }
 
-    let { name, email, pw, new_pw, avatar, vrHandSync } = request.body;
+    let { name, email, pw, pw1, pw2, avatar, vrHandSync } = request.body;
     const avatar_id = parseInt(avatar);
     if(!name || !email || !pw || !vrHandSync || isNaN(avatar_id)) {
         const err = new BadRequestError(`Some insertbox is empty`);
@@ -256,9 +256,21 @@ router.post('/alterUser', async (request, response, next) => {
         }
 
         let query, params;
-        if(new_pw) {
-            query = `update t_user set name=?, email=?, passwd=SHA2(?, 256), avatar_id=?, vr_hand_sync=b'${vrHandSync}' where id=?`;
-            params = [name, email, new_pw, avatar_id, uid];
+        if(vrHandSync == false){
+            vrHandSync = 0;
+        }
+        else{
+            vrHandSync = 1;
+        }
+        if(pw1) {
+            if(pw1 === pw2){
+                query = `update t_user set name=?, email=?, passwd=SHA2(?, 256), avatar_id=?, vr_hand_sync=b'${vrHandSync}' where id=?`;
+                params = [name, email, pw1, avatar_id, uid];
+            }
+            else{
+                const err = new BadRequestError(`New passwords are not equal`);
+                return next(err);
+            }
         }
         else {
             query = `update t_user set name=?, email=? where id=?`;
