@@ -179,6 +179,8 @@
             success: (data)=>{
                 let target = participants.get(parseInt(data.uid));
                 target.rid = parseInt(data.rid);
+                
+                alert("Participant's role is chaged");
             },
             error: (err)=>{
                 alert("code: " + err.status +"\n" + err.responseText);
@@ -200,6 +202,8 @@
                 let sel = document.getElementById('sel_participant');
                 sel.remove(sel.selectedIndex--);
                 onChangeSel();
+
+                alert("Participant is exiled");
             },
             error: (err)=>{
                 alert("code: " + err.status +"\n" + err.responseText);
