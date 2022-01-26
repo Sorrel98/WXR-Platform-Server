@@ -521,19 +521,13 @@ router.post('/editParticipant', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     let { wid, participant, role, type } = request.body;
     [wid, participant, role] = [wid, participant, role].map( x => parseInt(x) );
     if(isNaN(wid) || isNaN(participant) || (type === '1' && isNaN(role)) || (type !== '1' && type !== '2')) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("Doesn't meet condition to edit participant.", 400));
     }
 
     let conn, result;
