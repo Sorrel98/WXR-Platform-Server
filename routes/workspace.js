@@ -597,18 +597,12 @@ router.post('/save', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const { wid, content, vroptions, screenshot } = request.body;
     if(!wid || !content || !screenshot) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("Doesn't meet condition to save workspace.", 400));
     }
 
     let conn;
