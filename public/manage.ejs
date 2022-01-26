@@ -86,6 +86,8 @@
 			type: fm.method,
 			data: params,
 			success: ()=>{
+                alert("Attributes are changed");
+                location.href = '/main';
 			},
 			error: (err)=>{
 				alert("code: " + err.status +"\n" + err.responseText);
