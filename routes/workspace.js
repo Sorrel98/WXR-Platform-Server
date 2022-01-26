@@ -67,8 +67,10 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
         const res2 = await conn.query(`insert into t_participation(uid, wid, rid, bookmark, access_date) values(?, ?, 1, b'0', NULL)`, [uid, res1.insertId]);
 
         // Array of [wid, tag] pair
-        const values = tagArr.map( tag => [res1.insertId, tag] );
-        await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
+        if (tagArr.length > 0) {
+            const values = tagArr.map( tag => [res1.insertId, tag] );
+            await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
+        }
         
         conn.commit();
         conn.release();
@@ -497,12 +499,14 @@ router.post('/alter', async (request, response, next) => { //todo: Check the con
         }
 
         await conn.beginTransaction();
-        const res2 = await conn.query(`update t_workspace set name=?, description=?, content=? where id=?`, [wname, desc, source, wid]);
+        const res2 = await conn.query(`update t_workspace set name=?, description=?, content=? where id=?`, [wname, description, source, wid]);
         const res3 = await conn.query(`delete from t_tag where wid = ?`, wid);
 
         // Array of [wid, tag] pair
-        const values = tagArr.map( tag => [wid, tag] );
-        await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
+        if (tagArr.length != 0) {
+            const values = tagArr.map( tag => [wid, tag] );
+            await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
+        }
 
         conn.commit();
         conn.release();
@@ -660,7 +664,7 @@ router.post('/save', async (request, response, next) => {
         return;
     }
 
-    const { wid, content, vrOptions, screenshot } = request.body;
+    const { wid, content, vroptions, screenshot } = request.body;
     if(!wid || !content || !screenshot) {
         // return next(new AuthError(400));
         response.writeHead(400);
@@ -672,7 +676,7 @@ router.post('/save', async (request, response, next) => {
     try {
 
         conn = await dbPool.getConnection();
-        const res1 = await conn.query(`update t_workspace set content=?, vr_options=?, thumbnail=? where id = ?`, [content, vrOptions, screenshot, wid]);
+        const res1 = await conn.query(`update t_workspace set content=?, vr_options=?, thumbnail=? where id = ?`, [content, vroptions, screenshot, wid]);
         conn.release();
 
     } catch (err) {

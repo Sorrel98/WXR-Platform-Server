@@ -1,30 +1,26 @@
+const util = require('util');
+
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const multiparty = require('multiparty');
 
 const dbPool = require('../lib/DBpool').dbPool;
-const { DBError } = require('../lib/errors');
+const { UnauthorizedError, BadRequestError, NotFoundError, InternalServerError, ForbiddenError } = require('../lib/errors');
 
 
 router.get('/assetInfo', async (request, response, next) => { 
     
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
 	let astId = null;
     if(request.query.id) {
         astId = parseInt(request.query.id);
-        if(isNaN(astId)) {
-			// return next(new InvalidAssetId(401));
-            response.writeHead(400);
-            response.end();
-            return;
+        if(isNaN(astId)) {	
+			return next(new BadRequestError(`Invalid asset id. request.query: ${util.inspect(request.query, true, 2, true)}`));
         }
     }
 
@@ -42,18 +38,20 @@ router.get('/assetInfo', async (request, response, next) => {
 			if(!_astId) {
 				// Append suffix about asset type and read permission.
 				pathArr[0].name = 'assets' + ((pathArr.length === 1) ? 'du' : '');
-				
+				// Return the search result and escape bottomUpSearch recursion.
 				return pathArr;
 			}
 
 			const res2 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?)`, [_astId, uid]);
 			if(res2.length !== 1) {
-				throw new DBError('Not found', 404);
+				throw new NotFoundError(`Couldn't found the requested asset. astid: ${_astId}, uid: ${uid}`);
 			}
 
-			// Append suffix about asset type and read permission.
-			const types = ['d', 't', 'b', 'c'];
-			pathArr[0].name = res2[0].name + types[res2[0].item_type] + (res2[0].owner_id ? 'r' : 'u');
+			if(pathArr.length === 1) {
+				const types = ['d', 't', 'b', 'c'];
+				res2[0].name += types[res2[0].item_type] + (res2[0].owner_id ? 'r' : 'u');
+			}
+			pathArr[0].name = res2[0].name;
 
 			pathArr.unshift({id: res2[0].parent_dir, name: null});
 
@@ -67,7 +65,7 @@ router.get('/assetInfo', async (request, response, next) => {
 
 		let res3 = [];
 		if(astId) {
-			res3 = conn.query(`select id, name, email from t_user as u join t_asset_share as ash on u.id = ash.uid where ash.as_id = ?`, astId);
+			res3 = await conn.query(`select id, name, email from t_user as u join t_asset_share as ash on u.id = ash.uid where ash.as_id = ?`, astId);
 		}
 
 		let res4;
@@ -78,20 +76,23 @@ router.get('/assetInfo', async (request, response, next) => {
 				
 			case 't':
 				//feature meta data array
-				res4 = conn.query(`select 'vuforia_feature' as feature_type, type, hex(left(dat, 4)) as signature from t_vuforia_feature where id = ? union all select 'general_feature' as feature_type, type, hex(left(bin, 4)) as signature from t_general_feature where id = ?`, [astId, astId]);
+				res4 = await conn.query(`select 'vuforia_feature' as feature_type, type, hex(left(dat, 4)) as signature from t_vuforia_feature where id = ? union all select 'general_feature' as feature_type, type, hex(left(bin, 4)) as signature from t_general_feature where id = ?`, [astId, astId]);
 				break;
 
 			case 'b':
 				//binary data size
-				res4 = conn.query(`select length(data) as size, hex(left(data, 4)) as signature from t_binary_data where id = ?`, astId);
+				res4 = await conn.query(`select length(data) as size, hex(left(data, 4)) as signature from t_binary_data where id = ?`, astId);
 				res4 = (res4.length === 1) ? res4[0] : null;
 				break;
 
 			case 'c':
 				//content source
-				res4 = conn.query(`select data from t_template where id = ?`, astId);
+				res4 = await conn.query(`select data from t_template where id = ?`, astId);
 				res4 = (res4.length === 1) ? res4[0] : null;
 				break;
+			
+			default:
+				throw new InternalServerError(`Invalid asset type. asset type: ${assetType}`);
 		}
 
 		conn.release();
@@ -121,19 +122,13 @@ router.post('/makeDirectory', async (request, response, next) => {
 	
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
 	let { parentId, astName } = request.body;
 	parentId = parseInt(parentId);
 	if(isNaN(parentId) || !astName) {
-		// return next(new AuthError(400));
-		response.writeHead(400);
-		response.end();
-		return;
+		return next(new BadRequestError(`Invalid asset name or parent asset id. request.body: ${util.inspect(request.body, true, 2, true)}`));
 	}
 
 	let data = { id: undefined, name: astName, parent_dir: parentId, owner_id: undefined, item_type: 0 };
@@ -142,7 +137,7 @@ router.post('/makeDirectory', async (request, response, next) => {
 		conn = await dbPool.getConnection();
 		const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [parentId, uid]);
 		if(res1.length !== 1) {
-			throw new DBError('Invalid directory access', 412);			// Nonexistent or unauthorized directory
+			throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${parentId}, uid: ${uid}`);
 		}
 
 		const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 0)`, [astName, parentId, res1[0].owner_id]);
@@ -168,19 +163,13 @@ router.post('/makeBinaryFromURI', async (request, response, next) => {
 	
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
 	let { parentId, astName, srcURI } = request.body;
 	parentId = parseInt(parentId);
 	if(isNaN(parentId) || !astName || !srcURI) {
-		// return next(new AuthError(400));
-		response.writeHead(400);
-		response.end();
-		return;
+		return next(new BadRequestError(`Invalid parent asset id or asset name or uri. request.body: ${util.inspect(request.body, true, 2, true)}`));
 	}
 
 	let httpCl;
@@ -189,14 +178,11 @@ router.post('/makeBinaryFromURI', async (request, response, next) => {
 		switch (srcURI.protocol) {
 			case 'http:': httpCl = require('http'); break;
 			case 'https:': httpCl = require('https'); break;
-			default: throw new Error('Invalid URL error');
+			default: throw new BadRequestError(`Invalid URI format. URI: ${srcURI}`);
 		}
 	} catch (err) {
 		// Invalid URL error
-		// return next(err);
-		response.writeHead(400);
-		response.end();
-		return;
+		return next(err);
 	}
 
 	let data = { id: undefined, name: astName, parent_dir: parentId, owner_id: undefined, item_type: 2 };
@@ -206,13 +192,12 @@ router.post('/makeBinaryFromURI', async (request, response, next) => {
 		
 		const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [parentId, uid]);
 		if(res1.length !== 1) {
-			throw new DBError('Invalid directory access', 412);		// Nonexistent or unauthorized directory
+			throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${parentId}, uid: ${uid}`);
 		}
 
-		const res = await axios.get(srcURI.href);
+		const res = await axios.get(srcURI.href, { responseType: 'arraybuffer' });
 		if (res.status !== 200) {
-			console.log('Response status err');
-			throw Error('HTTP/HTTPS response status err', res.status);
+			throw InternalServerError(`HTTP/HTTPS response status err. status: ${res.status}, response: ${res}`);
 		}
 
 		await conn.beginTransaction();
@@ -244,10 +229,7 @@ router.post('/makeBinaryFromUpload', (request, response, next) => {
 	
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
 	let parentId, astName;
@@ -263,15 +245,12 @@ router.post('/makeBinaryFromUpload', (request, response, next) => {
 
 		if(partDataStream.name !== 'src') {
 			partDataStream.resume();
-			return;
+			return;		// No error???
 		}
 
 		if(isNaN(parentId) || !astName) {
 			partDataStream.resume();
-			// return next(new AuthError(400));
-			response.writeHead(400);
-			response.end();
-			return;
+			return next(new BadRequestError(`Invalid parent asset id or asset name. parent id: ${parentId}, asset name: ${astName}`));
 		}
 
 		let data = {id: undefined, name: astName, parent_dir: parentId, owner_id: undefined, item_type: 2};
@@ -280,7 +259,7 @@ router.post('/makeBinaryFromUpload', (request, response, next) => {
 			conn = await dbPool.getConnection();
 			const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [parentId, uid]);
 			if(res1.length !== 1) {
-				throw new DBError('Invalid directory access', 412);		// Nonexistent or unauthorized directory
+				throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${parentId}, uid: ${uid}`);
 			}
 
 			await conn.beginTransaction();
@@ -314,19 +293,13 @@ router.post('/makeTarget', async (request, response, next) => {
 	
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
 	const parentId = parseInt(request.body.parentId);
 	const astName = request.body.astName;
 	if(isNaN(parentId) || !astName) {
-		// return next(new AuthError(400));
-		response.writeHead(400);
-		response.end();
-		return;
+		return next(new BadRequestError(`Invalid parentasset id or asset name. request.body: ${util.inspect(request.body, true, 2, true)}`));
 	}
 	
 	let data = { id: undefined, name: astName, parent_dir: parentId, owner_id: undefined, item_type: 1 };
@@ -335,7 +308,7 @@ router.post('/makeTarget', async (request, response, next) => {
 		conn = await dbPool.getConnection();
 		const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [parentId, uid]);
 		if(res1.length !== 1) {
-			throw new DBError('Invalid directory access', 412);		// Nonexistent or unauthorized directory
+			throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${parentId}, uid: ${uid}`);
 		}
 
 		const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 1)`, [astName, parentId, res1[0].owner_id]);
@@ -362,10 +335,7 @@ router.post('/makeTargetGeneralFeature', async (request, response, next) => {
 	
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
 	let targetId, width;
@@ -380,16 +350,13 @@ router.post('/makeTargetGeneralFeature', async (request, response, next) => {
 	form.on('part', async (partDataStream) => {
 		
 		if(partDataStream.name !== 'src') {
-			partDataStream.resume();
+			partDataStream.resume();	// No error???
 			return;
 		}
 
 		if(isNaN(targetId) || isNaN(width)) {
 			partDataStream.resume();
-			// return next(new AuthError(400));
-			response.writeHead(400);
-			response.end();
-			return;
+			return next(new BadRequestError(`Invalid target id or width value. target id: ${targetId}, width: ${width}`));
 		}
 
 		let conn;
@@ -397,7 +364,7 @@ router.post('/makeTargetGeneralFeature', async (request, response, next) => {
 			conn = await dbPool.getConnection();
 			const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 1`, [targetId, uid]);
 			if(res1.length !== 1) {
-				throw new DBError('Invalid access', 412);		// Nonexistent or unauthorized target
+				throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${targetId}, uid: ${uid}`);
 			}
 
 			await conn.beginTransaction();
@@ -419,9 +386,9 @@ router.post('/makeTargetGeneralFeature', async (request, response, next) => {
 			const res4 = await conn.query(`select type, hex(left(bin, 4)) as signature from t_general_feature where id = ?`, targetId);
 			response.status(200).json(res4[0]);
 		} catch(err) {
+			// The update has been completed, but this page contains expired information
 			console.log(err);
-			response.writeHead(200);
-			response.end();
+			response.status(200).end();
 		}
 
 		conn.release();
@@ -431,14 +398,12 @@ router.post('/makeTargetGeneralFeature', async (request, response, next) => {
 	form.parse(request);
 });
 
+// TODO: Unit test
 router.post('/makeTargetVuforiaFeature', (request, response, next) => {
 	
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
 	let targetId, type;
@@ -460,10 +425,7 @@ router.post('/makeTargetVuforiaFeature', (request, response, next) => {
 
 			if(isNaN(targetId) || !type || !xmlStream) {
 				partDataStream.resume();
-				// return next(new AuthError(400));
-				response.writeHead(400);
-				response.end();
-				return;
+				return next(new BadRequestError(`Invalid target id or type or xml. target id: ${targetId}, type: ${type}, xml: ${util.inspect(xmlStream, true, 2, true)}`));
 			}
 
 			let conn;
@@ -471,7 +433,7 @@ router.post('/makeTargetVuforiaFeature', (request, response, next) => {
 				conn = await dbPool.getConnection();
 				const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 1`, [targetId, uid]);
 				if(res1.length !== 1) {
-					throw new DBError('Invalid access', 412);		// Nonexistent or unauthorized target
+					throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${targetId}, uid: ${uid}`);
 				}
 
 				await conn.beginTransaction();
@@ -494,6 +456,7 @@ router.post('/makeTargetVuforiaFeature', (request, response, next) => {
 				const res4 = await conn.query(`select type, hex(left(dat,4)) as signature from t_vuforia_feature where id = ?`, targetId);
 				response.status(200).json(res4[0]);
 			} catch(err) {
+				// The update has been completed, but this page contains expired information
 				console.log(err);
 				response.status(200).end();
 			}
@@ -502,9 +465,7 @@ router.post('/makeTargetVuforiaFeature', (request, response, next) => {
 
 		}
 		else {
-			// return next(new AuthError(400));
-			response.writeHead(400);
-			response.end();
+			return next(new BadRequestError(`Didn't receive 'xml' or 'dat'.`));
 		}
 	});
 
@@ -515,19 +476,13 @@ router.post('/makeTemplate', async (request, response, next) => {
 	
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
 	let parentId = parseInt(request.body.parentId);
 	let astName = request.body.astName;
 	if(isNaN(parentId) || !astName) {
-		// return next(new AuthError(400));
-		response.writeHead(400);
-		response.end();
-		return;
+		return next(new BadRequestError(`Invalid parent asset id or asset name. request.body: ${util.inspect(request.body, true, 2, true)}`));
 	}
 
 	let data = { id: undefined, name: astName, parent_dir: parentId, owner_id: undefined, item_type: 3 };
@@ -536,7 +491,7 @@ router.post('/makeTemplate', async (request, response, next) => {
 		conn = await dbPool.getConnection();
 		const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [parentId, uid]);
 		if(res1.length !== 1) {
-			throw new DBError('Invalid directory access', 412);		// Nonexistent or unauthorized directory
+			throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${parentId}, uid: ${uid}`);
 		}
 
 		await conn.beginTransaction();
@@ -566,18 +521,12 @@ router.post('/commitContent', async (request, response, next) => {
 	
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 	
 	const astId = parseInt(request.body.astId);
 	if(isNaN(astId)) {
-		// return next(new AuthError(400));
-		response.writeHead(400);
-		response.end();
-		return;
+		return next(new BadRequestError(`Invalid asset id. request.body: ${util.inspect(request.body, true, 2, true)}`));
 	}
 	
 	const contentSource = request.body.source.replace(/'/g, `"`);
@@ -605,26 +554,20 @@ router.post('/removeAsset', async (request, response, next) => {
     
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
     const astId = request.body.astId;
     if(!astId) {
-		// return next(new AuthError(400));
-		response.writeHead(400);
-        response.end();
-        return;
+		return next(new BadRequestError(`Invalid parent asset id or asset name. request.body: ${util.inspect(request.body, true, 2, true)}`));
     }
 	
 	let conn;
 	try {
 		conn = await dbPool.getConnection();
-		const res1 = conn.query(`delete from t_asset_item where id = ? and parent_dir is not null and (owner_id is null or owner_id = ?)`, [astId, uid]);
+		const res1 = await conn.query(`delete from t_asset_item where id = ? and parent_dir is not null and (owner_id is null or owner_id = ?)`, [astId, uid]);
 		if(res1.affectedRows === 0) {
-			throw new DBError('Invalid asset access', 412);		// Nonexistent or unauthorized asset
+			throw new ForbiddenError(`Nonexistent or unauthorized asset access. asset id: ${astId}, uid: ${uid}`);
 		}
 		
 		conn.release();
@@ -645,26 +588,20 @@ router.post('/renameAsset', async (request, response, next) => {
     
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 	
 	const { astId, astName } = request.body;
     if(!astId || !astName) {
-		// return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+		return next(new BadRequestError(`Invalid asset id or asset name. request.body: ${util.inspect(request.body, true, 2, true)}`));
     }
 		
 	let conn;
 	try {
 		conn = await dbPool.getConnection();
-		const res1 = conn.query(`update t_asset_item set name = ? where id = ? and parent_dir is not null and (owner_id is null or owner_id = ?)`, [astName, astId, uid]);
+		const res1 = await conn.query(`update t_asset_item set name = ? where id = ? and parent_dir is not null and (owner_id is null or owner_id = ?)`, [astName, astId, uid]);
 		if(res1.affectedRows === 0) {
-			throw new DBError('Invalid asset access', 412);		// Nonexistent or unauthorized asset
+			throw new ForbiddenError(`Nonexistent or unauthorized asset access. asset name: ${astName}, asset id: ${astId}, uid: ${uid}`);
 		}
 		
 		conn.release();
@@ -685,28 +622,20 @@ router.post('/shareAsset', async (request, response, next) => {
     
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
-	const { astId, targets } = request.body;
+	const astId = request.body.astId;
+	let targets = request.body.targets;
     if(!astId || !targets) {
-		// return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+		return next(new BadRequestError(`Invalid asset id or targets. request.body: ${util.inspect(request.body, true, 3, true)}`));
     }
 
     if(typeof targets === 'string') {
         targets = [targets];
     }
     if(!(targets instanceof Array)) {
-		// return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+		return next(new BadRequestError(`Invalid targets is not array type. targets: ${util.inspect(targets, true, 2, true)}`));
     }
 
 	let conn;
@@ -715,19 +644,22 @@ router.post('/shareAsset', async (request, response, next) => {
 		conn = await dbPool.getConnection();
 		const res1 = await conn.query(`select count(*) as canShare from t_asset_item where id = ? and owner_id = ?`, [astId, uid]);
 		if(res1[0].canShare !== 1) {
-			throw new DBError('Invalid asset access', 412);		// Nonexistent or unauthorized asset
+			throw new ForbiddenError(`Nonexistent or unauthorized asset access. asset id: ${astId}, uid: ${uid}`);
 		}
 		
 		for await (const target of targets) {
 			try {
 				if(typeof target !== 'string') {
-					throw new Error('Nonexistent user');
+					throw new BadRequestError(`Invalid user name or email. target: ${target}, targets: ${targets}`);
 				}
 	
 				const isEmail = (target.indexOf('@') !== -1);
 				const res2 = await conn.query(`select id, name, email from t_user where ${(isEmail ? 'email' : 'name')} = ?`, target);
 				if (res2.length !== 1) {
-					throw new Error('Nonexistent user');
+					throw new BadRequestError(`The request user does not exist. target: ${target}, targets: ${targets}`);
+				}
+				if (res2[0].id === uid) {
+					throw new BadRequestError(`The asset is already shared. uid: ${uid}, target user id: ${res2[0].id}, target: ${target}, targets: ${targets}`);
 				}
 				
 				const res3 = await conn.query(`insert into t_asset_share(as_id, uid) values(?, ?)`, [astId, res2[0].id]);
@@ -735,9 +667,7 @@ router.post('/shareAsset', async (request, response, next) => {
 				affectedPersons.push(res2[0]);
 
 			} catch(err) {
-				// Nonexistent user, DB query error
-				// if err3.errno === 1169 => Already shared
-				console.log(err);	
+				throw err;
 			}
 		}
 
@@ -746,6 +676,10 @@ router.post('/shareAsset', async (request, response, next) => {
 	} catch (err) {
 		if (conn) {
 			conn.release();
+		}
+
+		if (err.errno === 1062) {
+			return next(new BadRequestError(`The asset is already shared. error: ${util.inspect(err, true, 1, true)}`));
 		}
 
 		// conn error (500), res1 error (500), Invalid asset access (412), Nonexistent user (500), res2 error (500)
@@ -760,18 +694,12 @@ router.post('/unshareAsset', async (request, response, next) => {
     
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 	
 	const { astId, targetId } = request.body;
     if(!astId || !targetId) {
-		// return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+		return next(new BadRequestError(`Invalid asset id or target id. request.body: ${util.inspect(request.body, true, 2, true)}`));
     }
 
 	let conn;
@@ -779,12 +707,12 @@ router.post('/unshareAsset', async (request, response, next) => {
 		conn = await dbPool.getConnection();
 		const res1 = await conn.query(`select count(*) as canShare from t_asset_item where id = ? and owner_id = ?`, [astId, uid]);
 		if(res1[0].canShare !== 1) {
-			throw new DBError('Invalid asset access', 412);		// Nonexistent or unauthorized asset
+			throw new ForbiddenError(`Nonexistent or unauthorized asset access. asset id: ${astId}, uid: ${uid}`);
 		}
 
 		const res2 = await conn.query(`delete from t_asset_share where as_id = ? and uid = ?`, [astId, targetId]);
 		if(res2.affectedRows !== 1) {
-			throw new DBError('Already unshared', 412);		// Already unshared
+			new UnauthorizedError(`The asset is already unshared. asset id: ${astId}, target user id: ${targetId}`);
 		}
 
 		conn.release();
@@ -805,19 +733,13 @@ router.get('/assetRawData', async (request, response, next) => {
 	
 	const uid = request.session.uid;
 	if(!uid) {
-		// return next(new AuthError(401));
-		response.writeHead(401);
-		response.end();
-		return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
 	}
 
 	const assetId = parseInt(request.query.assetId);
 	const featureType = request.query.featureType;
 	if(isNaN(assetId)) {
-		// return next(new AuthError(400));
-		response.writeHead(400);
-		response.end();
-		return;
+		return next(new BadRequestError(`Invalid asset id. request.query: ${util.inspect(request.query, true, 2, true)}`));
 	}
 
 	let contentHeader, data;
@@ -829,32 +751,30 @@ router.get('/assetRawData', async (request, response, next) => {
 		const bottomUpAuthCheck = async (id, auth) => {
 			if(id === null) {
 				if(auth !== 1) {
-					return false;
+					throw new UnauthorizedError(`Unauthorized access. asset id: ${id}, auth: ${auth}`);
 				}
 				return true;
 			}
 			// Check access permission for the current level.
 			const res1 = await conn.query(`select parent_dir, (owner_id is null or owner_id = ? or (select count(*) from t_asset_share where as_id = id and uid = ?)) as auth from t_asset_item where id = ?`, [uid, uid, id]);
 			if(res1.length !== 1) {
-				return false;
+				throw new UnauthorizedError(`Unauthorized access. uid: ${uid}, asset id: ${id}`);
 			}
 
 			// When successfully reaching the topmost asset, the root directory, the parent_dir is null.
 			return await bottomUpAuthCheck(res1[0].parent_dir, res1[0].auth | auth);
 		}
-		if(!await bottomUpAuthCheck(assetId, 1)) {
-			throw new DBError('Unauthorized access', 403);
-		}
+		await bottomUpAuthCheck(assetId, 1);
 
 		const res2 = await conn.query(`select name, item_type from t_asset_item where id = ?`, assetId);
 		if (res2.length !== 1) {
-			throw new DBError('Internal error', 500);		// DB query error
+			throw new InternalServerError(`The asset does not exist. asset id: ${assetId}`);
 		}
 
 		let query, header;
 		switch(res2[0].item_type) {
 		case 0:
-			throw new DBError('Invalid access', 412);		// It is directory
+			throw new BadRequestError(`Undefined asscess (downlaod a directory). asset info: ${util.inspect(res2[0], true, 2, true)}`);
 
 		case 1:
 			switch(featureType) {
@@ -869,7 +789,7 @@ router.get('/assetRawData', async (request, response, next) => {
 				break;
 
 			default:
-				throw new DBError('Invalid feature type', 400);		// Invalid feature type
+				throw new InternalServerError(`Invalid feature type. asset info: ${util.inspect(res2[0], true, 2, true)}`);
 
 			}
 			break;
@@ -883,11 +803,14 @@ router.get('/assetRawData', async (request, response, next) => {
 			query = `select data as bin from t_template where id = ?`;
 			header = ['Content-disposition', `attachment; filename=${res2[0].name}`];
 			break;
+
+		default: 
+			throw new InternalServerError(`Invalid item type. asset info: ${util.inspect(res2[0], true, 2, true)}`);
 		}
 
 		const res3 = await conn.query(query, assetId);
 		if(res3.length !== 1) {
-			throw new DBError('Internal error', 500);		// DB query error
+			throw new InternalServerError(`The requested asset does not exist. query: ${query}, asset id: ${assetId}`);
 		}
 
 		conn.release();
@@ -912,10 +835,7 @@ router.get('/assets/:path([^/]+(?:/[^/]+)*)', async (request, response, next) =>
     
 	const uid = request.session.uid;
     if(!uid) {
-		// return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+		return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
     // If it is target feature, a suffix (eg., /general or /vuforia) is appended to the passed path
@@ -924,35 +844,44 @@ router.get('/assets/:path([^/]+(?:/[^/]+)*)', async (request, response, next) =>
 	try {
 		conn = await dbPool.getConnection();
 		
-		const res1 = await conn.query(`select id, (owner_id is null or owner_id = ?) as auth from t_asset_item where parent_dir is null and name = ?`, [uid, pathArr[0]]);
+		const res1 = await conn.query(`select id, (owner_id is null or owner_id = ?) as auth, name from t_asset_item where parent_dir is null and name = ?`, [uid, pathArr[0]]);
 		if(res1.length !== 1) {
-			throw new DBError('Not found', 404);
+			throw new NotFoundError(`Couldn't find the first object in the path. uid: ${uid}, path: ${util.inspect(pathArr, true, 2, true)}`);
 		}
 
 		// Recursively find the target asset along with the given path.
 		const topdownAssetSearch = async (prevResult, pathArr) => {
-			if(prevResult[0].auth !== 1) {
-				throw new DBError('Unauthorized access', 403);
+
+			if (pathArr.length == 0) {
+				throw new BadRequestError(`Undefined access (access a directory). name: ${prevResult[0].name}`);
 			}
 
-			// if the current item is not directory (its type is 0), return it.
-			if((prevResult[0].item_type === 1 && pathArr.length === 2) 		// ar target
-			|| (prevResult[0].item_type > 1 && pathArr.length === 1)) {		// others except directory
-				return prevResult;
-			}
-
-			// or the current item is a directory. Retrieve its child item along the path.
+			// Retrieve the first asset in the pathArr queue.
 			const name = pathArr.shift();
 			const parentId = prevResult[0].id;
-			let res2 = await conn.query(`select id, (owner_id is null or owner_id = ? or (select count(*) from t_asset_share where as_id = id and uid = ?)) as auth, item_type from t_asset_item where parent_dir = ? and name = ?`, [uid, uid, parentId, name]);
+			let res2 = await conn.query(`select id, (owner_id is null or owner_id = ? or (select count(*) from t_asset_share where as_id = id and uid = ?)) as auth, item_type, name from t_asset_item where parent_dir = ? and name = ?`, [uid, uid, parentId, name]);
 			if(res2.length !== 1) {
-				throw new DBError('Not found', 404);
+				throw new NotFoundError(`Failed to find '${name}'. uid: ${uid}, parent id: ${parentId}, name: ${name}`);
 			}
 			
+			// If any parent assets allowed to be accessed exist, 
+			// the user also has access permission for the current asset.
 			res2[0].auth |= prevResult[0].auth;
+
+			// Check escape condition.
+			if((res2[0].item_type === 1 && pathArr.length === 1) 		// ar target
+			|| (res2[0].item_type > 1 && pathArr.length === 0)) {		// others except directory
+				
+				if(res2[0].auth !== 1) {
+					throw new ForbiddenError(`The requested access has no permission`);
+				}
+
+				return res2;
+			}
+
 			return await topdownAssetSearch(res2, pathArr);
 		}
-		const asset = await topdownAssetSearch(res1, pathArr.slice());
+		const asset = await topdownAssetSearch(res1, pathArr.slice(1));		// pathArr.slice() returns the copy of pathArr.
 
 		switch(asset[0].item_type) {
 			case 1:	// ar target
@@ -960,7 +889,7 @@ router.get('/assets/:path([^/]+(?:/[^/]+)*)', async (request, response, next) =>
 					case 'general': {
 						const res3 = await conn.query(`select * from t_general_feature where id = ?`, asset[0].id);
 						if(res3.length !== 1) {
-							throw new DBError('No general feature', 412);		// The target has not general feature
+							throw new NotFoundError(`Couldn't find general feature. asset id: ${asset[0].id}`);		// The target has not general feature
 						}
 
 						response.writeHead(200);
@@ -989,7 +918,7 @@ router.get('/assets/:path([^/]+(?:/[^/]+)*)', async (request, response, next) =>
 						//todo : unit test
 						const res3 = await conn.query(`select type, xml, length(xml) as len, dat from t_vuforia_feature where id = ?`, asset[0].id);
 						if(res3.length !== 1) {
-							throw new DBError('No general feature', 412);		// The target has not general feature
+							throw new NotFoundError(`Couldn't find vuforia feature. asset id: ${asset[0].id}`);		// The target has not vuforia feature
 						}
 
 						response.writeHead(200);
@@ -1014,7 +943,7 @@ router.get('/assets/:path([^/]+(?:/[^/]+)*)', async (request, response, next) =>
 			case 2:	{	// binary data
 				const res3 = await conn.query(`select data from t_binary_data where id = ?`, asset[0].id);
 				if(res3.length !== 1) {
-					throw new DBError('Unknown error', 500);		// Unknown error;
+					throw new NotFoundError(`Couldn't find the requested resource. asset id: ${asset[0].id}`);
 				}
 
 				response.writeHead(200);
@@ -1024,7 +953,7 @@ router.get('/assets/:path([^/]+(?:/[^/]+)*)', async (request, response, next) =>
 			case 3:	{	// xr scene template
 				const res3 = await conn.query(`select data from t_template where id = ?`, asset[0].id);
 				if(res3.length !== 1) {
-					throw new DBError('Unknown error', 500);		// Unknown error;
+					throw new NotFoundError(`Couldn't find the requested template. asset id: ${asset[0].id}`);
 				}
 
 				response.writeHead(200);
@@ -1032,7 +961,7 @@ router.get('/assets/:path([^/]+(?:/[^/]+)*)', async (request, response, next) =>
 				break;
 			}
 			default:
-				throw new DBError('Not a file', 412);		// Not a file
+				throw new InternalServerError(`The requested asset has invalid type information. asset: ${util.inspect(asset[0], true, 2, true)}`);
 		}
 
 		conn.release();

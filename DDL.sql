@@ -45,8 +45,8 @@ CREATE TABLE t_workspace
     `vr_options`    VARCHAR(128)   DEFAULT 
 'enableOneHandTrigger:true;enableTwoHandTrigger:true;enableTwoHandGrip:true;floorHeight:0;moveSpeed:2',
     `content`       MEDIUMTEXT     NULL, 
-    `description`   TINYTEXT       NULL, 
     `thumbnail`     TEXT           NULL, 
+    `description`   TINYTEXT       NULL     DEFAULT '',
     PRIMARY KEY (id)
 );
 

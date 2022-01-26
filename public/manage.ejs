@@ -58,7 +58,7 @@
 			url: uri,
 			type: 'GET',
 			success: (data)=>{
-				document.getElementById('source').value = data;
+                document.querySelector('textarea[name="source"]').value = data;
 			},
 			error:(err)=>{
 				alert("code: " + err.status +"\n" + err.responseText);
@@ -73,7 +73,7 @@
 		let selectedFile = files[0];
 		let reader = new FileReader();
 		reader.onload = function(evt) {
-			document.getElementById('source').value = evt.target.result;
+            document.querySelector('textarea[name="source"]').value = evt.target.result;
 		};
 		reader.readAsText(selectedFile);
 	};
@@ -243,7 +243,7 @@
                 document.write("</div></div><div class='mb-4'>");
 				document.write("<textarea class='form-control' name='description' placeholder='description...'>" + spaceInform.description + "</textarea></div>");
                 document.write("<div class='input-group input-group-sm'><div class='input-group-prepend'><span class='input-group-text' id='prependURI'>URI</span></div><input type='text' class='form-control' id='codeURI' aria-describedby='prependURI'><div class='input-group-append'><button class='btn btn-outline-secondary' type='button' id='codeImportFromURIBtn' onclick='codeImportFromURI();'>Import</button></div></div>");
-				document.write("<div class='input-group input-group-sm'><div class='custom-file'><input type='file' class='custom-file-input' id='codeFile' aria-describedby='codeImportBtn'><label class='custom-file-label' for='codeFile'>Choose file</label></div><div class='input-group-append'><button class='btn btn-outline-secondary' type='button' id='codeImportFromFileBtn' onclick='codeImportFromFile();'>Import</button></div></div>");
+				document.write("<div class='input-group input-group-sm'><input type='file' class='custom-file-input' id='codeFile' aria-describedby='codeImportBtn' onclick='this.value = \'\';' onchange='codeImportFromFile();'><label class='custom-file-label' for='codeFile'>Choose file</label></div>");
 				document.write("<div class='input-group input-group-sm'><div class='input-group-prepend'><span class='input-group-text'>Content Source</span></div><textarea class='form-control' style='height:400px;' aria-label='Content Source' name='source'>" + spaceInform.content + "</textarea></div>");
 				document.write("<button class='btn btn-sm btn-danger m-1' type='button' onclick='onRemove(" + spaceInform.id + ")' style='float:right;'>remove</button>");
                 document.write("<button class='btn btn-sm btn-primary m-1' type='submit' style='float:right;'>apply</button>");

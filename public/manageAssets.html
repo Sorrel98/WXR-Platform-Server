@@ -247,6 +247,7 @@
             data: params,
             success: ()=> {
                 $('#assetNavOl').children('li:last')[0].innerHTML = node.pathArr[node.pathArr.length - 1].name = document.getElementById('assetName').value;
+                alert('Successfully updated.');
             },
             error: (err)=> {
                 alert("Code: " + err.status +"\n" + err.responseText);
@@ -601,6 +602,7 @@
 			type: fm.method,
 			data: params,
 			success: ()=>{
+                alert('Committed');
 				console.log('committed');
 			},
 			error: (err)=>{
@@ -971,13 +973,8 @@
 								</div>
 							</div>
 							<div class="input-group input-group-sm">
-								<div class="custom-file">
-									<input type="file" class="custom-file-input" id="codeFile" aria-describedby="codeImportBtn" />
-									<label class="custom-file-label" for="codeFile">Choose file</label>
-								</div>
-								<div class="input-group-append">
-									<button class="btn btn-outline-secondary" type="button" id="codeImportFromFileBtn" onclick="codeImportFromFile();">Import</button>
-								</div>
+                                <input type="file" class="custom-file-input" id="codeFile" aria-describedby="codeImportBtn" onclick="this.value = '';" onchange="codeImportFromFile();" />
+                                <label class="custom-file-label" for="codeFile">Choose file</label>
 							</div>
 							<div class="input-group input-group-sm mb-3">
 								<div class="input-group-prepend">
