@@ -615,7 +615,7 @@ router.post('/save', async (request, response, next) => {
         return;
     }
 
-    const { wid, content, vrOptions, screenshot } = request.body;
+    const { wid, content, vroptions, screenshot } = request.body;
     if(!wid || !content || !screenshot) {
         // return next(new AuthError(400));
         response.writeHead(400);
@@ -627,7 +627,7 @@ router.post('/save', async (request, response, next) => {
     try {
 
         conn = await dbPool.getConnection();
-        const res1 = await conn.query(`update t_workspace set content=?, vr_options=?, thumbnail=? where id = ?`, [content, vrOptions, screenshot, wid]);
+        const res1 = await conn.query(`update t_workspace set content=?, vr_options=?, thumbnail=? where id = ?`, [content, vroptions, screenshot, wid]);
         conn.release();
 
     } catch (err) {
