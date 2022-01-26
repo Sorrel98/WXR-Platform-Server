@@ -417,18 +417,12 @@ router.post('/alter', async (request, response, next) => { //todo: Check the con
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const { wid, wname } = request.body;
     if(!wid || !wname) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no wid or wname", 400));
     }
 
 	if(sessionManager.isLiveSession(parseInt(wid))) {
@@ -449,20 +443,21 @@ router.post('/alter', async (request, response, next) => { //todo: Check the con
     let conn;
     try {
         conn = await dbPool.getConnection();
-
         const res1 = await conn.query(`select aid from t_auth_role_relation where rid = (select rid from t_participation where uid = ? and wid = ?)`, [uid, wid]);
         const hasAlterAuth = res1.map( auth => auth.aid ).filter( aid => aid === 1 ).length > 0;
         if (!hasAlterAuth) {
             throw new DBError('Unauthorized access', 403);     // Has no privilege to workspace settings
         }
-
+        
         await conn.beginTransaction();
-        const res2 = await conn.query(`update t_workspace set name=?, description=?, content=? where id=?`, [wname, desc, source, wid]);
+        const res2 = await conn.query(`update t_workspace set name=?, description=?, content=? where id=?`, [wname, description, source, wid]);
         const res3 = await conn.query(`delete from t_tag where wid = ?`, wid);
 
         // Array of [wid, tag] pair
-        const values = tagArr.map( tag => [wid, tag] );
-        await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
+        if (tagArr.length > 0){
+            const values = tagArr.map( tag => [wid, tag] );
+            await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
+        }
 
         conn.commit();
         conn.release();
