@@ -238,13 +238,14 @@ router.post('/alterUser', async (request, response, next) => {
     }
 
     let { name, email, pw, pw1, pw2, avatar, vrHandSync } = request.body;
+    let new_pw = pw1;
     const avatar_id = parseInt(avatar);
     if(!name || !email || !pw || !vrHandSync || isNaN(avatar_id)) {
-        const err = new BadRequestError(`Some insertbox is empty`);
+        const err = new BadRequestError(`Any insertbox is empty`);
         return next(err);
     }
 
-    vrHandSync == (vrHandSync == 'true') ? 1 : 0;
+    vrHandSync = (vrHandSync == 'true') ? 1 : 0;
     let conn;
     try {
         conn = await dbPool.getConnection();
@@ -255,21 +256,9 @@ router.post('/alterUser', async (request, response, next) => {
         }
 
         let query, params;
-        if(vrHandSync == false){
-            vrHandSync = 0;
-        }
-        else{
-            vrHandSync = 1;
-        }
-        if(pw1) {
-            if(pw1 === pw2){
-                query = `update t_user set name=?, email=?, passwd=SHA2(?, 256), avatar_id=?, vr_hand_sync=b'${vrHandSync}' where id=?`;
-                params = [name, email, pw1, avatar_id, uid];
-            }
-            else{
-                const err = new BadRequestError(`New passwords are not equal`);
-                return next(err);
-            }
+        if(new_pw) {
+            query = `update t_user set name=?, email=?, passwd=SHA2(?, 256), avatar_id=?, vr_hand_sync=b'${vrHandSync}' where id=?`;
+            params = [name, email, new_pw, avatar_id, uid];
         }
         else {
             query = `update t_user set name=?, email=? where id=?`;
@@ -385,7 +374,7 @@ router.get('/workspace', async (request, response, next) => {
         for(let r of res3) {
             if(r.aid === 5)
                 canWrite = true;
-            if(r.aid === 2)
+            else if(r.aid === 2)
                 canInvite = true;
         }
 
