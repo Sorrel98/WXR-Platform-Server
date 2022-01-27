@@ -4,9 +4,9 @@
 
 AFRAME.registerComponent('point-cloud', {
   schema: {
-    pcd: {type: 'model'},
-    pointSize: {type: 'number', default: 0.01},
-    pointColor: {type: 'color', default: '#FFF'}
+    pcd: { type: 'model' },
+    pointSize: { type: 'number', default: 0.01 },
+    pointColor: { type: 'color', default: '#FFF' }
   },
 
   init: function () {
@@ -17,21 +17,21 @@ AFRAME.registerComponent('point-cloud', {
   update: function (oldData) {
     var data = this.data;
     if (!data.pcd) { return; }
-    if(this.model) {
-        if(oldData.pcd === data.pcd) {
-            this.model.material.size = data.pointSize;
-            this.model.material.color = new THREE.Color(data.pointColor);
-			if(!this.el.object3DMap['mesh']) {
-				this.el.setObject3D('mesh', this.model);
-			}
+    if (this.model) {
+      if (oldData.pcd === data.pcd) {
+        this.model.material.size = data.pointSize;
+        this.model.material.color = new THREE.Color(data.pointColor);
+        if (!this.el.object3DMap['mesh']) {
+          this.el.setObject3D('mesh', this.model);
         }
-        else {
-            this.resetMesh();
-            this.loadObj(data.pcd);
-        }
+      }
+      else {
+        this.resetMesh();
+        this.loadObj(data.pcd);
+      }
     }
     else {
-        this.loadObj(data.pcd);
+      this.loadObj(data.pcd);
     }
   },
 
@@ -50,21 +50,21 @@ AFRAME.registerComponent('point-cloud', {
     var pcdLoader = this.pcdLoader;
     var rendererSystem = this.el.sceneEl.systems.renderer;
 
-    pcdLoader.load(pcdUrl, 
-        function onLoad (objModel) {
-            self.model = objModel;
-            el.setObject3D('mesh', objModel);
-            self.model.material.size = self.data.pointSize;
-            self.model.material.color = new THREE.Color(self.data.pointColor);
-            console.log('pcd : ' + self.data.pcd + ' has loaded');
-            el.emit('model-loaded', {format: 'pcd', model: objModel});
-        },
-        function onProgress (xhr) {
-            //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-        },
-        function onError (error) {
-            console.log( 'An error happened' );
-        }
+    pcdLoader.load(pcdUrl,
+      function onLoad(objModel) {
+        self.model = objModel;
+        el.setObject3D('mesh', objModel);
+        self.model.material.size = self.data.pointSize;
+        self.model.material.color = new THREE.Color(self.data.pointColor);
+        console.log('pcd : ' + self.data.pcd + ' has loaded');
+        el.emit('model-loaded', { format: 'pcd', model: objModel });
+      },
+      function onProgress(xhr) {
+        //console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+      },
+      function onError(error) {
+        console.log('An error happened');
+      }
     );
   }
 });

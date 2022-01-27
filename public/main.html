@@ -1,7 +1,8 @@
 ﻿<!DOCTYPE HTML>
 <html>
+
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
@@ -18,362 +19,365 @@
     <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff"> 
-    <link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">    
+    <meta name="theme-color" content="#ffffff">
+    <link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="/library/jquery-1.11.3.min.js"></script>
     <script src="/library/bootstrap-4.4.1-dist/js/bootstrap.bundle.min.js"></script>
     <script src="/library/bootstrap-4.4.1-dist/js/bootstrap.min.js"></script>
     <script>
-    var wsListPage = 1;
-    var total = 0; // total row number
-    var rows = 10;// row number per page
-    var order = 0;// sort by ([name, size, access_date, owner_name])
-    var desc = false;//descending or ascending
-    var keyword = '';//search keyword
-    var bookmarkOnly = false;
-    
-    function onSubmitInvite() {
-        const fm = document.getElementById('writeInvForm');
-        const params = $(fm).serialize();
-        document.getElementById('writeInvitation').style.display = 'none';
-        $.ajax({
-            url: fm.action,
-            type: fm.method,
-            data: params,
-            success: ()=>{
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-        fm.reset();
-        return false;
-    };
-    
-    function postJoin(iid) {
-        $.ajax({
-            url: '/join',
-            type: 'POST',
-            data: {'inviteId': iid},
-            success: ()=>{
-                location.reload();
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-    function postRemoveInvite(iid) {  
-        $.ajax({
-            url: '/removeInvite',
-            type: 'POST',
-            data: {'inviteId': iid},
-            success: ()=>{
-                location.reload();
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-    function postLeaveWorkspace(wid) {
-        $.ajax({
-            url: '/leave',
-            type: 'POST',
-            data: {'wid': wid},
-            success: ()=>{
-                location.reload();
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    } ;
+        var wsListPage = 1;
+        var total = 0; // total row number
+        var rows = 10;// row number per page
+        var order = 0;// sort by ([name, size, access_date, owner_name])
+        var desc = false;//descending or ascending
+        var keyword = '';//search keyword
+        var bookmarkOnly = false;
 
-    function showInvDiv(wid) {
-        document.getElementById('invite_wid').value = wid;
-        $('#writeInvitation').modal();
-    };
-    
-    function formatDate(date) {
-        return date.getFullYear() + "-" + (1 + date.getMonth()) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-    };
-    
-    function setBookmark(wid, val) {
-        $.ajax({
-            url: '/setBookmark',
-            type: 'POST',
-            data: {'wid': wid, 'val': val},
-            success:()=>{
-                loadWS();
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-    function loadWS() {
-        $.ajax({
-            url: '/wsList',
-            type: 'GET',
-            async: false,
-            data: {'page': wsListPage, 'rows': rows, 'order': order, 'desc': desc, 'keyword': keyword, 'bmonly': bookmarkOnly},
-            dataType: 'JSON',
-            success: (data)=>{
-                total = parseInt(data.total);
-                let maxPage = Math.ceil(total / rows);
-                let pageSet = parseInt((wsListPage - 1) / 5);
-                let startPage = pageSet * 5 + 1;
-				for(let i = 0; i < 5; ++i) {
-                    let pn = startPage + i;
-					let pi = document.getElementById('pageNum' + i);
-                    if(pn > maxPage) {
-                        $(pi).addClass('d-none');
-					}
-                    else {
-						$(pi).removeClass('d-none');
-						if(pn === wsListPage) {
-							pi.innerHTML = "<b><a class='page-link' href='javascript:getPage(" + pn + ");'>" + pn + "</a></b>";
-						}
-						else {
-							pi.innerHTML = "<a class='page-link' href='javascript:getPage(" + pn + ");'>" + pn + "</a>";
-						}
-					}
+        function onSubmitInvite() {
+            const fm = document.getElementById('writeInvForm');
+            const params = $(fm).serialize();
+            document.getElementById('writeInvitation').style.display = 'none';
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: params,
+                success: () => {
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
                 }
-                let wsTable = document.getElementById('wsTable');
-                $('#wsTable .wsInform').remove();
-                for(let ws of data.result) {
-                    let tr = document.createElement('tr');
-                    tr.className = 'wsInform';
-                    
-                    let td = document.createElement('td');
-                    td.innerHTML = "<div class='btn-group' role='group'><button id='btnGroupDrop" + ws.id + "' type='button' class='btn btn-secondary dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>〓</button><div class='dropdown-menu' aria-labelledby='btnGroupDrop" + ws.id + "'><a class='dropdown-item' href='javascript:setBookmark(" + ws.id + ", " + (1 - ws.bookmark.data[0]) + ");'>" + (ws.bookmark.data[0]===1?"un":"") + "Set bookmark</a><a class='dropdown-item' href='javascript:showInvDiv(" + ws.id + ");'>Invite</a><a class='dropdown-item' href='/manage?id=" + ws.id + "'>Manage</a><a class='dropdown-item' href='javascript:postLeaveWorkspace(" + ws.id +  ");'>Leave</a></div></div>";
-                    tr.appendChild(td);
-                    
-                    td = document.createElement('td');
-                    td.innerHTML = "<a href='/workspace?id=" + ws.id + "'>" + ws.name + "</a>";
-                    tr.appendChild(td);
-                    
-                    td = document.createElement('td');
-                    td.innerHTML = formatDate(new Date(ws.created_date));
-                    tr.appendChild(td);
-                    
-                    td = document.createElement('td');
-                    td.innerHTML = ws.owner_name;
-                    tr.appendChild(td);
-                    
-                    td = document.createElement('td');
-                    td.innerHTML = ws.size;
-                    tr.appendChild(td);
-                    
-                    td = document.createElement('td');
-                    td.innerHTML = ws.role_name;
-                    tr.appendChild(td);
-                    
-                    td = document.createElement('td');
-                    if(ws.access_date)
-                        td.innerHTML = formatDate(new Date(ws.access_date));
-                    tr.appendChild(td);
-                    
-                    td = document.createElement('td');
-                    for(let tag of ws.tags) {
-                        td.innerHTML += "<span class='badge badge-pill badge-secondary mx-1'>" + tag + "</span>";
+            });
+            fm.reset();
+            return false;
+        };
+
+        function postJoin(iid) {
+            $.ajax({
+                url: '/join',
+                type: 'POST',
+                data: { 'inviteId': iid },
+                success: () => {
+                    location.reload();
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+
+        function postRemoveInvite(iid) {
+            $.ajax({
+                url: '/removeInvite',
+                type: 'POST',
+                data: { 'inviteId': iid },
+                success: () => {
+                    location.reload();
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+
+        function postLeaveWorkspace(wid) {
+            $.ajax({
+                url: '/leave',
+                type: 'POST',
+                data: { 'wid': wid },
+                success: () => {
+                    location.reload();
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+
+        function showInvDiv(wid) {
+            document.getElementById('invite_wid').value = wid;
+            $('#writeInvitation').modal();
+        };
+
+        function formatDate(date) {
+            return date.getFullYear() + "-" + (1 + date.getMonth()) + "-" + date.getDate() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+        };
+
+        function setBookmark(wid, val) {
+            $.ajax({
+                url: '/setBookmark',
+                type: 'POST',
+                data: { 'wid': wid, 'val': val },
+                success: () => {
+                    loadWS();
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+
+        function loadWS() {
+            $.ajax({
+                url: '/wsList',
+                type: 'GET',
+                async: false,
+                data: { 'page': wsListPage, 'rows': rows, 'order': order, 'desc': desc, 'keyword': keyword, 'bmonly': bookmarkOnly },
+                dataType: 'JSON',
+                success: (data) => {
+                    total = parseInt(data.total);
+                    let maxPage = Math.ceil(total / rows);
+                    let pageSet = parseInt((wsListPage - 1) / 5);
+                    let startPage = pageSet * 5 + 1;
+                    for (let i = 0; i < 5; ++i) {
+                        let pn = startPage + i;
+                        let pi = document.getElementById('pageNum' + i);
+                        if (pn > maxPage) {
+                            $(pi).addClass('d-none');
+                        }
+                        else {
+                            $(pi).removeClass('d-none');
+                            if (pn === wsListPage) {
+                                pi.innerHTML = "<b><a class='page-link' href='javascript:getPage(" + pn + ");'>" + pn + "</a></b>";
+                            }
+                            else {
+                                pi.innerHTML = "<a class='page-link' href='javascript:getPage(" + pn + ");'>" + pn + "</a>";
+                            }
+                        }
                     }
-                    tr.appendChild(td);
-                    
-                    wsTable.appendChild(tr);
+                    let wsTable = document.getElementById('wsTable');
+                    $('#wsTable .wsInform').remove();
+                    for (let ws of data.result) {
+                        let tr = document.createElement('tr');
+                        tr.className = 'wsInform';
+
+                        let td = document.createElement('td');
+                        td.innerHTML = "<div class='btn-group' role='group'><button id='btnGroupDrop" + ws.id + "' type='button' class='btn btn-secondary dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>〓</button><div class='dropdown-menu' aria-labelledby='btnGroupDrop" + ws.id + "'><a class='dropdown-item' href='javascript:setBookmark(" + ws.id + ", " + (1 - ws.bookmark.data[0]) + ");'>" + (ws.bookmark.data[0] === 1 ? "un" : "") + "Set bookmark</a><a class='dropdown-item' href='javascript:showInvDiv(" + ws.id + ");'>Invite</a><a class='dropdown-item' href='/manage?id=" + ws.id + "'>Manage</a><a class='dropdown-item' href='javascript:postLeaveWorkspace(" + ws.id + ");'>Leave</a></div></div>";
+                        tr.appendChild(td);
+
+                        td = document.createElement('td');
+                        td.innerHTML = "<a href='/workspace?id=" + ws.id + "'>" + ws.name + "</a>";
+                        tr.appendChild(td);
+
+                        td = document.createElement('td');
+                        td.innerHTML = formatDate(new Date(ws.created_date));
+                        tr.appendChild(td);
+
+                        td = document.createElement('td');
+                        td.innerHTML = ws.owner_name;
+                        tr.appendChild(td);
+
+                        td = document.createElement('td');
+                        td.innerHTML = ws.size;
+                        tr.appendChild(td);
+
+                        td = document.createElement('td');
+                        td.innerHTML = ws.role_name;
+                        tr.appendChild(td);
+
+                        td = document.createElement('td');
+                        if (ws.access_date)
+                            td.innerHTML = formatDate(new Date(ws.access_date));
+                        tr.appendChild(td);
+
+                        td = document.createElement('td');
+                        for (let tag of ws.tags) {
+                            td.innerHTML += "<span class='badge badge-pill badge-secondary mx-1'>" + tag + "</span>";
+                        }
+                        tr.appendChild(td);
+
+                        wsTable.appendChild(tr);
+                    }
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
                 }
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-    function toggleShowBookmarkOnly() {
-        bookmarkOnly = !bookmarkOnly;
-        loadWS();
-    };
-    
-    function loadInvitation() {
-        $.ajax({
-            url: '/invitationList',
-            type: 'GET',
-            dataType: 'JSON',
-            success: (data)=>{
-                let invListGroup = document.getElementById('invitations');
-                for(let inv of data) {
-                    invListGroup.innerHTML += "<a href='#' class='list-group-item list-group-item-action'><div class='d-flex w-100 justify-content-between'><h5 class='mb-1'>" + inv.wname + "</h5><small>" + formatDate(new Date(inv.cdate)) + "</small></div><p class='mb-1'>" + inv.message +"</p><small>From. " + inv.sender_name + "</small><button class='btn btn-sm btn-danger mx-1' style='float:right;' onclick='postRemoveInvite(" + inv.id + ")'>delete</button><button class='btn btn-sm btn-primary mx-1' style='float:right;' onclick='postJoin(" + inv.id + ")'>join</button></a>";
+            });
+        };
+
+        function toggleShowBookmarkOnly() {
+            bookmarkOnly = !bookmarkOnly;
+            loadWS();
+        };
+
+        function loadInvitation() {
+            $.ajax({
+                url: '/invitationList',
+                type: 'GET',
+                dataType: 'JSON',
+                success: (data) => {
+                    let invListGroup = document.getElementById('invitations');
+                    for (let inv of data) {
+                        invListGroup.innerHTML += "<a href='#' class='list-group-item list-group-item-action'><div class='d-flex w-100 justify-content-between'><h5 class='mb-1'>" + inv.wname + "</h5><small>" + formatDate(new Date(inv.cdate)) + "</small></div><p class='mb-1'>" + inv.message + "</p><small>From. " + inv.sender_name + "</small><button class='btn btn-sm btn-danger mx-1' style='float:right;' onclick='postRemoveInvite(" + inv.id + ")'>delete</button><button class='btn btn-sm btn-primary mx-1' style='float:right;' onclick='postJoin(" + inv.id + ")'>join</button></a>";
+                    }
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
                 }
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-    function loadProfile() {
-        $.ajax({
-            url: '/profile',
-            type: 'GET',
-            dataType: 'JSON',
-            success: (data)=>{
-                let pf = document.getElementById('profile');
-                pf.innerHTML = data.name + " (" + data.email + ")";
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-    function loadAll() {
-        loadInvitation();
-        loadWS();
-        loadProfile();
-    };
-    
-    function logout() {
-        $.ajax({
-            url: '/logout',
-            type: 'POST',
-            success: ()=>{
-                location.href = '/loginPage';
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-    function onSearch() {
-        let searchBar = document.getElementById('search');
-        keyword = searchBar.value;
-        loadWS();
-        searchBar.value = '';
-        return false;
-    };
-    
-    function getPage(pageNum) {
-        let maxPage = Math.ceil(total / rows);
-        if(pageNum <= maxPage) {
-            wsListPage = pageNum;
+            });
+        };
+
+        function loadProfile() {
+            $.ajax({
+                url: '/profile',
+                type: 'GET',
+                dataType: 'JSON',
+                success: (data) => {
+                    let pf = document.getElementById('profile');
+                    pf.innerHTML = data.name + " (" + data.email + ")";
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+
+        function loadAll() {
+            loadInvitation();
             loadWS();
-        }
-    };
-    
-    function nextPage() {
-        let maxPage = Math.ceil(total / rows);
-        if(wsListPage < maxPage) {
-            ++wsListPage;
+            loadProfile();
+        };
+
+        function logout() {
+            $.ajax({
+                url: '/logout',
+                type: 'POST',
+                success: () => {
+                    location.href = '/loginPage';
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+
+        function onSearch() {
+            let searchBar = document.getElementById('search');
+            keyword = searchBar.value;
             loadWS();
-        }
-    };
-    
-    function prevPage() {
-        if(wsListPage > 1) {
-            --wsListPage;
+            searchBar.value = '';
+            return false;
+        };
+
+        function getPage(pageNum) {
+            let maxPage = Math.ceil(total / rows);
+            if (pageNum <= maxPage) {
+                wsListPage = pageNum;
+                loadWS();
+            }
+        };
+
+        function nextPage() {
+            let maxPage = Math.ceil(total / rows);
+            if (wsListPage < maxPage) {
+                ++wsListPage;
+                loadWS();
+            }
+        };
+
+        function prevPage() {
+            if (wsListPage > 1) {
+                --wsListPage;
+                loadWS();
+            }
+        };
+
+        function clickTitle() {
+            let prevCol = document.getElementById('th' + order);
+            prevCol.innerHTML = prevCol.innerHTML.slice(0, -1);
+            if (order === 0) {
+                desc = !desc;
+                prevCol.innerHTML += (desc ? '↓' : '↑');
+            }
+            else {
+                order = 0;
+                desc = false;
+                let newCol = document.getElementById('th' + order);
+                newCol.innerHTML += '↑';
+            }
             loadWS();
-        }
-    };
-    
-    function clickTitle() {
-        let prevCol = document.getElementById('th' + order);
-        prevCol.innerHTML = prevCol.innerHTML.slice(0, -1);
-        if(order === 0) {
-            desc = !desc;
-            prevCol.innerHTML += (desc ? '↓' : '↑');
-        }
-        else {
-            order = 0;
-            desc = false;
-            let newCol = document.getElementById('th' + order);
-            newCol.innerHTML += '↑';
-        }
-        loadWS();
-    };
-    
-    function clickOwner() {
-        let prevCol = document.getElementById('th' + order);
-        prevCol.innerHTML = prevCol.innerHTML.slice(0, -1);
-        if(order === 3) {
-            desc = !desc;
-            prevCol.innerHTML += (desc ? '↓' : '↑');
-        }
-        else {
-            order = 3;
-            desc = false;
-            let newCol = document.getElementById('th' + order);
-            newCol.innerHTML += '↑';
-        }
-        loadWS();
-    };
-    
-    function clickSize() {
-        let prevCol = document.getElementById('th' + order);
-        prevCol.innerHTML = prevCol.innerHTML.slice(0, -1);
-        if(order === 1) {
-            desc = !desc;
-            prevCol.innerHTML += (desc ? '↓' : '↑');
-        }
-        else {
-            order = 1;
-            desc = false;
-            let newCol = document.getElementById('th' + order);
-            newCol.innerHTML += '↑';
-        }
-        loadWS();
-    };
-    
-    function clickRecentAccess() {
-        let prevCol = document.getElementById('th' + order);
-        prevCol.innerHTML = prevCol.innerHTML.slice(0, -1);
-        if(order === 2) {
-            desc = !desc;
-            prevCol.innerHTML += (desc ? '↓' : '↑');
-        }
-        else {
-            order = 2;
-            desc = false;
-            let newCol = document.getElementById('th' + order);
-            newCol.innerHTML += '↑';
-        }
-        loadWS();
-    };
+        };
+
+        function clickOwner() {
+            let prevCol = document.getElementById('th' + order);
+            prevCol.innerHTML = prevCol.innerHTML.slice(0, -1);
+            if (order === 3) {
+                desc = !desc;
+                prevCol.innerHTML += (desc ? '↓' : '↑');
+            }
+            else {
+                order = 3;
+                desc = false;
+                let newCol = document.getElementById('th' + order);
+                newCol.innerHTML += '↑';
+            }
+            loadWS();
+        };
+
+        function clickSize() {
+            let prevCol = document.getElementById('th' + order);
+            prevCol.innerHTML = prevCol.innerHTML.slice(0, -1);
+            if (order === 1) {
+                desc = !desc;
+                prevCol.innerHTML += (desc ? '↓' : '↑');
+            }
+            else {
+                order = 1;
+                desc = false;
+                let newCol = document.getElementById('th' + order);
+                newCol.innerHTML += '↑';
+            }
+            loadWS();
+        };
+
+        function clickRecentAccess() {
+            let prevCol = document.getElementById('th' + order);
+            prevCol.innerHTML = prevCol.innerHTML.slice(0, -1);
+            if (order === 2) {
+                desc = !desc;
+                prevCol.innerHTML += (desc ? '↓' : '↑');
+            }
+            else {
+                order = 2;
+                desc = false;
+                let newCol = document.getElementById('th' + order);
+                newCol.innerHTML += '↑';
+            }
+            loadWS();
+        };
     </script>
     <style>
-    body {
-      display: flex;
-      align-items: center;
-      padding-top: 40px;
-      padding-bottom: 40px;
-      background-color: #f5f5f5;
-    }
-    .content {
-        width: 100%;
-        max-width: 1920px;
-        padding: 15px;
-        margin: auto;
-    }
+        body {
+            display: flex;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 1920px;
+            padding: 15px;
+            margin: auto;
+        }
     </style>
 </head>
+
 <body onload="loadAll();">
     <header>
         <nav class="navbar navbar-dark fixed-top bg-dark">
             <span>
-			<a class="navbar-brand" href="/main">WXR Platform</a>
-			<b><a class="navbar-text" href="/tutorial/tutorial-index.html">Tutorial</a></b>
+                <a class="navbar-brand" href="/main">WXR Platform</a>
+                <b><a class="navbar-text" href="/tutorial/tutorial-index.html">Tutorial</a></b>
             </span>
-			<form class="form-inline">
+            <form class="form-inline">
                 <b><a class="navbar-text" id="profile" href="/editProfile"></a></b>
                 <button class="btn btn-sm btn-outline-success mx-1" id="logoutBtn" onclick="logout();">Logout</button>
             </form>
         </nav>
     </header>
-    <div class="modal fade" id="writeInvitation" tabindex="-1" role="dialog" aria-labelledby="inviteTitle" aria-hidden="true">
+    <div class="modal fade" id="writeInvitation" tabindex="-1" role="dialog" aria-labelledby="inviteTitle"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -383,19 +387,25 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form" id="writeInvForm" action="/invite" method="post" onsubmit="return onSubmitInvite();">
+                    <form class="form" id="writeInvForm" action="/invite" method="post"
+                        onsubmit="return onSubmitInvite();">
                         <fieldset class="form-group">
-                            <input type="hidden" id="invite_wid" name="workspaceId"/>
+                            <input type="hidden" id="invite_wid" name="workspaceId" />
                             <label for="invite_id" class="col-form-label">To:</label>
-                            <input class="form-control" id="invite_id" name="receiver" type="text" maxlength="45" required autofocus placeholder="Name or Email" pattern = "(^[A-Za-z0-9]+(@(\w+\.)+\w+)?$)"/>
+                            <input class="form-control" id="invite_id" name="receiver" type="text" maxlength="45"
+                                required autofocus placeholder="Name or Email"
+                                pattern="(^[A-Za-z0-9]+(@(\w+\.)+\w+)?$)" />
                             <label for="invite_message" class="col-form-label">Message:</label>
-                            <textarea class="form-control" id="invite_message" name="message" placeholder="Invite Message" maxlength="255" ></textarea>
-                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit" onclick="$('#writeInvitation').modal('hide');">Send</button>
+                            <textarea class="form-control" id="invite_message" name="message"
+                                placeholder="Invite Message" maxlength="255"></textarea>
+                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+                                onclick="$('#writeInvitation').modal('hide');">Send</button>
                         </fieldset>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="document.getElementById('writeInvForm').reset();">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        onclick="document.getElementById('writeInvForm').reset();">Close</button>
                 </div>
             </div>
         </div>
@@ -406,11 +416,14 @@
                 <h3 class="mb-3" style="display:inline">Workspaces</h3>
                 <div style="display:inline; float:right;">
                     <div class="form-group form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="chkBookMarkOnly" onclick="toggleShowBookmarkOnly();">
+                        <input class="form-check-input" type="checkbox" id="chkBookMarkOnly"
+                            onclick="toggleShowBookmarkOnly();">
                         <label class="form-check-label" for="chkMookMarkOnly">Bookmark only</label>
                     </div>
-                    <button class="btn btn-primary mb-3" id="goToManageAssets" onclick="location.href='/manageAssets';">Assets manager</button>
-                    <button class="btn btn-primary mb-3" id="makeWSBtn" onclick="location.href='/makePage';">Create Workspace</button>
+                    <button class="btn btn-primary mb-3" id="goToManageAssets"
+                        onclick="location.href='/manageAssets';">Assets manager</button>
+                    <button class="btn btn-primary mb-3" id="makeWSBtn" onclick="location.href='/makePage';">Create
+                        Workspace</button>
                 </div>
                 <table class="table" id="wsTable">
                     <th>Functions</th>
@@ -444,7 +457,7 @@
 
                 <form id="searchForm" style="display:inline" onsubmit="return onSearch();">
                     <div class="form-row justify-content-center">
-                        <input class="form-control form-control-sm" id="search" type="text" style="width:500px"/>
+                        <input class="form-control form-control-sm" id="search" type="text" style="width:500px" />
                         <button class="btn btn-sm btn-primary" type="submit">Search</button>
                     </div>
                 </form>
@@ -457,4 +470,5 @@
         </div>
     </div>
 </body>
+
 </html>

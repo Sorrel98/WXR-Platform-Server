@@ -1,68 +1,69 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
-    <script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
-    <script src="/library/jquery-1.11.3.min.js"></script>
+	<script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
+	<script src="/library/jquery-1.11.3.min.js"></script>
 	<script src="/library/jquery.blockUI.js"></script>
 	<script src="/library/aframe-v1.2.0.min.js"></script>
-    <script src="/library/THREE.TransformControls.js"></script>
-    <script src="/library/THREE.PCDLoader.js"></script>
+	<script src="/library/THREE.TransformControls.js"></script>
+	<script src="/library/THREE.PCDLoader.js"></script>
 	<script src="/library/animation-mixer.js"></script>
-    <script src="/library/cube-env-map.js"></script>
+	<script src="/library/cube-env-map.js"></script>
 	<script src="/library/stack.js"></script>
-    <script src="/library/list.js"></script>
+	<script src="/library/list.js"></script>
 	<script src="/components/event-capturer.js"></script>
 	<script src="/components/flag+trigger.js"></script>
-    <script src="/primitives/a-flag.js"></script>
-    <script src="/primitives/a-trigger.js"></script>
+	<script src="/primitives/a-flag.js"></script>
+	<script src="/primitives/a-trigger.js"></script>
 	<script src="/components/position-observer.js"></script>
 	<script src="/components/rotation-observer.js"></script>
 	<script src="/components/scale-observer.js"></script>
 	<script src="/components/collision-observer.js"></script>
 	<script src="/components/two-state-animation.js"></script>
-    <script src="/components/two-state-embedded-animation.js"></script>
+	<script src="/components/two-state-embedded-animation.js"></script>
 	<script src="/components/transparency.js"></script>
 	<script src="/components/vr-slide.js"></script>
 	<script src="/components/vr-1axis-hinge.js"></script>
 	<script src="/components/vr-snap.js"></script>
-    <script src="/components/point-cloud.js"></script>
-    <script src="/primitives/a-point-cloud.js"></script>
-    <script src="/primitives/a-group.js"></script>
-    <script src="/components/binder.js"></script>
-    <script src="/components/hinge-animation.js"></script>
+	<script src="/components/point-cloud.js"></script>
+	<script src="/primitives/a-point-cloud.js"></script>
+	<script src="/primitives/a-group.js"></script>
+	<script src="/components/binder.js"></script>
+	<script src="/components/hinge-animation.js"></script>
 	<script src="/components/avatar.js"></script>
 	<script src="/primitives/a-user.js"></script>
-    <script src="/components/interaction-manger.js"></script>
-    <script src="/components/thd-mode-controls.js"></script>
-    <script src="/components/vr-mode-controls.js"></script>
+	<script src="/components/interaction-manger.js"></script>
+	<script src="/components/thd-mode-controls.js"></script>
+	<script src="/components/vr-mode-controls.js"></script>
 	<script src="/components/ar-mode-controls.js"></script>
-    <script src="/components/mode-changer.js"></script>
-    <script src="/components/target.js"></script>
-    <script src="/components/active-marker.js"></script>
-    <script src="/primitives/a-marker.js"></script>
-    <script src="/components/base-marker.js"></script>
-    <script src="/primitives/a-base.js"></script>
-    <script src="/components/color-scroll-material.js"></script>
+	<script src="/components/mode-changer.js"></script>
+	<script src="/components/target.js"></script>
+	<script src="/components/active-marker.js"></script>
+	<script src="/primitives/a-marker.js"></script>
+	<script src="/components/base-marker.js"></script>
+	<script src="/primitives/a-base.js"></script>
+	<script src="/components/color-scroll-material.js"></script>
 	<script src="/components/property-setter.js"></script>
-	
-    <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
-    <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
-	
+
+	<link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+	<link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+
 	<script>
 		var step = 0;
 		var maxReachedStep = 0;
@@ -84,141 +85,152 @@
 			'축하합니다. VR 모드 튜토리얼을 모두 완료하였습니다.'
 		];
 		function next() {
-			if((step === maxReachedStep && !canPass) || step === messages.length - 1) return;
-			if(++step > maxReachedStep)
+			if ((step === maxReachedStep && !canPass) || step === messages.length - 1) return;
+			if (++step > maxReachedStep)
 				maxReachedStep = step;
 			setStep();
 		}
-		
+
 		function prev() {
-			if(step === 0) return;
+			if (step === 0) return;
 			--step;
 			setStep();
 		}
-		
-		function setStep()
-		{
+
+		function setStep() {
 			let paging = document.getElementById('paging');
 			let el = document.getElementById('annotation');
 			el.setAttribute('text', 'value', messages[step]);
-			if(step === maxReachedStep) {
-				switch(step) {
-					case 3: 
-					{
-						let handler = ()=>{
-							el.sceneEl.removeEventListener('t1up', handler);
-							canPass = true;
-							paging.setAttribute('visible', true);
-						};
-						el.sceneEl.addEventListener('t1up', handler);
-						canPass = false;
-						paging.setAttribute('visible', false);
-						break;
-					}
+			if (step === maxReachedStep) {
+				switch (step) {
+					case 3:
+						{
+							let handler = () => {
+								el.sceneEl.removeEventListener('t1up', handler);
+								canPass = true;
+								paging.setAttribute('visible', true);
+							};
+							el.sceneEl.addEventListener('t1up', handler);
+							canPass = false;
+							paging.setAttribute('visible', false);
+							break;
+						}
 					case 5:
-					{
-						canWrite = true;
-						document.getElementById('box').setAttribute('collidable', '');
-						let handler = ()=>{
-							el.sceneEl.removeEventListener('t2down', handler);
-							canPass = true;
-							paging.setAttribute('visible', true);
-						};
-						el.sceneEl.addEventListener('t2down', handler);
-						canPass = false;
-						paging.setAttribute('visible', false);
-						break;
-					}
+						{
+							canWrite = true;
+							document.getElementById('box').setAttribute('collidable', '');
+							let handler = () => {
+								el.sceneEl.removeEventListener('t2down', handler);
+								canPass = true;
+								paging.setAttribute('visible', true);
+							};
+							el.sceneEl.addEventListener('t2down', handler);
+							canPass = false;
+							paging.setAttribute('visible', false);
+							break;
+						}
 					case 7:
-					{
-						let handler = ()=>{
-							el.sceneEl.removeEventListener('t2up', handler);
-							canPass = true;
-							paging.setAttribute('visible', true);
-						};
-						el.sceneEl.addEventListener('t2up', handler);
-						canPass = false;
-						paging.setAttribute('visible', false);
-						break;
-					}
+						{
+							let handler = () => {
+								el.sceneEl.removeEventListener('t2up', handler);
+								canPass = true;
+								paging.setAttribute('visible', true);
+							};
+							el.sceneEl.addEventListener('t2up', handler);
+							canPass = false;
+							paging.setAttribute('visible', false);
+							break;
+						}
 					case 8:
-					{
-						let handler = ()=>{
-							el.sceneEl.removeEventListener('t3up', handler);
-							canPass = true;
-							paging.setAttribute('visible', true);
-						};
-						el.sceneEl.addEventListener('t3up', handler);
-						canPass = false;
-						paging.setAttribute('visible', false);
-						break;
-					}
+						{
+							let handler = () => {
+								el.sceneEl.removeEventListener('t3up', handler);
+								canPass = true;
+								paging.setAttribute('visible', true);
+							};
+							el.sceneEl.addEventListener('t3up', handler);
+							canPass = false;
+							paging.setAttribute('visible', false);
+							break;
+						}
 					case 9:
-					{
-						let handler = ()=>{
-							el.sceneEl.removeEventListener('t4up', handler);
-							canPass = true;
-							paging.setAttribute('visible', true);
-						};
-						el.sceneEl.addEventListener('t4up', handler);
-						canPass = false;
-						paging.setAttribute('visible', false);
-						break;
-					}
+						{
+							let handler = () => {
+								el.sceneEl.removeEventListener('t4up', handler);
+								canPass = true;
+								paging.setAttribute('visible', true);
+							};
+							el.sceneEl.addEventListener('t4up', handler);
+							canPass = false;
+							paging.setAttribute('visible', false);
+							break;
+						}
 					case 11:
-					{
-						document.getElementById('sphere').setAttribute('collidable', '');
-						let handler = ()=>{
-							el.sceneEl.removeEventListener('t5up', handler);
-							canPass = true;
-							paging.setAttribute('visible', true);
-						};
-						el.sceneEl.addEventListener('t5up', handler);
-						canPass = false;
-						paging.setAttribute('visible', false);
-						break;
-					}
+						{
+							document.getElementById('sphere').setAttribute('collidable', '');
+							let handler = () => {
+								el.sceneEl.removeEventListener('t5up', handler);
+								canPass = true;
+								paging.setAttribute('visible', true);
+							};
+							el.sceneEl.addEventListener('t5up', handler);
+							canPass = false;
+							paging.setAttribute('visible', false);
+							break;
+						}
 					default:
 						paging.setAttribute('visible', true);
 						break;
 				}
-			}			
+			}
 		}
-		
-		function init()
-		{
+
+		function init() {
 			canWrite = false;
 			let el = document.getElementById('annotation');
 			el.setAttribute('text', 'value', messages[step]);
 			el.sceneEl.addEventListener('aButtonDown', next);
 			el.sceneEl.addEventListener('bButtonDown', prev);
-			el.sceneEl.addEventListener('enter-vr', ()=>{
-				if(step === 0)
+			el.sceneEl.addEventListener('enter-vr', () => {
+				if (step === 0)
 					next();
 			});
 		}
-		
+
 	</script>
 </head>
+
 <body>
-    <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
+	<a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls
+		renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
 		<a-entity>
 			<a-camera position-observer="goal:0 0 -5;tolerance:2;flagName:fn1;onWorldCoordinate:true">
-				<a-text id="annotation" position="0 0.1 -0.75" text="anchor:center;align:center;baseline:center;width:auto;height:auto;color:black;font:nanumgothicbold;shader:msdf" geometry="primitive:plane;width:0.75;height:0.15;" material="color:white;" transparency="value:0.5;">
+				<a-text id="annotation" position="0 0.1 -0.75"
+					text="anchor:center;align:center;baseline:center;width:auto;height:auto;color:black;font:nanumgothicbold;shader:msdf"
+					geometry="primitive:plane;width:0.75;height:0.15;" material="color:white;"
+					transparency="value:0.5;">
 				</a-text>
-				<a-image visible="false" id="paging" position="0.45 0.1 -0.75" geometry="primitive:plane;width:0.1;height:0.1;" material="src:/tutorial/aButton.png" transparency="value:0" animation="dir:alternate;from:0;to:1;loop:true;property:transparency.value">
+				<a-image visible="false" id="paging" position="0.45 0.1 -0.75"
+					geometry="primitive:plane;width:0.1;height:0.1;" material="src:/tutorial/aButton.png"
+					transparency="value:0" animation="dir:alternate;from:0;to:1;loop:true;property:transparency.value">
 				</a-image>
 			</a-camera>
 		</a-entity>
-		<a-entity visible="true" light="color:#BBB;type:ambient;angle:60;groundColor:#FFF;decay:1;distance:0;intensity:1;penumbra:0;target:null;castShadow:false;shadowBias:0;shadowCameraFar:500;shadowCameraFov:90;shadowCameraNear:0.5;shadowCameraTop:5;shadowCameraRight:5;shadowCameraBottom:-5;shadowCameraLeft:-5;shadowCameraVisible:false;shadowMapHeight:512;shadowMapWidth:512;shadowRadius:1;">
+		<a-entity visible="true"
+			light="color:#BBB;type:ambient;angle:60;groundColor:#FFF;decay:1;distance:0;intensity:1;penumbra:0;target:null;castShadow:false;shadowBias:0;shadowCameraFar:500;shadowCameraFov:90;shadowCameraNear:0.5;shadowCameraTop:5;shadowCameraRight:5;shadowCameraBottom:-5;shadowCameraLeft:-5;shadowCameraVisible:false;shadowMapHeight:512;shadowMapWidth:512;shadowRadius:1;">
 		</a-entity>
-		<a-entity visible="true" position="-0.5 1 1" light="color:#FFF;intensity:0.6;castShadow:true;angle:60;groundColor:#FFF;decay:1;distance:0;penumbra:0;type:directional;target:null;shadowBias:0;shadowCameraFar:500;shadowCameraFov:90;shadowCameraNear:0.5;shadowCameraTop:5;shadowCameraRight:5;shadowCameraBottom:-5;shadowCameraLeft:-5;shadowCameraVisible:false;shadowMapHeight:512;shadowMapWidth:512;shadowRadius:1;">
+		<a-entity visible="true" position="-0.5 1 1"
+			light="color:#FFF;intensity:0.6;castShadow:true;angle:60;groundColor:#FFF;decay:1;distance:0;penumbra:0;type:directional;target:null;shadowBias:0;shadowCameraFar:500;shadowCameraFov:90;shadowCameraNear:0.5;shadowCameraTop:5;shadowCameraRight:5;shadowCameraBottom:-5;shadowCameraLeft:-5;shadowCameraVisible:false;shadowMapHeight:512;shadowMapWidth:512;shadowRadius:1;">
 		</a-entity>
-		<a-box id="box" visible="true" position="0 0 -5" material="color:yellow;" geometry="primitive:box;" position-observer="goal:0 0 -5;tolerance:0.001;flagName:fn2;" rotation-observer="goal:0 0 0;flagName:fn3;" scale-observer="goal:1 1 1;flagName:fn4;">
+		<a-box id="box" visible="true" position="0 0 -5" material="color:yellow;" geometry="primitive:box;"
+			position-observer="goal:0 0 -5;tolerance:0.001;flagName:fn2;" rotation-observer="goal:0 0 0;flagName:fn3;"
+			scale-observer="goal:1 1 1;flagName:fn4;">
 		</a-box>
-		<a-sphere id="sphere" visible="true" position="2.5 0 -5" scale="0.5 0.5 0.5" material="color:blue;" geometry="primitive:sphere;" position-observer="goal:3 3 -3; tolerance:0.01; flagName:fn5;" vr-snap="target:#torus;">
+		<a-sphere id="sphere" visible="true" position="2.5 0 -5" scale="0.5 0.5 0.5" material="color:blue;"
+			geometry="primitive:sphere;" position-observer="goal:3 3 -3; tolerance:0.01; flagName:fn5;"
+			vr-snap="target:#torus;">
 		</a-sphere>
-		<a-torus id="torus" visible="true" position ="3 3 -3" material="color:green;" geometry="primitive:torus;">
+		<a-torus id="torus" visible="true" position="3 3 -3" material="color:green;" geometry="primitive:torus;">
 		</a-torus>
 		<a-trigger id="t1" trigger="type:and;inverse:false;risingEdgeEvent:t1up;fallingEdgeEvent:t1down;">
 			<a-flag id="f1" flag="name:fn1;inverse:false;">
@@ -228,7 +240,7 @@
 			<a-flag id="f2" flag="name:fn2;inverse:false;">
 			</a-flag>
 		</a-trigger>
-		<a-trigger id="t3" trigger="type:and; risingEdgeEvent:t3up;fallingEdgeEvent:t3down;">			
+		<a-trigger id="t3" trigger="type:and; risingEdgeEvent:t3up;fallingEdgeEvent:t3down;">
 			<a-flag id="f3" flag="name:fn3;inverse:true;">
 			</a-flag>
 		</a-trigger>
@@ -245,16 +257,17 @@
 	</a-scene>
 	<script>
 		var scene = document.querySelector('a-scene');
-			if (scene.hasLoaded) {
-				init();
-			} else {
-				scene.addEventListener('loaded', init);
-			}
+		if (scene.hasLoaded) {
+			init();
+		} else {
+			scene.addEventListener('loaded', init);
+		}
 	</script>
-    <div id="modeChangerLayer" class="buttonUI">
-        <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
-        <img id="_ARButton" src="/img/icon/AR in circle.svg"/>
-        <img id="_3DButton" src="/img/icon/3D in circle.svg"/>
-    </div>
+	<div id="modeChangerLayer" class="buttonUI">
+		<img id="_VRButton" src="/img/icon/VR in circle.svg" />
+		<img id="_ARButton" src="/img/icon/AR in circle.svg" />
+		<img id="_3DButton" src="/img/icon/3D in circle.svg" />
+	</div>
 </body>
+
 </html>

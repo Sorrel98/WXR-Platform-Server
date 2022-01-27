@@ -5,7 +5,7 @@
  */
 AFRAME.registerComponent('thd-mode-controls', {
     dependencies: ['interaction-manager'],
-    
+
     init: function () {
         if (this.el.sceneEl !== this.el) return;
         let tdModeControlsComp = this;
@@ -13,28 +13,28 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.enableKeyEvent = true;
         this.ctrlPushed = false;
         this.shiftPushed = false;
-        
+
         /**
          * Depending on the selected tab, the selected target in the Hierarchy View or Flag View will be deleted from the scene.
          * @returns undefined
          */
-        this._delete = ()=> {
-			let target;
-			if(tdModeControlsComp.leftSideMultiTab.selected === 0) {
-				target = tdModeControlsComp.HierarchyView.getSelectedEl();
-				if (target === null) return;
-				if (target === target.sceneEl || target.id === '' || target.tagName.toLowerCase() === 'a-user')
-					return;
-				if (target.object3D !== undefined && tdModeControlsComp.transformControls.object === target.object3D)
-					tdModeControlsComp.transformControls.detach();
-			}
-			else if(tdModeControlsComp.leftSideMultiTab.selected === 2) {
-				target = tdModeControlsComp.FlagView.getSelectedEl();
-				if (target === null) return;
-			}
+        this._delete = () => {
+            let target;
+            if (tdModeControlsComp.leftSideMultiTab.selected === 0) {
+                target = tdModeControlsComp.HierarchyView.getSelectedEl();
+                if (target === null) return;
+                if (target === target.sceneEl || target.id === '' || target.tagName.toLowerCase() === 'a-user')
+                    return;
+                if (target.object3D !== undefined && tdModeControlsComp.transformControls.object === target.object3D)
+                    tdModeControlsComp.transformControls.detach();
+            }
+            else if (tdModeControlsComp.leftSideMultiTab.selected === 2) {
+                target = tdModeControlsComp.FlagView.getSelectedEl();
+                if (target === null) return;
+            }
             interactionManagerComp.writeInteraction(target, 'object', 'deleted');
         };
-        
+
         /**
          * Stringify the data of components with multiple properties.
          * The parameter is bound to [some element].components[any component name].data.
@@ -67,16 +67,16 @@ AFRAME.registerComponent('thd-mode-controls', {
             }
             return ret;
         };
-        
+
         /**
          * Stringify the scene to create the content source.
          * @returns string
          */
-        this._stringifyContent = ()=> {
+        this._stringifyContent = () => {
             const sceneEl = tdModeControlsComp.el;
             let dataStr = '';
             const makeStr = (el) => {
-				if(el.tagName.toLowerCase() === 'a-user') return false;
+                if (el.tagName.toLowerCase() === 'a-user') return false;
                 let thisStr = '<';
                 thisStr += el.tagName.toLowerCase();
                 if (el.id) {
@@ -84,12 +84,12 @@ AFRAME.registerComponent('thd-mode-controls', {
                 }
                 if (el.components) {
                     if (el.components['camera']) return false;
-					if(el.tagName !== 'A-TRIGGER' && el.tagName !== 'A-FLAG') {
-						thisStr += ' visible="' + el.getAttribute('visible') + '"';
-						thisStr += ' position="' + AFRAME.utils.coordinates.stringify(el.getAttribute('position')) + '"';
-						thisStr += ' rotation="' + AFRAME.utils.coordinates.stringify(el.getAttribute('rotation')) + '"';
-						thisStr += ' scale="' + AFRAME.utils.coordinates.stringify(el.getAttribute('scale')) + '"';
-					}
+                    if (el.tagName !== 'A-TRIGGER' && el.tagName !== 'A-FLAG') {
+                        thisStr += ' visible="' + el.getAttribute('visible') + '"';
+                        thisStr += ' position="' + AFRAME.utils.coordinates.stringify(el.getAttribute('position')) + '"';
+                        thisStr += ' rotation="' + AFRAME.utils.coordinates.stringify(el.getAttribute('rotation')) + '"';
+                        thisStr += ' scale="' + AFRAME.utils.coordinates.stringify(el.getAttribute('scale')) + '"';
+                    }
                     for (let comp in el.components) {
                         if (comp === 'visible' || comp === 'position' || comp === 'rotation' || comp === 'scale')
                             continue;
@@ -105,15 +105,15 @@ AFRAME.registerComponent('thd-mode-controls', {
                 thisStr += '>';
                 dataStr += thisStr;
                 for (let child of el.children) {
-                    if(!makeStr(child)) {
-						dataStr = dataStr.substring(0, dataStr.lastIndexOf('<'));
-						return true;
-					}
+                    if (!makeStr(child)) {
+                        dataStr = dataStr.substring(0, dataStr.lastIndexOf('<'));
+                        return true;
+                    }
                 }
                 dataStr += '</' + el.tagName.toLowerCase() + '>';
-				return true;
+                return true;
             };
-            
+
             for (let child of sceneEl.children) {
                 if (child.tagName.startsWith('A-')) {
                     makeStr(child);
@@ -121,25 +121,25 @@ AFRAME.registerComponent('thd-mode-controls', {
             }
             return dataStr;
         };
-        
-        this._saveContent = ()=> {
+
+        this._saveContent = () => {
             const sceneEl = tdModeControlsComp.el;
-			let contentStr = tdModeControlsComp._stringifyContent();
+            let contentStr = tdModeControlsComp._stringifyContent();
             let vrOptions = JSON.stringify(sceneEl.components['vr-mode-controls'].data);
-			vrOptions = vrOptions.substring(2, vrOptions.length -1).replaceAll('"', '').replaceAll(',', ';');
+            vrOptions = vrOptions.substring(2, vrOptions.length - 1).replaceAll('"', '').replaceAll(',', ';');
             sceneEl.components.screenshot.data.width = 128;
             sceneEl.components.screenshot.data.height = 96;
-            
+
             let imageURL = sceneEl.components.screenshot.getCanvas('perspective').toDataURL();
-            
+
             $.ajax({
                 url: '/save',
                 type: 'POST',
                 data: {
-                    wid : wid,
-                    content : contentStr,
-					vroptions : vrOptions,
-                    screenshot : imageURL
+                    wid: wid,
+                    content: contentStr,
+                    vroptions: vrOptions,
+                    screenshot: imageURL
                 },
                 success: (result) => {
                     console.log('success to save');
@@ -150,11 +150,11 @@ AFRAME.registerComponent('thd-mode-controls', {
                 }
             });
         };
-		
-       /**
-        * Toggles the reference coordinate system of the gizmo between world coordinate system and local coordinate system.
-        */
-        this._toggleSpace = ()=> {
+
+        /**
+         * Toggles the reference coordinate system of the gizmo between world coordinate system and local coordinate system.
+         */
+        this._toggleSpace = () => {
             tdModeControlsComp.transformControls.setSpace(tdModeControlsComp.transformControls.space === "local" ? "world" : "local");
             if (tdModeControlsComp.transformControls.space === 'local')
                 tdModeControlsComp.coordinatesButton.setAttribute('src', '/img/icon/cube in circle.svg');
@@ -162,10 +162,10 @@ AFRAME.registerComponent('thd-mode-controls', {
                 tdModeControlsComp.coordinatesButton.setAttribute('src', '/img/icon/earth in circle.svg');
         };
 
-       /**
-        * Switch the control mode of the gizmo to translate.
-        */
-        this._setModeTranslate = ()=> {
+        /**
+         * Switch the control mode of the gizmo to translate.
+         */
+        this._setModeTranslate = () => {
             tdModeControlsComp.transformControls.setMode('translate');
             tdModeControlsComp.translateButton.setAttribute('src', '/img/icon/position in circle_active.svg');
             tdModeControlsComp.rotateButton.setAttribute('src', '/img/icon/rotation in circle_inactive.svg');
@@ -175,7 +175,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         /**
         * Switch the control mode of the gizmo to rotate.
         */
-        this._setModeRotate = ()=> {
+        this._setModeRotate = () => {
             tdModeControlsComp.transformControls.setMode("rotate");
             tdModeControlsComp.translateButton.setAttribute('src', '/img/icon/position in circle_inactive.svg');
             tdModeControlsComp.rotateButton.setAttribute('src', '/img/icon/rotation in circle_active.svg');
@@ -185,7 +185,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         /**
         * Switch the control mode of the gizmo to scale.
         */
-        this._setModeScale = ()=> {
+        this._setModeScale = () => {
             tdModeControlsComp.transformControls.setMode("scale");
             tdModeControlsComp.translateButton.setAttribute('src', '/img/icon/position in circle_inactive.svg');
             tdModeControlsComp.rotateButton.setAttribute('src', '/img/icon/rotation in circle_inactive.svg');
@@ -199,7 +199,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.initHelpWindow();
         this.initUILayer();
 
-        window.addEventListener('keydown', (event)=> {
+        window.addEventListener('keydown', (event) => {
             if (!tdModeControlsComp.enableKeyEvent) return;
             if (event.defaultPrevented) return;
             if (event.key === "Shift") {
@@ -219,9 +219,9 @@ AFRAME.registerComponent('thd-mode-controls', {
             }
             else if (event.key === "Enter") {
                 let selectedEl;
-                if(tdModeControlsComp.leftSideMultiTab.selected === 0)
-				    selectedEl = tdModeControlsComp.HierarchyView.getSelectedEl();
-                else if(tdModeControlsComp.leftSideMultiTab.selected === 2)
+                if (tdModeControlsComp.leftSideMultiTab.selected === 0)
+                    selectedEl = tdModeControlsComp.HierarchyView.getSelectedEl();
+                else if (tdModeControlsComp.leftSideMultiTab.selected === 2)
                     selectedEl = tdModeControlsComp.FlagView.getSelectedEl();
                 if (selectedEl !== null)
                     tdModeControlsComp.loadEditor(selectedEl);
@@ -236,13 +236,13 @@ AFRAME.registerComponent('thd-mode-controls', {
                 wasdControls.data.fly = !wasdControls.data.fly;
                 return;
             }
-            else if(event.key === "u" || event.key === "U") {
+            else if (event.key === "u" || event.key === "U") {
                 tdModeControlsComp.toggleUIDisplay();
                 return;
             }
-			else if(tdModeControlsComp.ctrlPushed && (event.key === "s" || event.key === "S")) {
-				tdModeControlsComp._saveContent();
-			}
+            else if (tdModeControlsComp.ctrlPushed && (event.key === "s" || event.key === "S")) {
+                tdModeControlsComp._saveContent();
+            }
             else if (tdModeControlsComp.ctrlPushed && (event.key === "z" || event.key === "Z")) {
                 if (tdModeControlsComp.shiftPushed)
                     interactionManagerComp.redo();
@@ -250,38 +250,36 @@ AFRAME.registerComponent('thd-mode-controls', {
                     interactionManagerComp.undo();
                 return;
             }
-            else if(event.key === "Escape") {
-                if(tdModeControlsComp.leftSideMultiTab.selected === 0) {
+            else if (event.key === "Escape") {
+                if (tdModeControlsComp.leftSideMultiTab.selected === 0) {
                     if (tdModeControlsComp.transformControls.object) {
                         const oldTarget = tdModeControlsComp.transformControls.object;
                         tdModeControlsComp.transformControls.detach();
                         tdModeControlsComp.el.emit('target-detached', { el: oldTarget }, false);
                     }
                 }
-                else if(tdModeControlsComp.leftSideMultiTab.selected === 2) {
+                else if (tdModeControlsComp.leftSideMultiTab.selected === 2) {
                     tdModeControlsComp.FlagView.deselect();
                 }
             }
-			else if(event.key === "." || event.key === ">")
-			{
-				let wasdControls = document.querySelector('[wasd-controls]').components['wasd-controls'];
-				if(tdModeControlsComp.shiftPushed)
-					wasdControls.data.acceleration += 10;
-				else
-					wasdControls.data.acceleration++;
-				if(wasdControls.data.acceleration > 100)
-					wasdControls.data.acceleration = 100;
-			}
-			else if(event.key === "," || event.key === "<")
-			{
-				let wasdControls = document.querySelector('[wasd-controls]').components['wasd-controls'];
-				if(tdModeControlsComp.shiftPushed)
-					wasdControls.data.acceleration -= 10;
-				else
-					wasdControls.data.acceleration--;
-				if(wasdControls.data.acceleration < 1)
-					wasdControls.data.acceleration = 1;
-			}
+            else if (event.key === "." || event.key === ">") {
+                let wasdControls = document.querySelector('[wasd-controls]').components['wasd-controls'];
+                if (tdModeControlsComp.shiftPushed)
+                    wasdControls.data.acceleration += 10;
+                else
+                    wasdControls.data.acceleration++;
+                if (wasdControls.data.acceleration > 100)
+                    wasdControls.data.acceleration = 100;
+            }
+            else if (event.key === "," || event.key === "<") {
+                let wasdControls = document.querySelector('[wasd-controls]').components['wasd-controls'];
+                if (tdModeControlsComp.shiftPushed)
+                    wasdControls.data.acceleration -= 10;
+                else
+                    wasdControls.data.acceleration--;
+                if (wasdControls.data.acceleration < 1)
+                    wasdControls.data.acceleration = 1;
+            }
             if (tdModeControlsComp.transformControls.object === undefined)
                 return;
             switch (event.key) {
@@ -302,11 +300,11 @@ AFRAME.registerComponent('thd-mode-controls', {
                     tdModeControlsComp._setModeScale();
                     break;
 
-				case "+":
+                case "+":
                     tdModeControlsComp.transformControls.setSize(tdModeControlsComp.transformControls.size + 0.1);
                     break;
 
-				case "-":
+                case "-":
                     tdModeControlsComp.transformControls.setSize(Math.max(tdModeControlsComp.transformControls.size - 0.1, 0.1));
                     break;
 
@@ -331,7 +329,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             }
         });
 
-        window.addEventListener('keyup', (event)=> {
+        window.addEventListener('keyup', (event) => {
             switch (event.key) {
                 case "Shift":
                     tdModeControlsComp.shiftPushed = false;
@@ -346,19 +344,19 @@ AFRAME.registerComponent('thd-mode-controls', {
     /**
      * Create a gizmo and register related event handlers.
      */
-    initTransformControls: function() {
+    initTransformControls: function () {
         let tdModeControlsComp = this;
         let interactionManagerComp = this.el.components['interaction-manager'];
         this.transformControls = new THREE.TransformControls(this.el.camera, this.el.renderer.domElement);
         this.el.object3D.add(this.transformControls);
 
         //When the pick target is changed
-        this.transformControls.addEventListener('change', ()=> {
+        this.transformControls.addEventListener('change', () => {
             tdModeControlsComp.el.renderer.render(tdModeControlsComp.el.object3D, tdModeControlsComp.el.camera);
         });
 
         //Occurs during manipulation via gizmos
-        this.transformControls.addEventListener('dragging-changed', (event)=> {
+        this.transformControls.addEventListener('dragging-changed', (event) => {
             document.querySelector('[look-controls]').getAttribute('look-controls').enabled = !event.value;
             document.querySelector('[look-controls]').getAttribute('look-controls').touchEnabled = !event.value;
             if (event.value) {
@@ -381,7 +379,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         });
 
         //Occurs when an operation through the gizmo ends
-        this.transformControls.addEventListener('objectChange', (event)=> {
+        this.transformControls.addEventListener('objectChange', (event) => {
             let targetEl = event.target.object.el;
             let mode = event.target.getMode();
             interactionManagerComp.writeInteraction(targetEl, 'transform', mode);
@@ -392,70 +390,70 @@ AFRAME.registerComponent('thd-mode-controls', {
         var onDownPosition = new THREE.Vector2();
         var onUpPosition = new THREE.Vector2();
 
-        let getIntersects = (point, object3Ds)=> {
+        let getIntersects = (point, object3Ds) => {
             mouse.set((point.x * 2) - 1, -(point.y * 2) + 1);
             raycaster.setFromCamera(mouse, tdModeControlsComp.el.camera);
             return raycaster.intersectObjects(object3Ds, true);
         }
 
-        let getMousePosition = (dom, x, y)=> {
+        let getMousePosition = (dom, x, y) => {
             let rect = dom.getBoundingClientRect();
             return [(x - rect.left) / rect.width, (y - rect.top) / rect.height];
         }
 
         //mouse(or touch) picking
-        let handleClick = ()=> {
+        let handleClick = () => {
             if (onDownPosition.distanceTo(onUpPosition) === 0) {
                 let objects = [];
-				let entry = (obj, collidableAncestor)=>{
-					let hasCollidable = obj.hasAttribute('collidable');
-					if(obj.object3DMap['mesh']) {
-						if(collidableAncestor || hasCollidable) {
-							objects.push(obj.object3DMap['mesh']);  
-						}
-					}
-					for(let child of obj.getChildEntities()) {
-						entry(child, collidableAncestor || hasCollidable);
-					}
-				};
-				entry(tdModeControlsComp.el, false);
+                let entry = (obj, collidableAncestor) => {
+                    let hasCollidable = obj.hasAttribute('collidable');
+                    if (obj.object3DMap['mesh']) {
+                        if (collidableAncestor || hasCollidable) {
+                            objects.push(obj.object3DMap['mesh']);
+                        }
+                    }
+                    for (let child of obj.getChildEntities()) {
+                        entry(child, collidableAncestor || hasCollidable);
+                    }
+                };
+                entry(tdModeControlsComp.el, false);
 
                 let intersects = getIntersects(onUpPosition, objects);
                 if (intersects.length > 0) {
                     const object = intersects[0].object;
                     let target = object.el;
-					for(; target !== target.sceneEl; target = target.parentEl) {
-						if(target.hasAttribute('collidable'))
-							break;
-					}
-					tdModeControlsComp.transformControls.attach(target.object3D);
-					tdModeControlsComp.el.emit('target-attached', { el: target }, false);
+                    for (; target !== target.sceneEl; target = target.parentEl) {
+                        if (target.hasAttribute('collidable'))
+                            break;
+                    }
+                    tdModeControlsComp.transformControls.attach(target.object3D);
+                    tdModeControlsComp.el.emit('target-attached', { el: target }, false);
                 } else { }
             }
         }
 
-        this.onMouseDown = (event)=> {
+        this.onMouseDown = (event) => {
             event.preventDefault();
             let array = getMousePosition(tdModeControlsComp.el, event.clientX, event.clientY);
             onDownPosition.fromArray(array);
             document.addEventListener('mouseup', tdModeControlsComp.onMouseUp, false);
         };
 
-        this.onMouseUp = (event)=> {
+        this.onMouseUp = (event) => {
             let array = getMousePosition(tdModeControlsComp.el, event.clientX, event.clientY);
             onUpPosition.fromArray(array);
             handleClick();
             document.removeEventListener('mouseup', tdModeControlsComp.onMouseUp, false);
         };
 
-        this.onTouchStart = (event)=> {
+        this.onTouchStart = (event) => {
             let touch = event.changedTouches[0];
             let array = getMousePosition(tdModeControlsComp.el, touch.clientX, touch.clientY);
             onDownPosition.fromArray(array);
             document.addEventListener('touchend', tdModeControlsComp.onTouchEnd, false);
         };
 
-        this.onTouchEnd = (event)=> {
+        this.onTouchEnd = (event) => {
             let touch = event.changedTouches[0];
             let array = getMousePosition(tdModeControlsComp.el, touch.clientX, touch.clientY);
             onUpPosition.fromArray(array);
@@ -486,31 +484,31 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.insertWindow.style.top = '50%';
         $("body").prepend(this.insertWindow);
 
-        let onResize = (e)=> {
+        let onResize = (e) => {
             tdModeControlsComp.insertWindow.style.left = '35%';
             tdModeControlsComp.insertWindow.style.top = '50%';
         };
 
-        let onKeydown = (e)=> {
-            if(e.key === "Enter") {
+        let onKeydown = (e) => {
+            if (e.key === "Enter") {
                 tdModeControlsComp.onInsertOK();
             }
-            else if(e.key === "Escape") {
+            else if (e.key === "Escape") {
                 tdModeControlsComp.onInsertCancel();
             }
         };
-        
-        this.insertWindowHandlerLoader = ()=> {
+
+        this.insertWindowHandlerLoader = () => {
             window.addEventListener('resize', onResize);
             window.addEventListener('keydown', onKeydown);
         };
-        
-        this.insertWindowHandlerUnloader = ()=> {
+
+        this.insertWindowHandlerUnloader = () => {
             window.removeEventListener('resize', onResize);
             window.removeEventListener('keydown', onKeydown);
         };
-        
-        this.onInsertCancel = (e)=> {
+
+        this.onInsertCancel = (e) => {
             document.querySelector('#insert_id').value = "";
             document.querySelector('#insert_primitive').selectedIndex = 0;
             tdModeControlsComp.insertWindow.style.zIndex = '0';
@@ -525,17 +523,17 @@ AFRAME.registerComponent('thd-mode-controls', {
             tdModeControlsComp.leftSideMultiTab.activate = true;
             tdModeControlsComp.insertWindowHandlerUnloader();
         };
-        
-        this.onInsertOK = (e)=> {
+
+        this.onInsertOK = (e) => {
             const newid = document.querySelector('#insert_id').value;
             let primitives = document.querySelector('#insert_primitive');
             let parent;
-            if(primitives.length === 0) {
+            if (primitives.length === 0) {
                 tdModeControlsComp.onInsertCancel();
                 return;
             }
             let isFlag = tdModeControlsComp.leftSideMultiTab.selected === 2;
-            if(isFlag) {
+            if (isFlag) {
                 parent = tdModeControlsComp.FlagView.getSelectedEl();
             }
             else {
@@ -544,43 +542,43 @@ AFRAME.registerComponent('thd-mode-controls', {
             if (!parent) {
                 parent = tdModeControlsComp.el;
             }
-            if(parent.tagName === 'A-FLAG') {
+            if (parent.tagName === 'A-FLAG') {
                 tdModeControlsComp.onInsertCancel();
                 return;
             }
-            if(newid === '') {
+            if (newid === '') {
                 tdModeControlsComp.onInsertCancel();
                 return;
             }
             if (document.querySelector('#' + newid) === null) {
                 var newEl = document.createElement(primitives[primitives.selectedIndex].value);
                 newEl.setAttribute('id', newid);
-                if(!isFlag) {
+                if (!isFlag) {
                     newEl.setAttribute('visible', true);
                     newEl.setAttribute('position', { x: 0, y: 0, z: 0 });
                     newEl.setAttribute('rotation', { x: 0, y: 0, z: 0 });
                     newEl.setAttribute('scale', { x: 1, y: 1, z: 1 });
                 }
                 parent.appendChild(newEl);
-                if(newEl.tagName === 'A-GLTF-MODEL') {
-					newEl.setAttribute('gltf-model', 'undefined'); //default component
-				}
-				if(newEl.hasLoaded) {
+                if (newEl.tagName === 'A-GLTF-MODEL') {
+                    newEl.setAttribute('gltf-model', 'undefined'); //default component
+                }
+                if (newEl.hasLoaded) {
                     interactionManagerComp.writeInteraction(newEl, 'object', 'created');
-					if (!isFlag) {
-						tdModeControlsComp.transformControls.attach(newEl.object3D);
-						tdModeControlsComp.el.emit('target-attached', { el: newEl }, false);
+                    if (!isFlag) {
+                        tdModeControlsComp.transformControls.attach(newEl.object3D);
+                        tdModeControlsComp.el.emit('target-attached', { el: newEl }, false);
                     }
                     else {
                         let num = tdModeControlsComp.FlagView.nodeNumByEl.get(newEl);
                         tdModeControlsComp.FlagView.select(num);
                     }
-					tdModeControlsComp.onInsertCancel();
-					tdModeControlsComp.loadEditor(newEl);
+                    tdModeControlsComp.onInsertCancel();
+                    tdModeControlsComp.loadEditor(newEl);
                 }
                 else {
-					newEl.addEventListener('loaded', ()=>{
-						interactionManagerComp.writeInteraction(newEl, 'object', 'created');
+                    newEl.addEventListener('loaded', () => {
+                        interactionManagerComp.writeInteraction(newEl, 'object', 'created');
                         if (!isFlag) {
                             tdModeControlsComp.transformControls.attach(newEl.object3D);
                             tdModeControlsComp.el.emit('target-attached', { el: newEl }, false);
@@ -591,41 +589,41 @@ AFRAME.registerComponent('thd-mode-controls', {
                         }
                         tdModeControlsComp.onInsertCancel();
                         tdModeControlsComp.loadEditor(newEl);
-					});
+                    });
                 }
-                
+
             } else {
                 console.log('id duplicated!');
-                if(!isFlag) {
+                if (!isFlag) {
                     tdModeControlsComp.transformControls.attach(document.querySelector('#' + newid).object3D);
                     tdModeControlsComp.el.emit('target-attached', { el: document.querySelector('#' + newid) }, false);
                 }
                 tdModeControlsComp.onInsertCancel();
             }
         };
-        
-        this.loadInsertWindow = ()=> {
+
+        this.loadInsertWindow = () => {
             tdModeControlsComp.primitiveList = [];
-            if(tdModeControlsComp.leftSideMultiTab.selected === 1) return;
+            if (tdModeControlsComp.leftSideMultiTab.selected === 1) return;
             tdModeControlsComp.leftSideMultiTab.activate = false;
-			if(tdModeControlsComp.leftSideMultiTab.selected === 0) {
-				for (let prim in AFRAME.primitives.primitives) {
-					if(prim !== 'a-user' && prim !== 'a-flag' && prim !== 'a-trigger' && prim !== 'a-asset-item' && prim !== 'a-assets')
-						tdModeControlsComp.primitiveList.push(prim);
-				}
+            if (tdModeControlsComp.leftSideMultiTab.selected === 0) {
+                for (let prim in AFRAME.primitives.primitives) {
+                    if (prim !== 'a-user' && prim !== 'a-flag' && prim !== 'a-trigger' && prim !== 'a-asset-item' && prim !== 'a-assets')
+                        tdModeControlsComp.primitiveList.push(prim);
+                }
             }
-			else if(tdModeControlsComp.leftSideMultiTab.selected === 2) {
-				tdModeControlsComp.primitiveList.push('a-flag');
-				tdModeControlsComp.primitiveList.push('a-trigger');
-			}
-			
+            else if (tdModeControlsComp.leftSideMultiTab.selected === 2) {
+                tdModeControlsComp.primitiveList.push('a-flag');
+                tdModeControlsComp.primitiveList.push('a-trigger');
+            }
+
             const insertPrimitive = document.querySelector('#insert_primitive');
             insertPrimitive.innerHTML = '';
-			
-			for (let item of tdModeControlsComp.primitiveList) {
-				insertPrimitive.innerHTML += "<option value='" + item + "'>" + item + "</option>";
-			}
-			
+
+            for (let item of tdModeControlsComp.primitiveList) {
+                insertPrimitive.innerHTML += "<option value='" + item + "'>" + item + "</option>";
+            }
+
             tdModeControlsComp.insertWindow.style.zIndex = '10000';
             tdModeControlsComp.insertWindow.style.display = 'block';
 
@@ -637,9 +635,9 @@ AFRAME.registerComponent('thd-mode-controls', {
                 wasdControlsEl.getAttribute('wasd-controls').enabled = false;
             tdModeControlsComp.insertWindowHandlerLoader();
         };
-        
+
         document.querySelector('#insert_cancel').addEventListener('click', this.onInsertCancel);
-        document.querySelector('#insert_ok').addEventListener('click', this.onInsertOK);        
+        document.querySelector('#insert_ok').addEventListener('click', this.onInsertOK);
     },
 
     /**
@@ -663,45 +661,45 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.editWindow.style.top = '8%';
         $("body").prepend(this.editWindow);
 
-        let onResize = (e)=> {
+        let onResize = (e) => {
             tdModeControlsComp.editWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (tdModeControlsComp.editWindow.offsetWidth / 2)) + 'px';
 
         };
-        
-        let onKeydown = (e)=> {
-            if(e.key === "Enter") {
+
+        let onKeydown = (e) => {
+            if (e.key === "Enter") {
                 tdModeControlsComp.onEditOK();
             }
-            else if(e.key === "Escape") {
+            else if (e.key === "Escape") {
                 tdModeControlsComp.onEditCancel();
             }
         };
-        
-        let onComponentChanged = (e)=> {
+
+        let onComponentChanged = (e) => {
             tdModeControlsComp.loadEditor(e.target);
         };
-        
-        this.editWindowHandlerLoader = (el)=> {
+
+        this.editWindowHandlerLoader = (el) => {
             window.addEventListener('resize', onResize);
             window.addEventListener('keydown', onKeydown);
             el.addEventListener('componentinitialized', onComponentChanged);
             el.addEventListener('componentchanged', onComponentChanged);
             el.addEventListener('componentremoved', onComponentChanged);
         };
-        
-        this.editWindowHandlerUnloader = (el)=> {
+
+        this.editWindowHandlerUnloader = (el) => {
             window.removeEventListener('resize', onResize);
             window.removeEventListener('keydown', onKeydown);
             el.removeEventListener('componentinitialized', onComponentChanged);
             el.removeEventListener('componentchanged', onComponentChanged);
             el.removeEventListener('componentremoved', onComponentChanged);
         };
-            
-        this.onEditOK = (e)=> {
+
+        this.onEditOK = (e) => {
             const editPanel = document.querySelector('#edit_panel');
-			const headStr = $(editPanel).children('h4')[0].innerHTML;
-			let elId = headStr.substr(headStr.indexOf('#') + 1);
-            if(elId === '') {
+            const headStr = $(editPanel).children('h4')[0].innerHTML;
+            let elId = headStr.substr(headStr.indexOf('#') + 1);
+            if (elId === '') {
                 tdModeControlsComp.onEditCancel(e);
                 return;
             }
@@ -712,7 +710,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                 const attrNum = $(outerUL).children('li').length;
                 if (el.components !== undefined) {
                     let orgVal, newVal;
-                    if(el.tagName !== 'A-TRIGGER' && el.tagName !== 'A-FLAG') {
+                    if (el.tagName !== 'A-TRIGGER' && el.tagName !== 'A-FLAG') {
                         orgVal = '' + el.getAttribute('visible');
                         newVal = $($(outerUL).children('li')[0]).children('input')[0].value;
                         if (orgVal !== newVal) {
@@ -737,7 +735,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                             taskDetail.push({ componentName: 'scale', prevVal: orgVal });
                             el.setAttribute('scale', newVal);
                         }
-                    
+
                         for (let i = 2; i < attrNum; ++i) {
                             const attrLI = $(outerUL).children('li')[i];
                             let idx = attrLI.innerHTML.indexOf('<ul>');
@@ -755,7 +753,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                                     const propLI = $(attrLI).find('li')[j];
                                     const propName = propLI.innerHTML.split(':')[0].trim();
                                     const propVal = $(propLI).children('input')[0].value;
-                                    if(propVal !== '')
+                                    if (propVal !== '')
                                         attrVal += propName + ':' + propVal + ';';
                                 }
                                 orgVal = tdModeControlsComp._stringifyMultiPropComponent(el.components[attrName].data);
@@ -768,20 +766,20 @@ AFRAME.registerComponent('thd-mode-controls', {
                     }
                     else {
                         let compName;
-                        if(el.tagName === 'A-TRIGGER')
+                        if (el.tagName === 'A-TRIGGER')
                             compName = 'trigger';
                         else
                             compName = 'flag';
                         let orgVal, newVal;
                         orgVal = tdModeControlsComp._stringifyMultiPropComponent(el.components[compName].data);
                         newVal = '';
-                        for(let li of outerUL.children) {
+                        for (let li of outerUL.children) {
                             attrName = li.innerText.split(':')[0].trim();
                             attrVal = $(li).children('input')[0].value;
                             newVal += attrName + ':' + attrVal + ';';
                         }
-                        if(orgVal !== newVal) {
-                            taskDetail.push({componentName: compName, prevVal: orgVal});
+                        if (orgVal !== newVal) {
+                            taskDetail.push({ componentName: compName, prevVal: orgVal });
                             el.setAttribute(compName, newVal);
                         }
                     }
@@ -799,11 +797,11 @@ AFRAME.registerComponent('thd-mode-controls', {
                     }
                 }
                 interactionManagerComp.writeInteraction(el, 'component', 'total', taskDetail);
-            }            
+            }
             tdModeControlsComp.onEditCancel(e);
         };
 
-        this.onEditCancel = (e)=> {
+        this.onEditCancel = (e) => {
             tdModeControlsComp.editWindow.style.zIndex = '0';
             tdModeControlsComp.editWindow.style.display = 'none';
             tdModeControlsComp.el.addEventListener('mousedown', tdModeControlsComp.onMouseDown, false);
@@ -813,20 +811,20 @@ AFRAME.registerComponent('thd-mode-controls', {
             if (wasdControlsEl !== null)
                 wasdControlsEl.getAttribute('wasd-controls').enabled = true;
             document.activeElement.blur();
-            if(tdModeControlsComp.leftSideMultiTab.selected === 0)
+            if (tdModeControlsComp.leftSideMultiTab.selected === 0)
                 tdModeControlsComp.editWindowHandlerUnloader(tdModeControlsComp.HierarchyView.getSelectedEl());
-            else if(tdModeControlsComp.leftSideMultiTab.selected === 2)
+            else if (tdModeControlsComp.leftSideMultiTab.selected === 2)
                 tdModeControlsComp.editWindowHandlerUnloader(tdModeControlsComp.FlagView.getSelectedEl());
             tdModeControlsComp.leftSideMultiTab.activate = true;
         };
 
-        this.loadEditor = (el)=> {
-            if(el.tagName === 'A-USER') return;
+        this.loadEditor = (el) => {
+            if (el.tagName === 'A-USER') return;
             tdModeControlsComp.leftSideMultiTab.activate = false;
             const editPanel = document.querySelector('#edit_panel');
             editPanel.innerHTML = "<h4>&lt;" + el.tagName + "&gt; #" + el.id + "</h4>";
             if (el.components !== undefined) {
-                if(tdModeControlsComp.leftSideMultiTab.selected === 0) {
+                if (tdModeControlsComp.leftSideMultiTab.selected === 0) {
                     el.setAttribute('visible', el.getAttribute('visible'));
                     editPanel.innerHTML += "<ul><li>visible : <input type='text' value='" + el.getAttribute('visible') + "'></li>" +
                         "<li>transform<ul>" +
@@ -867,7 +865,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                     $('.propRemove').css('top', '5px');
                     editPanel.innerHTML += "<b>Add attribute</b><br><input id='setAttrArg1' type='text' style='width:100px;'><input id='setAttrArg2' type='text' style='width:100px;'><input id='setAttrArg3' type='text' style='width:100px;'><button id='addAttr'>Add</button>";
 
-                    document.querySelector('#addAttr').addEventListener('click', (e)=> {
+                    document.querySelector('#addAttr').addEventListener('click', (e) => {
                         let arg1 = document.querySelector('#setAttrArg1').value;
                         let arg2 = document.querySelector('#setAttrArg2').value;
                         let arg3 = document.querySelector('#setAttrArg3').value;
@@ -887,14 +885,14 @@ AFRAME.registerComponent('thd-mode-controls', {
                                         pv = null;
                                     }
                                     el.setAttribute(arg1, arg2, arg3);
-                                    
+
                                 } else {
                                     if (el.mappings[arg1]) {
                                         let tmp = el.mappings[arg1].split('.');
                                         arg3 = arg2;
                                         arg1 = tmp[0];
                                         arg2 = tmp[1];
-                                        if(!el.components[arg1]) {
+                                        if (!el.components[arg1]) {
                                             pv = null;
                                         }
                                         else if (el.components[arg1].data[arg2] !== arg3) {
@@ -909,7 +907,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                                         }
                                     }
                                 }
-                            } 
+                            }
                             else {
                                 if (!el.getAttribute(arg1)) {
                                     pv = null;
@@ -923,12 +921,12 @@ AFRAME.registerComponent('thd-mode-controls', {
 
                     let propRemoveEls = document.querySelectorAll('.propRemove');
                     for (let bt of propRemoveEls) {
-                        bt.addEventListener('click', (e)=> {
+                        bt.addEventListener('click', (e) => {
                             let pv = null;
                             let targetAttribute = e.target.getAttribute('target').split('.');
                             if (targetAttribute.length !== 0) {
                                 if (targetAttribute[0] == 'position' || targetAttribute[0] == 'rotation' || targetAttribute[0] == 'scale') {
-                                    if(AFRAME.utils.coordinates.stringify(el.getAttribute(targetAttribute[0])) === AFRAME.utils.coordinates.stringify(AFRAME.components[targetAttribute[0]].schema.default))
+                                    if (AFRAME.utils.coordinates.stringify(el.getAttribute(targetAttribute[0])) === AFRAME.utils.coordinates.stringify(AFRAME.components[targetAttribute[0]].schema.default))
                                         return;
                                     pv = AFRAME.utils.coordinates.stringify(el.getAttribute(targetAttribute[0]));
                                     el.setAttribute(targetAttribute[0], AFRAME.utils.coordinates.stringify(AFRAME.components[targetAttribute[0]].schema.default));
@@ -942,17 +940,17 @@ AFRAME.registerComponent('thd-mode-controls', {
                                         el.removeAttribute(targetAttribute[0], targetAttribute[1]);
                                     }
                                 }
-                                interactionManagerComp.writeInteraction(el, 'component', 'remove', { componentName: targetAttribute[0], prevVal:  pv});
+                                interactionManagerComp.writeInteraction(el, 'component', 'remove', { componentName: targetAttribute[0], prevVal: pv });
                             }
                             tdModeControlsComp.loadEditor(el);
                         });
                     }
                 }
-                else if(tdModeControlsComp.leftSideMultiTab.selected === 2){
+                else if (tdModeControlsComp.leftSideMultiTab.selected === 2) {
                     const outerUL = document.createElement('ul');
                     editPanel.appendChild(outerUL);
 
-                    for(let componentName in el.components) {
+                    for (let componentName in el.components) {
                         const componentData = el.components[componentName].data;
                         for (let prop in componentData) {
                             if (componentData[prop] === undefined) continue;
@@ -993,7 +991,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             tdModeControlsComp.editWindowHandlerLoader(el);
             tdModeControlsComp.editWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (tdModeControlsComp.editWindow.offsetWidth / 2)) + 'px'; // for dynamic resizing
         };
-        
+
         document.querySelector('#edit_cancel').addEventListener('click', this.onEditCancel);
         document.querySelector('#edit_ok').addEventListener('click', this.onEditOK);
     },
@@ -1006,94 +1004,94 @@ AFRAME.registerComponent('thd-mode-controls', {
      */
     initleftSideWindow: function () {
         let tdModeControlsComp = this;
-		document.querySelector('body').style.margin = 0;
+        document.querySelector('body').style.margin = 0;
         this.leftSideWindow = document.createElement('div');
-		this.el.setAttribute('embedded', true);
+        this.el.setAttribute('embedded', true);
         this.leftSideWindow.id = 'leftSideWindow';
-		this.leftSideWindow.style.position = 'fixed';
-		this.leftSideWindow.height = window.innerHeight + 'px';;
-		this.leftSideWindow.style.width = '25%';
-		this.leftSideWindow.minWidth = '315px';
-		this.leftSideWindow.maxWidth = '450px';
-		
-		this.leftSideMultiTab = new MultiTab(this.leftSideWindow, '#bfd3e2', '#82a5be');
-		this.HierarchyView = new HierarchyView(this);
-		this.leftSideMultiTab.pushTab(this.HierarchyView.view, 'hierarchy');
-		this.PeerView = new PeerView(this);
-		this.leftSideMultiTab.pushTab(this.PeerView.view, 'peer');
+        this.leftSideWindow.style.position = 'fixed';
+        this.leftSideWindow.height = window.innerHeight + 'px';;
+        this.leftSideWindow.style.width = '25%';
+        this.leftSideWindow.minWidth = '315px';
+        this.leftSideWindow.maxWidth = '450px';
+
+        this.leftSideMultiTab = new MultiTab(this.leftSideWindow, '#bfd3e2', '#82a5be');
+        this.HierarchyView = new HierarchyView(this);
+        this.leftSideMultiTab.pushTab(this.HierarchyView.view, 'hierarchy');
+        this.PeerView = new PeerView(this);
+        this.leftSideMultiTab.pushTab(this.PeerView.view, 'peer');
         this.FlagView = new FlagView(this);
         this.leftSideMultiTab.pushTab(this.FlagView.view, 'flags');
 
-        this.el.addEventListener('child-attached', (e)=> {
+        this.el.addEventListener('child-attached', (e) => {
             let child = e.detail.el;
-            if(!child.tagName.startsWith('A-') || child.tagName === 'A-ASSETS' || child.tagName === 'A-ASSET-ITEM') return;
-            if(child.tagName === 'A-USER') {
+            if (!child.tagName.startsWith('A-') || child.tagName === 'A-ASSETS' || child.tagName === 'A-ASSET-ITEM') return;
+            if (child.tagName === 'A-USER') {
                 let liEl = document.createElement('li');
-				liEl.style.listStyleType = 'none';
-				liEl.innerHTML = child.name;
-				$(this.PeerView.view).children('ul')[0].appendChild(liEl);
-				this.PeerView.LiByNode.set(child, liEl);
+                liEl.style.listStyleType = 'none';
+                liEl.innerHTML = child.name;
+                $(this.PeerView.view).children('ul')[0].appendChild(liEl);
+                this.PeerView.LiByNode.set(child, liEl);
             }
-            else if(child.tagName === 'A-TRIGGER' || child.tagName === 'A-FLAG') {
+            else if (child.tagName === 'A-TRIGGER' || child.tagName === 'A-FLAG') {
                 let thisNum = this.FlagView.nodeNumByEl.get(child);
-                if(thisNum !== undefined) return;
+                if (thisNum !== undefined) return;
                 let parent = e.target;
                 let parentNum = this.FlagView.nodeNumByEl.get(parent);
-                if(parentNum === undefined)
+                if (parentNum === undefined)
                     parentNum = -1;
                 let nd = this.FlagView.makeNode(child, parentNum);
                 this.FlagView.spreadOnPath(nd.num);
             }
             else {
                 let thisNum = this.HierarchyView.nodeNumByEl.get(child);
-                if(thisNum !== undefined) return;
+                if (thisNum !== undefined) return;
                 let parent = e.target;
                 let parentNum = this.HierarchyView.nodeNumByEl.get(parent);
-				if(parentNum === undefined)
+                if (parentNum === undefined)
                     parentNum = -1;
                 this.HierarchyView.makeNode(child, parentNum);
             }
-		});
-		this.el.addEventListener('child-detached', (e)=> {
+        });
+        this.el.addEventListener('child-detached', (e) => {
             let child = e.detail.el;
-            if(!child.tagName.startsWith('A-') || child.tagName === 'A-ASSETS' || child.tagName === 'A-ASSET-ITEM') return;
-            if(child.tagName === 'A-USER') {
+            if (!child.tagName.startsWith('A-') || child.tagName === 'A-ASSETS' || child.tagName === 'A-ASSET-ITEM') return;
+            if (child.tagName === 'A-USER') {
                 let liEl = this.PeerView.LiByNode.get(child);
-				if(liEl !== undefined) {
-					liEl.parentElement.removeChild(liEl);
-					this.PeerView.LiByNode.delete(child);
-				}
+                if (liEl !== undefined) {
+                    liEl.parentElement.removeChild(liEl);
+                    this.PeerView.LiByNode.delete(child);
+                }
             }
-            else if(child.tagName === 'A-TRIGGER' || child.tagName === 'A-FLAG') {
+            else if (child.tagName === 'A-TRIGGER' || child.tagName === 'A-FLAG') {
                 let childNum = this.FlagView.nodeNumByEl.get(child);
-                if(childNum !== undefined) {
+                if (childNum !== undefined) {
                     this.FlagView.removeNode(childNum);
-                    if(this.FlagView.selectedNodeNum === childNum)
+                    if (this.FlagView.selectedNodeNum === childNum)
                         this.FlagView.selectedNodeNum = -1;
                 }
             }
             else {
                 let childNum = this.HierarchyView.nodeNumByEl.get(child);
-                if(childNum !== undefined) {
+                if (childNum !== undefined) {
                     this.HierarchyView.removeNode(childNum);
-                    if(this.HierarchyView.selectedNodeNum === childNum)
+                    if (this.HierarchyView.selectedNodeNum === childNum)
                         this.HierarchyView.selectedNodeNum = -1;
                 }
             }
-		});
+        });
 
         $('body').prepend(this.leftSideWindow);
-	
-		this.el.style.height = (window.innerHeight) + 'px';
-		this.el.style.width = 'calc(100% - ' + this.leftSideWindow.offsetWidth + 'px)';
-		this.el.style.left = this.leftSideWindow.offsetWidth + 'px';
-        
-        window.addEventListener('resize', (e)=> {
+
+        this.el.style.height = (window.innerHeight) + 'px';
+        this.el.style.width = 'calc(100% - ' + this.leftSideWindow.offsetWidth + 'px)';
+        this.el.style.left = this.leftSideWindow.offsetWidth + 'px';
+
+        window.addEventListener('resize', (e) => {
             let sceneEl = tdModeControlsComp.el;
             sceneEl.style.height = (window.innerHeight) + 'px';
             sceneEl.style.width = 'calc(100% - ' + tdModeControlsComp.leftSideWindow.offsetWidth + 'px)';
-			sceneEl.style.left = tdModeControlsComp.leftSideWindow.offsetWidth + 'px';
-			this.leftSideWindow.height = window.innerHeight + 'px';
+            sceneEl.style.left = tdModeControlsComp.leftSideWindow.offsetWidth + 'px';
+            this.leftSideWindow.height = window.innerHeight + 'px';
         });
     },
 
@@ -1116,27 +1114,27 @@ AFRAME.registerComponent('thd-mode-controls', {
 
         $("body").prepend(this.helpWindow);
 
-        let onResize = (e)=> {
+        let onResize = (e) => {
             tdModeControlsComp.helpWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (tdModeControlsComp.helpWindow.offsetWidth / 2)) + 'px';
         };
-        
-        let onKeydown = (e)=> {
-            if(e.key === "Escape") {
+
+        let onKeydown = (e) => {
+            if (e.key === "Escape") {
                 tdModeControlsComp.closeHelper();
             }
         };
 
-        this.helpWindowHandlerLoader = ()=> {
+        this.helpWindowHandlerLoader = () => {
             window.addEventListener('resize', onResize);
             window.addEventListener('keydown', onKeydown);
         };
-        
-        this.helpWindowHandlerUnloader = ()=> {
+
+        this.helpWindowHandlerUnloader = () => {
             window.removeEventListener('resize', onResize);
             window.removeEventListener('keydown', onKeydown);
-        };  
+        };
 
-        this.closeHelper = (e)=> {
+        this.closeHelper = (e) => {
             tdModeControlsComp.helpWindow.style.zIndex = '0';
             tdModeControlsComp.helpWindow.style.display = 'none';
             tdModeControlsComp.el.addEventListener('mousedown', tdModeControlsComp.onMouseDown, false);
@@ -1149,7 +1147,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             tdModeControlsComp.helpWindowHandlerUnloader();
         };
 
-        this.loadHelper = ()=> {
+        this.loadHelper = () => {
             tdModeControlsComp.helpWindow.style.zIndex = '10000';
             tdModeControlsComp.helpWindow.style.display = 'block';
             tdModeControlsComp.el.removeEventListener('mousedown', tdModeControlsComp.onMouseDown);
@@ -1161,7 +1159,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             tdModeControlsComp.helpWindowHandlerLoader();
             tdModeControlsComp.helpWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (this.helpWindow.offsetWidth / 2)) + 'px'; // for dynamic resizing
         };
-        
+
         document.querySelector('#help_close').addEventListener('click', this.closeHelper);
     },
 
@@ -1172,124 +1170,124 @@ AFRAME.registerComponent('thd-mode-controls', {
         document.oncontextmenu = function () { return false; } // For prevent right click
         document.onselectstart = function () { return false; } // For prevent drag
         document.ondragstart = function () { return false; } // For prevent block selection
-		
-		let unitSize = Math.floor(this.el.offsetWidth * 0.04);
-		
+
+        let unitSize = Math.floor(this.el.offsetWidth * 0.04);
+
         this.UIDisplay = true;
-        
+
         this.UILayer1 = document.createElement('div');
         $("body").prepend(this.UILayer1);
-		this.UILayer1.id = 'UIGroup1';
+        this.UILayer1.id = 'UIGroup1';
         this.UILayer1.style.position = 'fixed';
         this.UILayer1.style.zIndex = 9999;
         this.UILayer1.style.height = unitSize + 'px';
         this.UILayer1.style.minHeight = '40px';
         this.UILayer1.style.width = (this.UILayer1.offsetHeight * 6) + 'px';
-		this.UILayer1.style.top = '2px';
+        this.UILayer1.style.top = '2px';
         this.UILayer1.style.left = (this.el.offsetLeft + this.el.offsetWidth - this.UILayer1.offsetWidth - 2) + 'px';
-		
-		let copyButtonUI = document.createElement('div');
-		copyButtonUI.id = 'CopyButtonUI';
-		$(copyButtonUI).addClass('buttonUI');
-		copyButtonUI.style.display = 'inline-block';
-		copyButtonUI.style.height = '100%';
-		this.UILayer1.appendChild(copyButtonUI);
-		
-		this.copyButton = document.createElement('img');
-		this.copyButton.setAttribute('src', '/img/icon/content_copy in circle.svg');
-		this.copyButton.style.height = 'calc(100% - 4px)';
+
+        let copyButtonUI = document.createElement('div');
+        copyButtonUI.id = 'CopyButtonUI';
+        $(copyButtonUI).addClass('buttonUI');
+        copyButtonUI.style.display = 'inline-block';
+        copyButtonUI.style.height = '100%';
+        this.UILayer1.appendChild(copyButtonUI);
+
+        this.copyButton = document.createElement('img');
+        this.copyButton.setAttribute('src', '/img/icon/content_copy in circle.svg');
+        this.copyButton.style.height = 'calc(100% - 4px)';
         this.copyButton.style.cursor = 'pointer';
-		this.copyButton.style.padding = '2px';
-		this.copyButton.addEventListener('click', ()=> {
-			navigator.clipboard.write([new ClipboardItem({'text/plain': new Blob([this._stringifyContent()], {type: 'text/plain'})})]).then(()=>{
-				console.log('success copy to clipboard');
-			}, ()=>{
-				console.log('fail copy to clipboard');
-			});
-		});
-		copyButtonUI.appendChild(this.copyButton);
-		
-		let saveButtonUI = document.createElement('div');
-		saveButtonUI.id = 'SaveButtonUI';
-		$(saveButtonUI).addClass('buttonUI');
-		saveButtonUI.style.display = 'inline-block';
-		saveButtonUI.style.height = '100%';
-		this.UILayer1.appendChild(saveButtonUI);
-		
+        this.copyButton.style.padding = '2px';
+        this.copyButton.addEventListener('click', () => {
+            navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([this._stringifyContent()], { type: 'text/plain' }) })]).then(() => {
+                console.log('success copy to clipboard');
+            }, () => {
+                console.log('fail copy to clipboard');
+            });
+        });
+        copyButtonUI.appendChild(this.copyButton);
+
+        let saveButtonUI = document.createElement('div');
+        saveButtonUI.id = 'SaveButtonUI';
+        $(saveButtonUI).addClass('buttonUI');
+        saveButtonUI.style.display = 'inline-block';
+        saveButtonUI.style.height = '100%';
+        this.UILayer1.appendChild(saveButtonUI);
+
         this.saveButton = document.createElement('img');
         this.saveButton.setAttribute('src', '/img/icon/upload in circle.svg');
         this.saveButton.style.height = 'calc(100% - 4px)';
         this.saveButton.style.cursor = 'pointer';
-		this.saveButton.style.padding = '2px';
-		this.saveButton.addEventListener('click', ()=>{
-			this._saveContent();
-		});
+        this.saveButton.style.padding = '2px';
+        this.saveButton.addEventListener('click', () => {
+            this._saveContent();
+        });
         saveButtonUI.appendChild(this.saveButton);
-        
-		let insertButtonUI = document.createElement('div');
-		insertButtonUI.id = 'InsertButtonUI';
-		$(insertButtonUI).addClass('buttonUI');
-		insertButtonUI.style.display = 'inline-block';
-		insertButtonUI.style.height = '100%';
-		this.UILayer1.appendChild(insertButtonUI);
-		
+
+        let insertButtonUI = document.createElement('div');
+        insertButtonUI.id = 'InsertButtonUI';
+        $(insertButtonUI).addClass('buttonUI');
+        insertButtonUI.style.display = 'inline-block';
+        insertButtonUI.style.height = '100%';
+        this.UILayer1.appendChild(insertButtonUI);
+
         this.insertButton = document.createElement('img');
         this.insertButton.setAttribute('src', '/img/icon/plus in circle.svg');
         this.insertButton.style.height = 'calc(100% - 4px)';
         this.insertButton.style.cursor = 'pointer';
         this.insertButton.style.padding = '2px';
-        this.insertButton.addEventListener('click', ()=> {
+        this.insertButton.addEventListener('click', () => {
             this.loadInsertWindow();
         });
         insertButtonUI.appendChild(this.insertButton);
 
-		let enterButtonUI = document.createElement('div');
-		enterButtonUI.id = 'EnterButtonUI';
-		$(enterButtonUI).addClass('buttonUI');
-		enterButtonUI.style.display = 'inline-block';
-		enterButtonUI.style.height = '100%';
-		this.UILayer1.appendChild(enterButtonUI);
-		
+        let enterButtonUI = document.createElement('div');
+        enterButtonUI.id = 'EnterButtonUI';
+        $(enterButtonUI).addClass('buttonUI');
+        enterButtonUI.style.display = 'inline-block';
+        enterButtonUI.style.height = '100%';
+        this.UILayer1.appendChild(enterButtonUI);
+
         this.enterButton = document.createElement('img');
         this.enterButton.setAttribute('src', '/img/icon/check in circle.svg');
         this.enterButton.style.height = 'calc(100% - 4px)';
         this.enterButton.style.cursor = 'pointer';
         this.enterButton.style.padding = '2px';
-        this.enterButton.addEventListener('click', ()=> {
+        this.enterButton.addEventListener('click', () => {
             let selectedEl;
-            if(this.leftSideMultiTab.selected === 0)
+            if (this.leftSideMultiTab.selected === 0)
                 selectedEl = this.HierarchyView.getSelectedEl();
-            else if(this.leftSideMultiTab.selected === 2)
+            else if (this.leftSideMultiTab.selected === 2)
                 selectedEl = this.FlagView.getSelectedEl();
             if (selectedEl !== null)
                 this.loadEditor(selectedEl);
         });
         enterButtonUI.appendChild(this.enterButton);
 
-		let deleteButtonUI = document.createElement('div');
-		deleteButtonUI.id = 'DeleteButtonUI';
-		$(deleteButtonUI).addClass('buttonUI');
-		deleteButtonUI.style.display = 'inline-block';
-		deleteButtonUI.style.height = '100%';
-		this.UILayer1.appendChild(deleteButtonUI);
+        let deleteButtonUI = document.createElement('div');
+        deleteButtonUI.id = 'DeleteButtonUI';
+        $(deleteButtonUI).addClass('buttonUI');
+        deleteButtonUI.style.display = 'inline-block';
+        deleteButtonUI.style.height = '100%';
+        this.UILayer1.appendChild(deleteButtonUI);
 
         this.deleteButton = document.createElement('img');
         this.deleteButton.setAttribute('src', '/img/icon/trashcan in circle.svg');
         this.deleteButton.style.height = 'calc(100% - 4px)';
         this.deleteButton.style.cursor = 'pointer';
         this.deleteButton.style.padding = '2px';
-        this.deleteButton.addEventListener('click', ()=> {
+        this.deleteButton.addEventListener('click', () => {
             this._delete();
         });
         deleteButtonUI.appendChild(this.deleteButton);
 
-		let helpButtonUI = document.createElement('div');
-		helpButtonUI.id = 'HelpButtonUI';
-		$(helpButtonUI).addClass('buttonUI');
-		helpButtonUI.style.display = 'inline-block';
-		helpButtonUI.style.height = '100%';
-		this.UILayer1.appendChild(helpButtonUI);
-		
+        let helpButtonUI = document.createElement('div');
+        helpButtonUI.id = 'HelpButtonUI';
+        $(helpButtonUI).addClass('buttonUI');
+        helpButtonUI.style.display = 'inline-block';
+        helpButtonUI.style.height = '100%';
+        this.UILayer1.appendChild(helpButtonUI);
+
         this.helpButton = document.createElement('img');
         this.helpButton.setAttribute('src', '/img/icon/question in circle.svg');
         this.helpButton.style.height = 'calc(100% - 4px)';
@@ -1302,7 +1300,7 @@ AFRAME.registerComponent('thd-mode-controls', {
 
         this.UILayer2 = document.createElement('div');
         $("body").prepend(this.UILayer2);
-		this.UILayer2.id = 'UIGroup2';
+        this.UILayer2.id = 'UIGroup2';
         this.UILayer2.style.position = 'fixed';
         this.UILayer2.style.zIndex = 9999;
         this.UILayer2.style.height = unitSize + 'px';
@@ -1312,10 +1310,10 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.UILayer2.style.left = (this.el.offsetLeft + (this.el.offsetWidth / 2) * 0.8) + 'px';
 
         let coordinatesButtonUI = document.createElement('div');
-		coordinatesButtonUI.id = 'CoordinatesButtonUI';
-		$(coordinatesButtonUI).addClass('buttonUI');
+        coordinatesButtonUI.id = 'CoordinatesButtonUI';
+        $(coordinatesButtonUI).addClass('buttonUI');
         coordinatesButtonUI.style.display = 'inline-block';
-		coordinatesButtonUI.style.height = '100%';
+        coordinatesButtonUI.style.height = '100%';
         this.UILayer2.appendChild(coordinatesButtonUI);
 
         this.coordinatesButton = document.createElement('img');
@@ -1328,14 +1326,14 @@ AFRAME.registerComponent('thd-mode-controls', {
         });
         coordinatesButtonUI.appendChild(this.coordinatesButton);
 
-		let translateButtonUI = document.createElement('div');
-		translateButtonUI.id = 'TranslateButtonUI';
-		$(translateButtonUI).addClass('buttonUI');
+        let translateButtonUI = document.createElement('div');
+        translateButtonUI.id = 'TranslateButtonUI';
+        $(translateButtonUI).addClass('buttonUI');
         translateButtonUI.style.display = 'inline-block';
-		translateButtonUI.style.height = '100%';
+        translateButtonUI.style.height = '100%';
         this.UILayer2.appendChild(translateButtonUI);
 
-		this.translateButton = document.createElement('img');
+        this.translateButton = document.createElement('img');
         this.translateButton.setAttribute('src', '/img/icon/position in circle_active.svg');
         this.translateButton.style.height = 'calc(100% - 4px)';
         this.translateButton.style.padding = '2px';
@@ -1345,11 +1343,11 @@ AFRAME.registerComponent('thd-mode-controls', {
         });
         translateButtonUI.appendChild(this.translateButton);
 
-		let rotateButtonUI = document.createElement('div');
-		rotateButtonUI.id = 'RotateButtonUI';
-		$(rotateButtonUI).addClass('buttonUI');
+        let rotateButtonUI = document.createElement('div');
+        rotateButtonUI.id = 'RotateButtonUI';
+        $(rotateButtonUI).addClass('buttonUI');
         rotateButtonUI.style.display = 'inline-block';
-		rotateButtonUI.style.height = '100%';
+        rotateButtonUI.style.height = '100%';
         this.UILayer2.appendChild(rotateButtonUI);
 
         this.rotateButton = document.createElement('img');
@@ -1362,13 +1360,13 @@ AFRAME.registerComponent('thd-mode-controls', {
         });
         rotateButtonUI.appendChild(this.rotateButton);
 
-		let scaleButtonUI = document.createElement('div');
-		scaleButtonUI.id = 'ScaleButtonUI';
-		$(scaleButtonUI).addClass('buttonUI');
+        let scaleButtonUI = document.createElement('div');
+        scaleButtonUI.id = 'ScaleButtonUI';
+        $(scaleButtonUI).addClass('buttonUI');
         scaleButtonUI.style.display = 'inline-block';
-		scaleButtonUI.style.height = '100%';
+        scaleButtonUI.style.height = '100%';
         this.UILayer2.appendChild(scaleButtonUI);
-		
+
         this.scaleButton = document.createElement('img');
         this.scaleButton.setAttribute('src', '/img/icon/scale in circle_inactive.svg');
         this.scaleButton.style.height = 'calc(100% - 4px)';
@@ -1381,7 +1379,7 @@ AFRAME.registerComponent('thd-mode-controls', {
 
         this.UILayer3 = document.createElement('div');
         $("body").prepend(this.UILayer3);
-		this.UILayer3.id = 'UIGroup3';
+        this.UILayer3.id = 'UIGroup3';
         this.UILayer3.style.position = 'fixed';
         this.UILayer3.style.zIndex = 9999;
         this.UILayer3.style.height = unitSize + 'px';
@@ -1389,35 +1387,35 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.UILayer3.style.width = (this.UILayer3.offsetHeight * 2) + 'px';
         this.UILayer3.style.bottom = '2px';
         this.UILayer3.style.left = (this.el.offsetLeft + 2) + 'px';
-        
-		let undoButtonUI = document.createElement('div');
-		undoButtonUI.id = 'UndoButtonUI';
-		$(undoButtonUI).addClass('buttonUI');
+
+        let undoButtonUI = document.createElement('div');
+        undoButtonUI.id = 'UndoButtonUI';
+        $(undoButtonUI).addClass('buttonUI');
         undoButtonUI.style.display = 'inline-block';
-		undoButtonUI.style.height = '100%';
+        undoButtonUI.style.height = '100%';
         this.UILayer3.appendChild(undoButtonUI);
-		
+
         this.undoButton = document.createElement('img');
         this.undoButton.setAttribute('src', '/img/icon/left in circle.svg');
         this.undoButton.style.height = 'calc(100% - 4px)';
-		this.undoButton.style.padding = '2px';
+        this.undoButton.style.padding = '2px';
         this.undoButton.style.cursor = 'pointer';
         this.undoButton.addEventListener('click', () => {
             this.el.components['interaction-manager'].undo();
         });
         undoButtonUI.appendChild(this.undoButton);
 
-		let redoButtonUI = document.createElement('div');
-		redoButtonUI.id = 'RedoButtonUI';
-		$(redoButtonUI).addClass('buttonUI');
+        let redoButtonUI = document.createElement('div');
+        redoButtonUI.id = 'RedoButtonUI';
+        $(redoButtonUI).addClass('buttonUI');
         redoButtonUI.style.display = 'inline-block';
-		redoButtonUI.style.height = '100%';
+        redoButtonUI.style.height = '100%';
         this.UILayer3.appendChild(redoButtonUI);
 
         this.redoButton = document.createElement('img');
         this.redoButton.setAttribute('src', '/img/icon/right in circle.svg');
         this.redoButton.style.height = 'calc(100% - 4px)';
-		this.redoButton.style.padding = '2px';
+        this.redoButton.style.padding = '2px';
         this.redoButton.style.cursor = 'pointer';
         this.redoButton.addEventListener('click', () => {
             this.el.components['interaction-manager'].redo();
@@ -1425,32 +1423,32 @@ AFRAME.registerComponent('thd-mode-controls', {
         redoButtonUI.appendChild(this.redoButton);
 
         window.addEventListener('resize', (e) => {
-			if(!this.el.is('ar-mode') && !this.el.is('vr-mode'))
-				this.toggleUIDisplay(window.innerHeight <= window.innerWidth);
-			
-			let unitSize = Math.floor(this.el.offsetWidth * 0.04);
-			this.UILayer1.style.height = unitSize + 'px';
+            if (!this.el.is('ar-mode') && !this.el.is('vr-mode'))
+                this.toggleUIDisplay(window.innerHeight <= window.innerWidth);
+
+            let unitSize = Math.floor(this.el.offsetWidth * 0.04);
+            this.UILayer1.style.height = unitSize + 'px';
             this.UILayer1.style.width = (this.UILayer1.offsetHeight * 6) + 'px';
-			this.UILayer2.style.height = unitSize + 'px';
+            this.UILayer2.style.height = unitSize + 'px';
             this.UILayer2.style.width = (this.UILayer2.offsetHeight * 4) + 'px';
-			this.UILayer3.style.height = unitSize + 'px';
+            this.UILayer3.style.height = unitSize + 'px';
             this.UILayer3.style.width = (this.UILayer3.offsetHeight * 2) + 'px';
 
             this.UILayer1.style.left = (this.el.offsetLeft + this.el.offsetWidth - this.UILayer1.offsetWidth - 2) + 'px';
             this.UILayer2.style.left = (this.el.offsetLeft + (this.el.offsetWidth / 2) * 0.8) + 'px';
             this.UILayer3.style.left = (this.el.offsetLeft + 2) + 'px';
         });
-		this.toggleUIDisplay(window.innerHeight <= window.innerWidth);
+        this.toggleUIDisplay(window.innerHeight <= window.innerWidth);
     },
 
     /**
      * Controls the visibility of the entire UI layer.
      * If there is no parameter, it is toggled, if the parameter is true, it is on, if it is false, it is off.
      */
-    toggleUIDisplay: function(display) {
-        if(typeof display === 'boolean')
+    toggleUIDisplay: function (display) {
+        if (typeof display === 'boolean')
             this.UIDisplay = !display;
-        if(this.UIDisplay) {
+        if (this.UIDisplay) {
             this.UILayer1.style.display = 'none';
             this.UILayer2.style.display = 'none';
             this.UILayer3.style.display = 'none';
@@ -1470,20 +1468,20 @@ AFRAME.registerComponent('thd-mode-controls', {
             this.UILayer3.style.display = 'block';
             this.leftSideWindow.style.display = 'block';
             this.leftSideWindow.style.height = window.innerHeight + 'px';
-			this.el.style.height = (window.innerHeight) + 'px';
-			this.el.style.width = 'calc(100% - ' + this.leftSideWindow.offsetWidth + 'px)';
-			this.el.style.left = this.leftSideWindow.offsetWidth + 'px';
-			
+            this.el.style.height = (window.innerHeight) + 'px';
+            this.el.style.width = 'calc(100% - ' + this.leftSideWindow.offsetWidth + 'px)';
+            this.el.style.left = this.leftSideWindow.offsetWidth + 'px';
+
             this.UIDisplay = true;
         }
         this.el.camera.aspect = this.el.canvas.offsetWidth / this.el.canvas.offsetHeight;
         this.el.camera.updateProjectionMatrix();
     },
-    
+
     remove: function () {
 
     },
-	
+
     /**
      * Change the parent object of an object.
      * The targetEl is the element of the object whose parent is to be changed,
@@ -1491,149 +1489,149 @@ AFRAME.registerComponent('thd-mode-controls', {
      * The targetEl's local transform matrix is modified appropriately so that the transform in world coordinates is maintained.
      * The cb is a callback function that is called when the hierarchy change is completed.
      */
-	hierarchyChange: function (targetEl, parentEl, cb) {
-		if(!targetEl || !parentEl) return;
-		let targetObject = targetEl.object3D;
-		let newMat = (new THREE.Matrix4()).copy(parentEl.object3D.matrixWorld).invert();
-		newMat.multiply(targetObject.matrixWorld);
-		
-		if (this.HierarchyView.selectedNodeNum !== -1) {
-			let selectedEl = this.HierarchyView.nodes[this.HierarchyView.selectedNodeNum].el;
-			for (let el = selectedEl; el !== el.sceneEl; el = el.parentEl) {
-				if (el === targetEl) {
-					this.transformControls.detach();
-					this.HierarchyView.nodes[this.HierarchyView.selectedNodeNum].style.background = 'transparent';
-					this.HierarchyView.selectedNodeNum = -1;
-				}
-			}
-		}
-		
-		targetEl.parentEl.removeChild(targetEl);
-		parentEl.appendChild(targetEl);
-		
-		let childAttachedHandler = (e)=>{
-			if(e.detail.el === targetEl) {
-				targetObject.el = targetEl;
-                
-                for(let componentName of Object.keys(targetEl.components)) {
+    hierarchyChange: function (targetEl, parentEl, cb) {
+        if (!targetEl || !parentEl) return;
+        let targetObject = targetEl.object3D;
+        let newMat = (new THREE.Matrix4()).copy(parentEl.object3D.matrixWorld).invert();
+        newMat.multiply(targetObject.matrixWorld);
+
+        if (this.HierarchyView.selectedNodeNum !== -1) {
+            let selectedEl = this.HierarchyView.nodes[this.HierarchyView.selectedNodeNum].el;
+            for (let el = selectedEl; el !== el.sceneEl; el = el.parentEl) {
+                if (el === targetEl) {
+                    this.transformControls.detach();
+                    this.HierarchyView.nodes[this.HierarchyView.selectedNodeNum].style.background = 'transparent';
+                    this.HierarchyView.selectedNodeNum = -1;
+                }
+            }
+        }
+
+        targetEl.parentEl.removeChild(targetEl);
+        parentEl.appendChild(targetEl);
+
+        let childAttachedHandler = (e) => {
+            if (e.detail.el === targetEl) {
+                targetObject.el = targetEl;
+
+                for (let componentName of Object.keys(targetEl.components)) {
                     let comp = targetEl.components[componentName];
-                    if(componentName === 'geometry' || componentName === 'obj-model' || componentName === 'gltf-model' || componentName === 'point-cloud') {
+                    if (componentName === 'geometry' || componentName === 'obj-model' || componentName === 'gltf-model' || componentName === 'point-cloud') {
                         comp.update(comp.oldData);
                     }
-                    else if(componentName === 'material') {
+                    else if (componentName === 'material') {
                         comp.update(comp.shader);
                     }
                 }
-				
-				newMat.decompose(targetObject.position, targetObject.quaternion, targetObject.scale);
-				targetObject.updateMatrix();
-				targetEl.setAttribute('position', AFRAME.utils.coordinates.stringify(targetEl.getAttribute('position')));
-				targetEl.setAttribute('rotation', AFRAME.utils.coordinates.stringify(targetEl.getAttribute('rotation')));
-				targetEl.setAttribute('scale', AFRAME.utils.coordinates.stringify(targetEl.getAttribute('scale')));
-				
-				parentEl.removeEventListener('child-attached', childAttachedHandler);
-				if(cb !== undefined)
-					cb();
-			}
-		};
-		parentEl.addEventListener('child-attached', childAttachedHandler);
-	}
+
+                newMat.decompose(targetObject.position, targetObject.quaternion, targetObject.scale);
+                targetObject.updateMatrix();
+                targetEl.setAttribute('position', AFRAME.utils.coordinates.stringify(targetEl.getAttribute('position')));
+                targetEl.setAttribute('rotation', AFRAME.utils.coordinates.stringify(targetEl.getAttribute('rotation')));
+                targetEl.setAttribute('scale', AFRAME.utils.coordinates.stringify(targetEl.getAttribute('scale')));
+
+                parentEl.removeEventListener('child-attached', childAttachedHandler);
+                if (cb !== undefined)
+                    cb();
+            }
+        };
+        parentEl.addEventListener('child-attached', childAttachedHandler);
+    }
 });
 
 class MultiTab {
-	constructor(windowEl, activeBG, deactiveBG) {
+    constructor(windowEl, activeBG, deactiveBG) {
         this.window = windowEl;
         this.activate = true;
-		this.tabCnt = 0;
-		this.selected = -1;
-		this.activeBG = activeBG;
-		this.deactiveBG = deactiveBG;
-		let header = document.createElement('div');
-		this.window.appendChild(header);
-		header.style.display = 'block';
-		header.style.height = '34px';
-		
-		let viewContainer = document.createElement('div');
-		this.window.appendChild(viewContainer);
-		viewContainer.style.display = 'block';
-		viewContainer.style.height = 'calc(100% - 34px)';
-	}
-	pushTab(viewEl, viewName) {
-		let header = this.window.children[0];
-		let viewContainer = this.window.children[1];
-		
-		viewContainer.appendChild(viewEl);
-		viewEl.style.backgroundColor = this.activeBG;
-		viewEl.style.display = 'none';
-		viewEl.style.height = '100%';
-		
-		let head = document.createElement('div');
-		header.appendChild(head);
-		head.idx = this.tabCnt++;
-		head.innerHTML = '<b>' + viewName + '</b>';
-		head.style.textAlign = 'center';
-		head.style.height = '100%';
-		head.style.display = 'inline-block';
-		head.style.backgroundColor = this.deactiveBG;
-		for(let i = 0; i < this.tabCnt; ++i) {
-			header.children[i].style.width = (100 / this.tabCnt) + '%';
-		}
-		head.addEventListener('click', (e)=>{
-			this.activeTab(head.idx);
-		});
-		if(this.tabCnt === 1)
-			this.activeTab(0);
-	}
-	popTab() {
-		if(this.tabCnt === 0) return;
-		let header = this.window.children[0];
-		let viewContainer = this.window.children[1];
-		header.removeChild(header.children[this.tabCnt]);
-		viewContainer.removeChild(viewContainer.children[this.tabCnt]);
-		if(this.tabCnt === this.selected) {
-			this.activeTab(this.tabCnt - 1);
-		}
-	}
-	activeTab(idx) {
-        if(!this.activate) return;
-		let header = this.window.children[0];
-		let viewContainer = this.window.children[1];
-		
-		if(this.tabCnt <= idx || idx < 0) {
-			this.selected = -1;
-			return;
-		}
-		if(this.selected >= 0 && this.selected < this.tabCnt) {
-			viewContainer.children[this.selected].style.display = 'none';
-			header.children[this.selected].style.backgroundColor = this.deactiveBG;
-		}
-		viewContainer.children[idx].style.display = 'block';
-		header.children[idx].style.backgroundColor = this.activeBG;
-		this.selected = idx;
-	}
+        this.tabCnt = 0;
+        this.selected = -1;
+        this.activeBG = activeBG;
+        this.deactiveBG = deactiveBG;
+        let header = document.createElement('div');
+        this.window.appendChild(header);
+        header.style.display = 'block';
+        header.style.height = '34px';
+
+        let viewContainer = document.createElement('div');
+        this.window.appendChild(viewContainer);
+        viewContainer.style.display = 'block';
+        viewContainer.style.height = 'calc(100% - 34px)';
+    }
+    pushTab(viewEl, viewName) {
+        let header = this.window.children[0];
+        let viewContainer = this.window.children[1];
+
+        viewContainer.appendChild(viewEl);
+        viewEl.style.backgroundColor = this.activeBG;
+        viewEl.style.display = 'none';
+        viewEl.style.height = '100%';
+
+        let head = document.createElement('div');
+        header.appendChild(head);
+        head.idx = this.tabCnt++;
+        head.innerHTML = '<b>' + viewName + '</b>';
+        head.style.textAlign = 'center';
+        head.style.height = '100%';
+        head.style.display = 'inline-block';
+        head.style.backgroundColor = this.deactiveBG;
+        for (let i = 0; i < this.tabCnt; ++i) {
+            header.children[i].style.width = (100 / this.tabCnt) + '%';
+        }
+        head.addEventListener('click', (e) => {
+            this.activeTab(head.idx);
+        });
+        if (this.tabCnt === 1)
+            this.activeTab(0);
+    }
+    popTab() {
+        if (this.tabCnt === 0) return;
+        let header = this.window.children[0];
+        let viewContainer = this.window.children[1];
+        header.removeChild(header.children[this.tabCnt]);
+        viewContainer.removeChild(viewContainer.children[this.tabCnt]);
+        if (this.tabCnt === this.selected) {
+            this.activeTab(this.tabCnt - 1);
+        }
+    }
+    activeTab(idx) {
+        if (!this.activate) return;
+        let header = this.window.children[0];
+        let viewContainer = this.window.children[1];
+
+        if (this.tabCnt <= idx || idx < 0) {
+            this.selected = -1;
+            return;
+        }
+        if (this.selected >= 0 && this.selected < this.tabCnt) {
+            viewContainer.children[this.selected].style.display = 'none';
+            header.children[this.selected].style.backgroundColor = this.deactiveBG;
+        }
+        viewContainer.children[idx].style.display = 'block';
+        header.children[idx].style.backgroundColor = this.activeBG;
+        this.selected = idx;
+    }
 };
 
 class TreeView {
     constructor(tdModeControlsComp) {
         this.tdModeControlsComp = tdModeControlsComp;
-		this.selectedNodeNum = -1;
-		this.mousedownNodeNum = -1;
-		this.view = document.createElement('div');
-		this.view.style.overflow = 'auto';
-		this.nextNodeNum = 0; //auto-increment
-		this.parents = [];
-		this.nodes = [];
-		this.childrens = []; //adjacency list
-		this.nodeNumByEl = new Map();//{el, nodeNum}
+        this.selectedNodeNum = -1;
+        this.mousedownNodeNum = -1;
+        this.view = document.createElement('div');
+        this.view.style.overflow = 'auto';
+        this.nextNodeNum = 0; //auto-increment
+        this.parents = [];
+        this.nodes = [];
+        this.childrens = []; //adjacency list
+        this.nodeNumByEl = new Map();//{el, nodeNum}
         this.init();
     }
     init() {
     }
     toggleFoldStatus(num) {
-		if(this.childrens[num].empty()) return;
-		let node = this.nodes[num];
-		let ulEl = $(node).children('ul')[0];
-		 if (ulEl.style.display === 'block') {
+        if (this.childrens[num].empty()) return;
+        let node = this.nodes[num];
+        let ulEl = $(node).children('ul')[0];
+        if (ulEl.style.display === 'block') {
             ulEl.style.display = 'none';
             $(node).children('img')[0].src = '/img/noun_Square plus_620378_000000.png';
         }
@@ -1641,210 +1639,210 @@ class TreeView {
             ulEl.style.display = 'block';
             $(node).children('img')[0].src = '/img/noun_Minus Square_768834.png';
         }
-	}
-	spread(num) {
-		if(this.childrens[num].empty()) return;
-		let node = this.nodes[num];
+    }
+    spread(num) {
+        if (this.childrens[num].empty()) return;
+        let node = this.nodes[num];
         $(node).children('ul')[0].style.display = 'block';
         $(node).children('img')[0].src = '/img/noun_Minus Square_768834.png';
     }
     spreadOnPath(num) {
-        for(let i = num; i !== -1; i = this.parents[i]) {
+        for (let i = num; i !== -1; i = this.parents[i]) {
             this.spread(i);
         }
     }
     fold(num) {
-        if(this.childrens[num].empty()) return;
-		let node = this.nodes[num];
+        if (this.childrens[num].empty()) return;
+        let node = this.nodes[num];
         $(node).children('ul')[0].style.display = 'none';
         $(node).children('img')[0].src = '/img/noun_Square plus_620378_000000.png';
     }
     makeNode(el, parentNum) {
         let node = document.createElement('div');
-		node.el = el;
-		node.num = this.nextNodeNum++;
-		node.innerHTML = "<img src='/img/Transparent.gif'></img> &lt;" + el.tagName + "&gt; " + "#" + el.id;
-		const ulEl = document.createElement('ul');
-		node.appendChild(ulEl);
-		
-		let imgTag = $(node).children('img')[0];
-		imgTag.style.height = '20px';
-		imgTag.style.width = '20px';
-		node.style.webkitTouchCallout = 'none'; // ios safari
-		node.style.webkitUserSelect = 'none'; // chrome, safari, opera
+        node.el = el;
+        node.num = this.nextNodeNum++;
+        node.innerHTML = "<img src='/img/Transparent.gif'></img> &lt;" + el.tagName + "&gt; " + "#" + el.id;
+        const ulEl = document.createElement('ul');
+        node.appendChild(ulEl);
+
+        let imgTag = $(node).children('img')[0];
+        imgTag.style.height = '20px';
+        imgTag.style.width = '20px';
+        node.style.webkitTouchCallout = 'none'; // ios safari
+        node.style.webkitUserSelect = 'none'; // chrome, safari, opera
         node.style.khtmlUserSelect = 'none'; // Konqueror
         node.style.mozUserSelect = 'none'; // firefox
         node.style.msUserSelect = 'none'; // ie, edge
         node.style.userSelect = 'none'; // ... non prefixed version
         ulEl.style.margin = '0px';
         ulEl.style.display = 'none';
-        
-        imgTag.addEventListener('click', (e)=>{
-			e.stopPropagation();
-			this.toggleFoldStatus(node.num);
+
+        imgTag.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleFoldStatus(node.num);
         });
-        
+
         this.parents.push(parentNum);
-		this.nodes.push(node);
-		this.childrens.push(new list());
-		this.nodeNumByEl.set(el, node.num);
-		
-		if(parentNum !== -1) {
-			this.childrens[parentNum].pushBack(node.num);
-			let parentNode = this.nodes[parentNum];
-			let liEl = document.createElement('li');
-			liEl.appendChild(node);
-			liEl.style.listStyleType = 'none';
-			$(parentNode).children('img')[0].src = '/img/noun_Square plus_620378_000000.png';
-			$(parentNode).children('ul')[0].appendChild(liEl);
-		}
-		else {
-			this.view.appendChild(node);
+        this.nodes.push(node);
+        this.childrens.push(new list());
+        this.nodeNumByEl.set(el, node.num);
+
+        if (parentNum !== -1) {
+            this.childrens[parentNum].pushBack(node.num);
+            let parentNode = this.nodes[parentNum];
+            let liEl = document.createElement('li');
+            liEl.appendChild(node);
+            liEl.style.listStyleType = 'none';
+            $(parentNode).children('img')[0].src = '/img/noun_Square plus_620378_000000.png';
+            $(parentNode).children('ul')[0].appendChild(liEl);
         }
-        
-        for(let child of el.children) {
+        else {
+            this.view.appendChild(node);
+        }
+
+        for (let child of el.children) {
             this.makeNode(child, node.num);
         }
 
-		return node;
+        return node;
     }
     removeNode(nodeNum) { //bottomUp recursive
-        for(let idx of this.childrens[nodeNum]) {
-			this.removeNode(idx);
+        for (let idx of this.childrens[nodeNum]) {
+            this.removeNode(idx);
         }
         let parentNum = this.parents[nodeNum];
         let node = this.nodes[nodeNum];
         node.parentElement.removeChild(node);
         this.nodeNumByEl.delete(node.el);
-        
-		this.childrens[nodeNum] = undefined;
-		this.parents[nodeNum] = undefined;
+
+        this.childrens[nodeNum] = undefined;
+        this.parents[nodeNum] = undefined;
         this.nodes[nodeNum] = undefined;
-        
-		if(parentNum !== -1) {
-			this.childrens[parentNum].removeNode(this.childrens[parentNum].getNode(nodeNum));
-			if(this.childrens[parentNum].empty()) {
-				$(this.nodes[parentNum]).children('img')[0].src = '/img/Transparent.gif';
-			}
-		}
-	}
-	getSelectedEl() {
-		if(this.selectedNodeNum === -1) return null;
-		return this.nodes[this.selectedNodeNum].el;
-	}
+
+        if (parentNum !== -1) {
+            this.childrens[parentNum].removeNode(this.childrens[parentNum].getNode(nodeNum));
+            if (this.childrens[parentNum].empty()) {
+                $(this.nodes[parentNum]).children('img')[0].src = '/img/Transparent.gif';
+            }
+        }
+    }
+    getSelectedEl() {
+        if (this.selectedNodeNum === -1) return null;
+        return this.nodes[this.selectedNodeNum].el;
+    }
 };
 
 /**
  * This is the scene hierarchy view to be shown in leftSideWindow.
  */
 class HierarchyView extends TreeView {
-	constructor(tdModeControlsComp) {
-		super(tdModeControlsComp);
+    constructor(tdModeControlsComp) {
+        super(tdModeControlsComp);
     }
     init() {
         this.makeNode(this.tdModeControlsComp.el, -1);
 
-		this.tdModeControlsComp.el.addEventListener('target-attached', (e)=>{
-			const el = e.detail.el;
+        this.tdModeControlsComp.el.addEventListener('target-attached', (e) => {
+            const el = e.detail.el;
             if (this.selectedNodeNum !== -1) {
-				this.nodes[this.selectedNodeNum].style.background = 'transparent';
-            }
-			let nodeNum = this.nodeNumByEl.get(el);
-			this.nodes[nodeNum].style.background = '#ff3030';
-			this.selectedNodeNum = nodeNum;
-            this.spreadOnPath(nodeNum);
-		});
-		this.tdModeControlsComp.el.addEventListener('target-detached', (e)=>{
-			 if (this.selectedNodeNum !== -1) {
                 this.nodes[this.selectedNodeNum].style.background = 'transparent';
-				this.selectedNodeNum = -1;
             }
-		});
+            let nodeNum = this.nodeNumByEl.get(el);
+            this.nodes[nodeNum].style.background = '#ff3030';
+            this.selectedNodeNum = nodeNum;
+            this.spreadOnPath(nodeNum);
+        });
+        this.tdModeControlsComp.el.addEventListener('target-detached', (e) => {
+            if (this.selectedNodeNum !== -1) {
+                this.nodes[this.selectedNodeNum].style.background = 'transparent';
+                this.selectedNodeNum = -1;
+            }
+        });
     }
-	makeNode(el, parentNum) { //topdown recursive
-        if(!el.tagName.startsWith('A-') || el.tagName === 'A-USER' || el.tagName === 'A-TRIGGER' || el.tagName === 'A-FLAG')
+    makeNode(el, parentNum) { //topdown recursive
+        if (!el.tagName.startsWith('A-') || el.tagName === 'A-USER' || el.tagName === 'A-TRIGGER' || el.tagName === 'A-FLAG')
             return;
 
-		let node = document.createElement('div');
-		node.el = el;
-		node.num = this.nextNodeNum++;
-		node.innerHTML = "<img src='/img/Transparent.gif'></img> &lt;" + el.tagName + "&gt; " + "#" + el.id;
-		const ulEl = document.createElement('ul');
-		node.appendChild(ulEl);
-		
-		let imgTag = $(node).children('img')[0];
-		imgTag.style.height = '20px';
-		imgTag.style.width = '20px';
-		node.style.webkitTouchCallout = 'none'; // ios safari
-		node.style.webkitUserSelect = 'none'; // chrome, safari, opera
+        let node = document.createElement('div');
+        node.el = el;
+        node.num = this.nextNodeNum++;
+        node.innerHTML = "<img src='/img/Transparent.gif'></img> &lt;" + el.tagName + "&gt; " + "#" + el.id;
+        const ulEl = document.createElement('ul');
+        node.appendChild(ulEl);
+
+        let imgTag = $(node).children('img')[0];
+        imgTag.style.height = '20px';
+        imgTag.style.width = '20px';
+        node.style.webkitTouchCallout = 'none'; // ios safari
+        node.style.webkitUserSelect = 'none'; // chrome, safari, opera
         node.style.khtmlUserSelect = 'none'; // Konqueror
         node.style.mozUserSelect = 'none'; // firefox
         node.style.msUserSelect = 'none'; // ie, edge
         node.style.userSelect = 'none'; // ... non prefixed version
         ulEl.style.margin = '0px';
-		ulEl.style.display = 'none';
-		
-		imgTag.addEventListener('click', (e)=>{
-			e.stopPropagation();
-			this.toggleFoldStatus(node.num);
-		});
-		
-		node.addEventListener('mousedown', (e)=>{
-			e.stopPropagation();
-			this.mousedownNodeNum = node.num;
-		});
-		
-		node.addEventListener('mouseup', (e)=>{
-			e.stopPropagation();
-			if(this.mousedownNodeNum === node.num) {
-				if(this.selectedNodeNum !== node.num) {
-					if(this.selectedNodeNum !== -1) {
-						this.nodes[this.selectedNodeNum].style.background = 'transparent';
-						this.tdModeControlsComp.transformControls.detach();
-					}
-					this.selectedNodeNum = node.num;
-					this.nodes[node.num].style.background = '#ff3030';
-					if (node.el.object3D !== undefined && node.el.object3D.type !== 'Scene')
-						this.tdModeControlsComp.transformControls.attach(node.el.object3D);
-				}
-			}
-			else if(this.mousedownNodeNum !== -1) {
-				let targetEl = this.nodes[this.mousedownNodeNum].el;
+        ulEl.style.display = 'none';
+
+        imgTag.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleFoldStatus(node.num);
+        });
+
+        node.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            this.mousedownNodeNum = node.num;
+        });
+
+        node.addEventListener('mouseup', (e) => {
+            e.stopPropagation();
+            if (this.mousedownNodeNum === node.num) {
+                if (this.selectedNodeNum !== node.num) {
+                    if (this.selectedNodeNum !== -1) {
+                        this.nodes[this.selectedNodeNum].style.background = 'transparent';
+                        this.tdModeControlsComp.transformControls.detach();
+                    }
+                    this.selectedNodeNum = node.num;
+                    this.nodes[node.num].style.background = '#ff3030';
+                    if (node.el.object3D !== undefined && node.el.object3D.type !== 'Scene')
+                        this.tdModeControlsComp.transformControls.attach(node.el.object3D);
+                }
+            }
+            else if (this.mousedownNodeNum !== -1) {
+                let targetEl = this.nodes[this.mousedownNodeNum].el;
                 let newParentEl = node.el;
-				let prevParent = targetEl.parentEl;
-                this.tdModeControlsComp.hierarchyChange(targetEl, newParentEl, ()=>{
-					let interactionManagerComp = this.tdModeControlsComp.el.components['interaction-manager'];
-					if(interactionManagerComp)
-						interactionManagerComp.writeInteraction(targetEl, 'hierarchy', prevParent);
-				});
-			}
-			this.mousedownNodeNum = -1;
-		});
-		
-		this.parents.push(parentNum);
-		this.nodes.push(node);
-		this.childrens.push(new list());
-		this.nodeNumByEl.set(el, node.num);
-		
-		if(parentNum !== -1) {
-			this.childrens[parentNum].pushBack(node.num);
-			let parentNode = this.nodes[parentNum];
-			let liEl = document.createElement('li');
-			liEl.appendChild(node);
-			liEl.style.listStyleType = 'none';
-			$(parentNode).children('img')[0].src = '/img/noun_Square plus_620378_000000.png';
-			$(parentNode).children('ul')[0].appendChild(liEl);
-		}
-		else {
-			this.view.appendChild(node);
+                let prevParent = targetEl.parentEl;
+                this.tdModeControlsComp.hierarchyChange(targetEl, newParentEl, () => {
+                    let interactionManagerComp = this.tdModeControlsComp.el.components['interaction-manager'];
+                    if (interactionManagerComp)
+                        interactionManagerComp.writeInteraction(targetEl, 'hierarchy', prevParent);
+                });
+            }
+            this.mousedownNodeNum = -1;
+        });
+
+        this.parents.push(parentNum);
+        this.nodes.push(node);
+        this.childrens.push(new list());
+        this.nodeNumByEl.set(el, node.num);
+
+        if (parentNum !== -1) {
+            this.childrens[parentNum].pushBack(node.num);
+            let parentNode = this.nodes[parentNum];
+            let liEl = document.createElement('li');
+            liEl.appendChild(node);
+            liEl.style.listStyleType = 'none';
+            $(parentNode).children('img')[0].src = '/img/noun_Square plus_620378_000000.png';
+            $(parentNode).children('ul')[0].appendChild(liEl);
         }
-        
-        for(let child of el.children) {
+        else {
+            this.view.appendChild(node);
+        }
+
+        for (let child of el.children) {
             this.makeNode(child, node.num);
         }
 
-		return node;
-	}
+        return node;
+    }
 };
 
 /**
@@ -1852,60 +1850,60 @@ class HierarchyView extends TreeView {
  */
 class FlagView extends TreeView {
     constructor(tdModeControlsComp) {
-		super(tdModeControlsComp);
+        super(tdModeControlsComp);
     }
     init() {
-        for(let child of this.tdModeControlsComp.el.children) {
-            if(child.tagName === 'A-TRIGGER' || child.tagName === 'A-FLAG') {
+        for (let child of this.tdModeControlsComp.el.children) {
+            if (child.tagName === 'A-TRIGGER' || child.tagName === 'A-FLAG') {
                 this.makeNode(child, -1);
             }
         }
     }
     makeNode(el, parentNum) {
-        if(!(el.tagName === 'A-TRIGGER') && !(el.tagName === 'A-FLAG'))
+        if (!(el.tagName === 'A-TRIGGER') && !(el.tagName === 'A-FLAG'))
             return;
-		let compName = el.tagName.toLowerCase().substring(2);
+        let compName = el.tagName.toLowerCase().substring(2);
         let node = document.createElement('div');
-		node.el = el;
-		node.num = this.nextNodeNum++;
-		node.innerHTML = "<img src='/img/Transparent.gif'></img> &lt;" + el.tagName + "&gt; " + "#" + el.id + "<b></b><img src='/img/flag.png' align='right' style='height:23px;display:none;'></img>";
-		const ulEl = document.createElement('ul');
-		node.appendChild(ulEl);
-		
-		let imgTag = $(node).children('img')[0];
-		imgTag.style.height = '20px';
-		imgTag.style.width = '20px';
-		node.style.webkitTouchCallout = 'none'; // ios safari
-		node.style.webkitUserSelect = 'none'; // chrome, safari, opera
+        node.el = el;
+        node.num = this.nextNodeNum++;
+        node.innerHTML = "<img src='/img/Transparent.gif'></img> &lt;" + el.tagName + "&gt; " + "#" + el.id + "<b></b><img src='/img/flag.png' align='right' style='height:23px;display:none;'></img>";
+        const ulEl = document.createElement('ul');
+        node.appendChild(ulEl);
+
+        let imgTag = $(node).children('img')[0];
+        imgTag.style.height = '20px';
+        imgTag.style.width = '20px';
+        node.style.webkitTouchCallout = 'none'; // ios safari
+        node.style.webkitUserSelect = 'none'; // chrome, safari, opera
         node.style.khtmlUserSelect = 'none'; // Konqueror
         node.style.mozUserSelect = 'none'; // firefox
         node.style.msUserSelect = 'none'; // ie, edge
         node.style.userSelect = 'none'; // ... non prefixed version
         ulEl.style.margin = '0px';
         ulEl.style.display = 'none';
-		
-        if(el.hasLoaded) {
+
+        if (el.hasLoaded) {
             let comp = el.components['flag'] || el.components['trigger'];
-			comp.viewNode = node;
+            comp.viewNode = node;
             comp.updateView();
-		}
-		else {
-			el.addEventListener('loaded', ()=>{
-				let comp = el.components['flag'] || el.components['trigger'];
+        }
+        else {
+            el.addEventListener('loaded', () => {
+                let comp = el.components['flag'] || el.components['trigger'];
                 comp.viewNode = node;
                 comp.updateView();
-			});
-		}
+            });
+        }
 
-        imgTag.addEventListener('click', (e)=>{
-			e.stopPropagation();
-			this.toggleFoldStatus(node.num);
-        });
-        
-        node.addEventListener('click', (e)=>{
+        imgTag.addEventListener('click', (e) => {
             e.stopPropagation();
-            if(this.selectedNodeNum !== node.num) {
-                if(this.selectedNodeNum !== -1) {
+            this.toggleFoldStatus(node.num);
+        });
+
+        node.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (this.selectedNodeNum !== node.num) {
+                if (this.selectedNodeNum !== -1) {
                     this.nodes[this.selectedNodeNum].style.background = 'transparent';
                     this.tdModeControlsComp.transformControls.detach();
                 }
@@ -1913,39 +1911,39 @@ class FlagView extends TreeView {
                 this.nodes[node.num].style.background = '#ff3030';
             }
         });
-		
+
         this.parents.push(parentNum);
-		this.nodes.push(node);
-		this.childrens.push(new list());
-		this.nodeNumByEl.set(el, node.num);
-		
-		if(parentNum !== -1) {
-			this.childrens[parentNum].pushBack(node.num);
-			let parentNode = this.nodes[parentNum];
-			let liEl = document.createElement('li');
-			liEl.appendChild(node);
-			liEl.style.listStyleType = 'none';
-			$(parentNode).children('img')[0].src = '/img/noun_Square plus_620378_000000.png';
-			$(parentNode).children('ul')[0].appendChild(liEl);
-		}
-		else {
-			this.view.appendChild(node);
+        this.nodes.push(node);
+        this.childrens.push(new list());
+        this.nodeNumByEl.set(el, node.num);
+
+        if (parentNum !== -1) {
+            this.childrens[parentNum].pushBack(node.num);
+            let parentNode = this.nodes[parentNum];
+            let liEl = document.createElement('li');
+            liEl.appendChild(node);
+            liEl.style.listStyleType = 'none';
+            $(parentNode).children('img')[0].src = '/img/noun_Square plus_620378_000000.png';
+            $(parentNode).children('ul')[0].appendChild(liEl);
         }
-        
-        for(let child of el.children) {
+        else {
+            this.view.appendChild(node);
+        }
+
+        for (let child of el.children) {
             this.makeNode(child, node.num);
         }
 
-		return node;
+        return node;
     }
     deselect() {
-        if(this.selectedNodeNum !== -1) {
+        if (this.selectedNodeNum !== -1) {
             this.nodes[this.selectedNodeNum].style.background = 'transparent';
         }
         this.selectedNodeNum = -1;
     }
     select(nodeNum) {
-        if(this.selectedNodeNum !== nodeNum) {
+        if (this.selectedNodeNum !== nodeNum) {
             this.deselect();
             this.selectedNodeNum = nodeNum;
             this.nodes[nodeNum].style.background = '#ff3030';
@@ -1957,22 +1955,22 @@ class FlagView extends TreeView {
  * This is the peer view to be shown in leftSideWindow.
  */
 class PeerView {
-	constructor(tdModeControlsComp) {
-		this.tdModeControlsComp = tdModeControlsComp;
-		this.view = document.createElement('div');
-		this.view.style.overflow = 'auto';
-		this.view.innerHTML = "<ul></ul>";
-		this.LiByNode = new Map();
-		
-		for(let child of tdModeControlsComp.el.children) {
-			if(child.tagName === 'A-USER') {
-				let liEl = document.createElement('li');
-				liEl.style.listStyleType = 'none';
-				liEl.innerHTML = child.name;
-				$(this.view).children('ul')[0].appendChild(liEl);
-				this.LiByNode.set(child, liEl);
-			}
-		}
-	}
+    constructor(tdModeControlsComp) {
+        this.tdModeControlsComp = tdModeControlsComp;
+        this.view = document.createElement('div');
+        this.view.style.overflow = 'auto';
+        this.view.innerHTML = "<ul></ul>";
+        this.LiByNode = new Map();
+
+        for (let child of tdModeControlsComp.el.children) {
+            if (child.tagName === 'A-USER') {
+                let liEl = document.createElement('li');
+                liEl.style.listStyleType = 'none';
+                liEl.innerHTML = child.name;
+                $(this.view).children('ul')[0].appendChild(liEl);
+                this.LiByNode.set(child, liEl);
+            }
+        }
+    }
 };
 
