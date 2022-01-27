@@ -1,7 +1,8 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
@@ -18,687 +19,689 @@
     <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff"> 
-    <link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">    
+    <meta name="theme-color" content="#ffffff">
+    <link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="/library/jquery-1.11.3.min.js"></script>
     <script src="/library/bootstrap-4.4.1-dist/js/bootstrap.bundle.min.js"></script>
     <script src="/library/bootstrap-4.4.1-dist/js/bootstrap.min.js"></script>
     <script src="/library/stack.js"></script>
     <script>
-    var typeStr = ['directory', 'target', 'binary', 'template'];
-    var node = null;
-    
-    //navagation history stacks
-    var prevStk = new stack(65535);
-    var nextStk = new stack(65535);
+        var typeStr = ['directory', 'target', 'binary', 'template'];
+        var node = null;
 
-    function logout() {
-        $.ajax({
-            url: '/logout',
-            type: 'POST',
-            success: ()=>{
-                location.href = '/loginPage';
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
+        //navagation history stacks
+        var prevStk = new stack(65535);
+        var nextStk = new stack(65535);
 
-	function changeItemView(item_type) {
-		let activeView = document.getElementById(typeStr[item_type % 4] + 'ItemDIV');
-		let deactiveView1 = document.getElementById(typeStr[(item_type + 1) % 4] + 'ItemDIV');
-		let deactiveView2 = document.getElementById(typeStr[(item_type + 2) % 4] + 'ItemDIV');
-		let deactiveView3 = document.getElementById(typeStr[(item_type + 3) % 4] + 'ItemDIV');
-		activeView.classList.remove('d-none');
-		activeView.classList.add('d-block');
-		deactiveView1.classList.remove('d-block');
-		deactiveView1.classList.add('d-none');
-		deactiveView2.classList.remove('d-block');
-		deactiveView2.classList.add('d-none');
-		deactiveView3.classList.remove('d-block');
-		deactiveView3.classList.add('d-none');
-	};
-	
-    function getAssetInfo(assetId, fromHistory) {
-        let result = null;
-        $.ajax({
-            url: '/assetInfo',
-            type: 'GET',
-            data: {'id' : assetId},
-            dataType: 'JSON',
-            async: false,
-            success: (data)=>{
-                if(node && fromHistory !== true) {
-                    nextStk.clear();
-                    prevStk.push(node.pathArr[node.pathArr.length - 1].id);
+        function logout() {
+            $.ajax({
+                url: '/logout',
+                type: 'POST',
+                success: () => {
+                    location.href = '/loginPage';
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
                 }
-                node = data;
-                let assetNavOl = document.getElementById('assetNavOl');
-                assetNavOl.innerHTML = "";
-                let lastIdx = node.pathArr.length - 1;
-                for(let idx = 0; idx < lastIdx; ++idx) {
-                    assetNavOl.innerHTML += "<li class='breadcrumb-item'><a href='javascript:getAssetInfo(" + node.pathArr[idx].id + ");'>" + node.pathArr[idx].name + "</a></li>";
-                }
-                assetNavOl.innerHTML += "<li class='breadcrumb-item active' aria-current='page'>" + node.pathArr[lastIdx].name + "</li>";
-                let assetNameInput = document.getElementById('assetName');
-                assetNameInput.value = node.pathArr[lastIdx].name;
-                if(lastIdx === 0)
-                    assetNameInput.setAttribute('readonly', true);
-                else
-                    assetNameInput.removeAttribute('readonly');
-				let directoryItemDIV = document.getElementById('directoryItemDIV');
-                let targetItemInfoDIV = document.getElementById('targetItemInfoDIV');
-				let binaryItemDIV = document.getElementById('binaryItemDIV');
-                let badgeStr = "";
-                switch(node.assetType) {
-                case 'd':
-                    badgeStr = "directory";
-                    changeItemView(0);
-                    let assetTableBody = document.getElementById('assetTableBody');
-                    assetTableBody.innerHTML = '';
-                    for(let asset of node.children) {
-                        let tr = document.createElement('tr');
-                        tr.className = 'asseteList';
-                        let td = document.createElement('td');
-                        td.innerHTML = typeStr[asset.item_type];
-                        td.width = '100em';
-                        td.style.textAlign = 'center';
-                        tr.appendChild(td);
-                        td = document.createElement('td');
-                        td.innerHTML = "<a href='javascript:getAssetInfo(" + asset.id + ");'>" + asset.name + "</a>";
-                        tr.appendChild(td);
-                        td = document.createElement('td');
-                        td.innerHTML = (asset.owner_id !== null ? 'private' : 'public');
-                        td.width = '100em';
-                        td.style.textAlign = 'center';
-                        tr.appendChild(td);
-                        assetTableBody.appendChild(tr);
+            });
+        };
+
+        function changeItemView(item_type) {
+            let activeView = document.getElementById(typeStr[item_type % 4] + 'ItemDIV');
+            let deactiveView1 = document.getElementById(typeStr[(item_type + 1) % 4] + 'ItemDIV');
+            let deactiveView2 = document.getElementById(typeStr[(item_type + 2) % 4] + 'ItemDIV');
+            let deactiveView3 = document.getElementById(typeStr[(item_type + 3) % 4] + 'ItemDIV');
+            activeView.classList.remove('d-none');
+            activeView.classList.add('d-block');
+            deactiveView1.classList.remove('d-block');
+            deactiveView1.classList.add('d-none');
+            deactiveView2.classList.remove('d-block');
+            deactiveView2.classList.add('d-none');
+            deactiveView3.classList.remove('d-block');
+            deactiveView3.classList.add('d-none');
+        };
+
+        function getAssetInfo(assetId, fromHistory) {
+            let result = null;
+            $.ajax({
+                url: '/assetInfo',
+                type: 'GET',
+                data: { 'id': assetId },
+                dataType: 'JSON',
+                async: false,
+                success: (data) => {
+                    if (node && fromHistory !== true) {
+                        nextStk.clear();
+                        prevStk.push(node.pathArr[node.pathArr.length - 1].id);
                     }
-                    break;
-                case 't':
-                    badgeStr = "target";
-					changeItemView(1);
-					targetItemInfoDIV.innerHTML = "";
-                    for(let md of node.metaData) {
-						let imgSrc = '';
-						switch(md.feature_type) {
-						case 'general_feature':
-							if(md.signature.startsWith('FFD8') || md.signature === '89504E47')
-								imgSrc = '/assetRawData?assetId=' + node.pathArr[node.pathArr.length - 1].id + '&featureType=general_feature';
-							break;
-						case 'vuforia_feature':
-							break;
-						}
-						if(imgSrc === '') {
-							targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
-						}
-						else {
-							targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><img src='" + imgSrc + "' class='card-img-top'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
-						}
-					}
-                    break;
-                case 'b':
-                    badgeStr = "binary";
-                    changeItemView(2);
-					if(node.metaData) {
-						let sizeView = '';
-						if(node.metaData.size < 1024) {
-							sizeView = node.metaData.size + ' byte';
-						}
-						else if(node.metaData.size < 1048576) {
-							sizeView = Math.ceil(node.metaData.size/1024) + ' KByte';
-						}
-						else if(node.metaData.size < 1073741824) {
-							sizeView = Math.ceil(node.metaData.size/1048576) + 'MByte';
-						}
-						else {
-							sizeView = Math.ceil(node.metaData.size/1073741824) + 'GByte';
-						}
-						let srcURI = '/assetRawData?assetId=' + node.pathArr[node.pathArr.length - 1].id + '?rn=' + (new Date().getTime());
-						if(node.metaData.signature.startsWith('FFD8') || node.metaData.signature === '89504E47') {//JPE, JPEG, JPG, PNG
-							binaryItemDIV.innerHTML = "<div class='card'><img class='mw-100 mh-80' src='" + srcURI + "' class='card-img-top'><div class='card-body'><p class='card-text d-flex justify-content-between'>size : " + sizeView + "<a class='btn btn-secondary btn-sm' href='" + srcURI + "'>download</a></p></div></div>";
-						}
-						else {
-							binaryItemDIV.innerHTML = "<div class='d-flex justify-content-center'><div class='card' style='width:18rem;'><a href='" + srcURI + "'><img src='/img/download_icon.png' class='card-img-top'></a><div class='card-body'><p class='card-text d-flex justify-content-between'>size : " + sizeView + "<a class='btn btn-secondary btn-sm' href='" + srcURI + "'>download</a></p></div></div></div>";
-						}
-					}
-                    break;
-				case 'c':
-					badgeStr = "template";
-					changeItemView(3);
-					document.getElementById('source').value = node.metaData.data;
-					break;
+                    node = data;
+                    let assetNavOl = document.getElementById('assetNavOl');
+                    assetNavOl.innerHTML = "";
+                    let lastIdx = node.pathArr.length - 1;
+                    for (let idx = 0; idx < lastIdx; ++idx) {
+                        assetNavOl.innerHTML += "<li class='breadcrumb-item'><a href='javascript:getAssetInfo(" + node.pathArr[idx].id + ");'>" + node.pathArr[idx].name + "</a></li>";
+                    }
+                    assetNavOl.innerHTML += "<li class='breadcrumb-item active' aria-current='page'>" + node.pathArr[lastIdx].name + "</li>";
+                    let assetNameInput = document.getElementById('assetName');
+                    assetNameInput.value = node.pathArr[lastIdx].name;
+                    if (lastIdx === 0)
+                        assetNameInput.setAttribute('readonly', true);
+                    else
+                        assetNameInput.removeAttribute('readonly');
+                    let directoryItemDIV = document.getElementById('directoryItemDIV');
+                    let targetItemInfoDIV = document.getElementById('targetItemInfoDIV');
+                    let binaryItemDIV = document.getElementById('binaryItemDIV');
+                    let badgeStr = "";
+                    switch (node.assetType) {
+                        case 'd':
+                            badgeStr = "directory";
+                            changeItemView(0);
+                            let assetTableBody = document.getElementById('assetTableBody');
+                            assetTableBody.innerHTML = '';
+                            for (let asset of node.children) {
+                                let tr = document.createElement('tr');
+                                tr.className = 'asseteList';
+                                let td = document.createElement('td');
+                                td.innerHTML = typeStr[asset.item_type];
+                                td.width = '100em';
+                                td.style.textAlign = 'center';
+                                tr.appendChild(td);
+                                td = document.createElement('td');
+                                td.innerHTML = "<a href='javascript:getAssetInfo(" + asset.id + ");'>" + asset.name + "</a>";
+                                tr.appendChild(td);
+                                td = document.createElement('td');
+                                td.innerHTML = (asset.owner_id !== null ? 'private' : 'public');
+                                td.width = '100em';
+                                td.style.textAlign = 'center';
+                                tr.appendChild(td);
+                                assetTableBody.appendChild(tr);
+                            }
+                            break;
+                        case 't':
+                            badgeStr = "target";
+                            changeItemView(1);
+                            targetItemInfoDIV.innerHTML = "";
+                            for (let md of node.metaData) {
+                                let imgSrc = '';
+                                switch (md.feature_type) {
+                                    case 'general_feature':
+                                        if (md.signature.startsWith('FFD8') || md.signature === '89504E47')
+                                            imgSrc = '/assetRawData?assetId=' + node.pathArr[node.pathArr.length - 1].id + '&featureType=general_feature';
+                                        break;
+                                    case 'vuforia_feature':
+                                        break;
+                                }
+                                if (imgSrc === '') {
+                                    targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
+                                }
+                                else {
+                                    targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><img src='" + imgSrc + "' class='card-img-top'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
+                                }
+                            }
+                            break;
+                        case 'b':
+                            badgeStr = "binary";
+                            changeItemView(2);
+                            if (node.metaData) {
+                                let sizeView = '';
+                                if (node.metaData.size < 1024) {
+                                    sizeView = node.metaData.size + ' byte';
+                                }
+                                else if (node.metaData.size < 1048576) {
+                                    sizeView = Math.ceil(node.metaData.size / 1024) + ' KByte';
+                                }
+                                else if (node.metaData.size < 1073741824) {
+                                    sizeView = Math.ceil(node.metaData.size / 1048576) + 'MByte';
+                                }
+                                else {
+                                    sizeView = Math.ceil(node.metaData.size / 1073741824) + 'GByte';
+                                }
+                                let srcURI = '/assetRawData?assetId=' + node.pathArr[node.pathArr.length - 1].id + '?rn=' + (new Date().getTime());
+                                if (node.metaData.signature.startsWith('FFD8') || node.metaData.signature === '89504E47') {//JPE, JPEG, JPG, PNG
+                                    binaryItemDIV.innerHTML = "<div class='card'><img class='mw-100 mh-80' src='" + srcURI + "' class='card-img-top'><div class='card-body'><p class='card-text d-flex justify-content-between'>size : " + sizeView + "<a class='btn btn-secondary btn-sm' href='" + srcURI + "'>download</a></p></div></div>";
+                                }
+                                else {
+                                    binaryItemDIV.innerHTML = "<div class='d-flex justify-content-center'><div class='card' style='width:18rem;'><a href='" + srcURI + "'><img src='/img/download_icon.png' class='card-img-top'></a><div class='card-body'><p class='card-text d-flex justify-content-between'>size : " + sizeView + "<a class='btn btn-secondary btn-sm' href='" + srcURI + "'>download</a></p></div></div></div>";
+                                }
+                            }
+                            break;
+                        case 'c':
+                            badgeStr = "template";
+                            changeItemView(3);
+                            document.getElementById('source').value = node.metaData.data;
+                            break;
+                    }
+                    let shareToView = document.getElementById('shareToView');
+                    let shareToUL = document.getElementById('shareToUL');
+                    shareToUL.innerHTML = "";
+                    if (node.isPrivate) {
+                        badgeStr = "private " + badgeStr;
+                        shareToView.classList.remove('d-none');
+                        shareToView.classList.add('d-block');
+                        if (node.shareTo.length > 0) {
+                            for (let person of node.shareTo) {
+                                shareToUL.innerHTML += "<li class='list-group-item d-flex justify-content-between'>" + person.name + "(" + person.email + ")" + "<button btn btn-sm onclick='unshare(" + person.id + ");'>out</button></li>";
+                            }
+                        }
+                    }
+                    else {
+                        badgeStr = "public " + badgeStr;
+                        shareToView.classList.remove('d-block');
+                        shareToView.classList.add('d-none');
+                    }
+                    document.getElementById('assetType').innerHTML = badgeStr;
+                    result = true;
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                    result = false;
                 }
-                let shareToView = document.getElementById('shareToView');
-                let shareToUL = document.getElementById('shareToUL');
-                shareToUL.innerHTML = "";
-                if(node.isPrivate) {
-                    badgeStr = "private " + badgeStr;
-					shareToView.classList.remove('d-none');
-					shareToView.classList.add('d-block');
-                    if(node.shareTo.length > 0) {
-                        for(let person of node.shareTo) {
+            });
+            return result;
+        };
+
+        function navParent() {
+            if (node.pathArr.length > 1) {
+                getAssetInfo(node.pathArr[node.pathArr.length - 2].id);
+            }
+        };
+
+        function navPrev() {
+            if (!prevStk.empty()) {
+                if (getAssetInfo(prevStk.top(), true)) {
+                    nextStk.push(prevStk.top());
+                    prevStk.pop();
+                }
+            }
+        };
+
+        function navNext() {
+            if (!nextStk.empty()) {
+                if (getAssetInfo(nextStk.top(), true)) {
+                    prevStk.push(nextStk.top());
+                    nextStk.pop();
+                }
+            }
+        };
+
+        function remove() {
+            $.ajax({
+                url: '/removeAsset',
+                type: 'POST',
+                data: { 'astId': node.pathArr[node.pathArr.length - 1].id },
+                success: () => {
+                    navParent();
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+
+        function onSubmitRename() {
+            document.getElementById('assetId').value = node.pathArr[node.pathArr.length - 1].id;
+            const fm = document.getElementById('assetNameForm');
+            const params = $(fm).serialize();
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: params,
+                success: () => {
+                    $('#assetNavOl').children('li:last')[0].innerHTML = node.pathArr[node.pathArr.length - 1].name = document.getElementById('assetName').value;
+                    alert('Successfully updated.');
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                    document.getElementById('assetName').value = node.pathArr[node.pathArr.length - 1].name;
+                }
+            });
+            return false;
+        };
+
+        function onSubmitMakeDirectory() {
+            document.getElementById('mkDirParendId').value = node.pathArr[node.pathArr.length - 1].id;
+            const fm = document.getElementById('makeDirectoryForm');
+            const params = $(fm).serialize();
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: params,
+                success: (child) => {
+                    node.children.push(child);
+                    let assetTableBody = document.getElementById('assetTableBody');
+                    let tr = document.createElement('tr');
+                    tr.className = 'asseteList';
+                    let td = document.createElement('td');
+                    td.innerHTML = typeStr[child.item_type];
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    assetTableBody.appendChild(tr);
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            fm.reset();
+            return false;
+        };
+
+        function onSubmitMakeTarget() {
+            document.getElementById('mkTargetParendId').value = node.pathArr[node.pathArr.length - 1].id;
+            const fm = document.getElementById('makeTargetForm');
+            const params = $(fm).serialize();
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: params,
+                success: (child) => {
+                    node.children.push(child);
+                    let assetTableBody = document.getElementById('assetTableBody');
+                    let tr = document.createElement('tr');
+                    tr.className = 'asseteList';
+                    let td = document.createElement('td');
+                    td.innerHTML = typeStr[child.item_type];
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    assetTableBody.appendChild(tr);
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            fm.reset();
+            return false;
+        };
+
+        function onSubmitUploadGeneralFeature() {
+            document.getElementById('UploadGeneralFeatureTargetId').value = node.pathArr[node.pathArr.length - 1].id;
+            let fm = document.getElementById('UploadGeneralFeatureForm');
+            let fd = new FormData(fm);
+            fd.set('src', document.getElementById('UploadGeneralFeatureSrc').files[0]);
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: fd,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: (data) => {
+                    if (data) {
+                        let item = node.metaData.find((item) => { return item.feature_type === 'general_feature' });
+                        if (item) {
+                            item.type = data.type;
+                            item.signature = data.signature;
+                        }
+                        else {
+                            node.metaData.push({ 'feature_type': 'general_feature', 'type': data.type, 'signature': data.signature });
+                        }
+                        let targetItemInfoDIV = document.getElementById('targetItemInfoDIV');
+                        targetItemInfoDIV.innerHTML = "";
+                        for (let md of node.metaData) {
+                            let imgSrc = '';
+                            switch (md.feature_type) {
+                                case 'general_feature':
+                                    if (md.signature.startsWith('FFD8') || md.signature === '89504E47')
+                                        imgSrc = '/assetRawData?assetId=' + node.pathArr[node.pathArr.length - 1].id + '&featureType=general_feature&' + (new Date().getTime());
+                                    break;
+                                case 'vuforia_feature':
+                                    break;
+                            }
+                            if (imgSrc === '') {
+                                targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
+                            }
+                            else {
+                                targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><img src='" + imgSrc + "' class='card-img-top'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
+                            }
+                        }
+                    }
+                    else {
+                        alert("The update has been completed, but this page contains expired information");
+                    }
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            fm.reset();
+            return false;
+        };
+
+        function onSubmitUploadVuforialFeature() {
+            document.getElementById('UploadVuforiaFeatureTargetId').value = node.pathArr[node.pathArr.length - 1].id;
+            let fm = document.getElementById('UploadVuforiaFeatureForm');
+            let fd = new FormData(fm);
+            fd.set('xml', document.getElementById('UploadVuforiaFeatureXml').files[0]);
+            fd.set('dat', document.getElementById('UploadVuforiaFeatureDat').files[0]);
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: fd,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: (data) => {
+                    if (data) {
+                        let item = node.metaData.find((item) => { return item.feature_type === 'vuforia_feature' });
+                        if (item) {
+                            item.type = data.type;
+                            item.signature = data.signature;
+                        }
+                        else {
+                            node.metaData.push({ 'feature_type:': 'vuforia_feature', 'type': data.type, 'signature': data.signature });
+                        }
+                        let targetItemInfoDIV = document.getElementById('targetItemInfoDIV');
+                        targetItemInfoDIV.innerHTML = "";
+                        for (let md of node.metaData) {
+                            let imgSrc = '';
+                            switch (md.feature_type) {
+                                case 'general_feature':
+                                    if (md.signature.startsWith('FFD8') || md.signature === '89504E47')
+                                        imgSrc = '/assetRawData?assetId=' + node.pathArr[node.pathArr.length - 1].id + '&featureType=general_feature&' + (new Date().getTime());
+                                    break;
+                                case 'vuforia_feature':
+                                    break;
+                            }
+                            if (imgSrc === '') {
+                                targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
+                            }
+                            else {
+                                targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><img src='" + imgSrc + "' class='card-img-top'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
+                            }
+                        }
+                    }
+                    else {
+                        alert("The update has been completed, but this page contains expired information");
+                    }
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            fm.reset();
+            return false;
+        };
+
+        function onSubmitMakeBinaryFromURI() {
+            document.getElementById('mkBinFromURIParentId').value = node.pathArr[node.pathArr.length - 1].id;
+            const fm = document.getElementById('makeBinaryFromURIForm');
+            const params = $(fm).serialize();
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: params,
+                success: (child) => {
+                    node.children.push(child);
+                    let assetTableBody = document.getElementById('assetTableBody');
+                    let tr = document.createElement('tr');
+                    tr.className = 'asseteList';
+                    let td = document.createElement('td');
+                    td.innerHTML = typeStr[child.item_type];
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    assetTableBody.appendChild(tr);
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            fm.reset();
+            return false;
+        };
+
+        function onSubmitMakeBinaryFromUpload() {
+            document.getElementById('mkBinFromUploadParentId').value = node.pathArr[node.pathArr.length - 1].id;
+            let fm = document.getElementById('makeBinaryFromUploadForm');
+            let fd = new FormData(fm);
+            fd.set('src', document.getElementById('mkBinFromUploadSrc').files[0]);
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: fd,
+                cache: false,
+                contentType: false,
+                processData: false,
+                xhr: () => {
+                    let xhrobj = $.ajaxSettings.xhr();
+                    if (xhrobj.upload) {
+                        xhrobj.upload.addEventListener('progress', (e) => {
+                            let percent = 0;
+                            let position = e.loaded || e.position;
+                            let total = e.total;
+                            if (e.lengthComputable) {
+                                percent = Math.ceil(position / total * 100);
+                            }
+                            console.log(percent + "% uploaded");
+
+                        }, false);
+                    }
+                    return xhrobj;
+                },
+                success: (child) => {
+                    node.children.push(child);
+                    let assetTableBody = document.getElementById('assetTableBody');
+                    let tr = document.createElement('tr');
+                    tr.className = 'asseteList';
+                    let td = document.createElement('td');
+                    td.innerHTML = typeStr[child.item_type];
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    assetTableBody.appendChild(tr);
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            fm.reset();
+            return false;
+        };
+
+        function onSubmitMakeTemplate() {
+            document.getElementById('mkTemplateParentId').value = node.pathArr[node.pathArr.length - 1].id;
+            const fm = document.getElementById('makeTemplateForm');
+            const params = $(fm).serialize();
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: params,
+                success: (child) => {
+                    node.children.push(child);
+                    let assetTableBody = document.getElementById('assetTableBody');
+                    let tr = document.createElement('tr');
+                    tr.className = 'asseteList';
+                    let td = document.createElement('td');
+                    td.innerHTML = typeStr[child.item_type];
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
+                    td.width = '100em';
+                    td.style.textAlign = 'center';
+                    tr.appendChild(td);
+                    assetTableBody.appendChild(tr);
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            fm.reset();
+            return false;
+        };
+
+        function codeImportFromURI() {
+            let uri = document.getElementById('codeURI').value;
+            if (uri.length === 0) return;
+            $.ajax({
+                url: uri,
+                type: 'GET',
+                success: (data) => {
+                    document.getElementById('source').value = data;
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            document.getElementById('codeURI').value = '';
+        };
+
+        function codeImportFromFile() {
+            let files = document.getElementById('codeFile').files;
+            if (files.length !== 1) return;
+            let selectedFile = files[0];
+            let reader = new FileReader();
+            reader.onload = function (evt) {
+                document.getElementById('source').value = evt.target.result;
+            };
+            reader.readAsText(selectedFile);
+        };
+
+        function onCommitTemplateContent() {
+            document.getElementById('templateItemAstId').value = node.pathArr[node.pathArr.length - 1].id;
+            const fm = document.getElementById('templateContentForm');
+            const params = $(fm).serialize();
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: params,
+                success: () => {
+                    alert('Committed');
+                    console.log('committed');
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            return false;
+        };
+
+        function onSubmitShareTo() {
+            let params = {};
+            params.astId = node.pathArr[node.pathArr.length - 1].id;
+            const fm = document.getElementById('shareToForm');
+            let targets = document.getElementById('shareTargetNames').value;
+            let targetArr = targets.split(',');
+            for (let idx = 0; idx < targetArr.length; ++idx) {
+                targetArr[idx] = targetArr[idx].trim();
+            }
+            params.targets = targetArr;
+            $.ajaxSettings.traditional = true;
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: params,
+                success: (added) => {
+                    let shareToUL = document.getElementById('shareToUL');
+                    for (let person of added) {
+                        node.shareTo.push(person);
+                        shareToUL.innerHTML += "<li class='list-group-item d-flex justify-content-between'>" + person.name + "(" + person.email + ")" + "<button btn btn-sm onclick='unshare(" + person.id + ");'>out</button></li>";
+                    }
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                    fm.reset();
+                }
+            });
+            fm.reset();
+            return false;
+        };
+
+        function unshare(targetId) {
+            $.ajax({
+                url: '/unshareAsset',
+                type: 'POST',
+                data: { 'astId': node.pathArr[node.pathArr.length - 1].id, 'targetId': targetId },
+                success: () => {
+                    let sz = node.shareTo.length;
+                    let findIdx = -1;
+                    for (let idx = 0; idx < sz; ++idx) {
+                        if (node.shareTo[idx].id === targetId) {
+                            findIdx = idx;
+                            break;
+                        }
+                    }
+                    node.shareTo.splice(findIdx, 1);
+                    let shareToUL = document.getElementById('shareToUL');
+                    shareToUL.innerHTML = "";
+                    if (node.shareTo.length > 0) {
+                        for (let person of node.shareTo) {
                             shareToUL.innerHTML += "<li class='list-group-item d-flex justify-content-between'>" + person.name + "(" + person.email + ")" + "<button btn btn-sm onclick='unshare(" + person.id + ");'>out</button></li>";
                         }
                     }
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
                 }
-                else {
-                    badgeStr = "public " + badgeStr;
-					shareToView.classList.remove('d-block');
-					shareToView.classList.add('d-none');
-                }
-                document.getElementById('assetType').innerHTML = badgeStr;
-                result = true;
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-                result = false;
-            }
-        });
-        return result;
-    };
-    
-    function navParent() {
-        if(node.pathArr.length > 1) {
-            getAssetInfo(node.pathArr[node.pathArr.length - 2].id);
-        }
-    };
-    
-    function navPrev() {
-        if(!prevStk.empty()) {
-            if(getAssetInfo(prevStk.top(), true)) {
-                nextStk.push(prevStk.top());
-                prevStk.pop();
-            }
-        }
-    };
-    
-    function navNext() {
-        if(!nextStk.empty()) {
-            if(getAssetInfo(nextStk.top(), true)) {
-                prevStk.push(nextStk.top());
-                nextStk.pop();
-            }
-        }
-    };
-    
-    function remove() {
-        $.ajax({
-            url: '/removeAsset',
-            type: 'POST',
-            data: {'astId' : node.pathArr[node.pathArr.length - 1].id},
-            success:()=>{
-                navParent();
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-    function onSubmitRename() {
-        document.getElementById('assetId').value = node.pathArr[node.pathArr.length - 1].id;
-        const fm = document.getElementById('assetNameForm');
-        const params = $(fm).serialize();
-        $.ajax({
-            url: fm.action,
-            type: fm.method,
-            data: params,
-            success: ()=> {
-                $('#assetNavOl').children('li:last')[0].innerHTML = node.pathArr[node.pathArr.length - 1].name = document.getElementById('assetName').value;
-                alert('Successfully updated.');
-            },
-            error: (err)=> {
-                alert("Code: " + err.status +"\n" + err.responseText);
-                document.getElementById('assetName').value = node.pathArr[node.pathArr.length - 1].name;
-            }
-        });
-        return false;
-    };
-    
-    function onSubmitMakeDirectory() {
-        document.getElementById('mkDirParendId').value = node.pathArr[node.pathArr.length - 1].id;
-        const fm = document.getElementById('makeDirectoryForm');
-        const params = $(fm).serialize();
-        $.ajax({
-            url: fm.action,
-            type: fm.method,
-            data: params,
-            success: (child)=> {
-                node.children.push(child);
-                let assetTableBody = document.getElementById('assetTableBody');
-                let tr = document.createElement('tr');
-                tr.className = 'asseteList';
-                let td = document.createElement('td');
-                td.innerHTML = typeStr[child.item_type];
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                assetTableBody.appendChild(tr);
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-        fm.reset();
-        return false;
-    };
-    
-	function onSubmitMakeTarget() {
-		document.getElementById('mkTargetParendId').value = node.pathArr[node.pathArr.length - 1].id;
-		const fm = document.getElementById('makeTargetForm');
-		const params = $(fm).serialize();
-		$.ajax({
-			url: fm.action,
-			type: fm.method,
-			data: params,
-			success: (child)=> {
-				node.children.push(child);
-                let assetTableBody = document.getElementById('assetTableBody');
-                let tr = document.createElement('tr');
-                tr.className = 'asseteList';
-                let td = document.createElement('td');
-                td.innerHTML = typeStr[child.item_type];
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                assetTableBody.appendChild(tr);
-			},
-			error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-		});
-		fm.reset();
-        return false;
-	};
-	
-	function onSubmitUploadGeneralFeature() {
-		document.getElementById('UploadGeneralFeatureTargetId').value = node.pathArr[node.pathArr.length - 1].id;
-		let fm = document.getElementById('UploadGeneralFeatureForm');
-		let fd = new FormData(fm);
-		fd.set('src', document.getElementById('UploadGeneralFeatureSrc').files[0]);
-		$.ajax({
-			url: fm.action,
-			type: fm.method,
-			data: fd,
-			cache: false,
-			contentType: false,
-			processData: false,
-			success: (data)=>{
-				if(data) {
-					let item = node.metaData.find((item)=>{return item.feature_type==='general_feature'});
-					if(item) {
-						item.type = data.type;
-						item.signature = data.signature;
-					}
-					else {
-						node.metaData.push({'feature_type':'general_feature', 'type':data.type, 'signature':data.signature});
-					}
-					let targetItemInfoDIV = document.getElementById('targetItemInfoDIV');
-					targetItemInfoDIV.innerHTML = "";
-                    for(let md of node.metaData) {
-						let imgSrc = '';
-						switch(md.feature_type) {
-						case 'general_feature':
-							if(md.signature.startsWith('FFD8') || md.signature === '89504E47')
-								imgSrc = '/assetRawData?assetId=' + node.pathArr[node.pathArr.length - 1].id + '&featureType=general_feature&' + (new Date().getTime());
-							break;
-						case 'vuforia_feature':
-							break;
-						}
-						if(imgSrc === '') {
-							targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
-						}
-						else {
-							targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><img src='" + imgSrc + "' class='card-img-top'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
-						}
-					}
-				}
-				else {
-					alert("The update has been completed, but this page contains expired information");
-				}
-			},
-			error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-		});
-		fm.reset();
-		return false;
-	};
-	
-	function onSubmitUploadVuforialFeature() {
-		document.getElementById('UploadVuforiaFeatureTargetId').value = node.pathArr[node.pathArr.length - 1].id;
-		let fm = document.getElementById('UploadVuforiaFeatureForm');
-		let fd = new FormData(fm);
-		fd.set('xml', document.getElementById('UploadVuforiaFeatureXml').files[0]);
-		fd.set('dat', document.getElementById('UploadVuforiaFeatureDat').files[0]);
-		$.ajax({
-            url: fm.action,
-            type: fm.method,
-            data: fd,
-			cache: false,
-			contentType: false,
-			processData: false,
-            success: (data)=> {
-				if(data) {
-					let item = node.metaData.find((item)=>{return item.feature_type==='vuforia_feature'});
-					if(item) {
-                        item.type = data.type;
-                        item.signature = data.signature;
-                    }
-                    else {
-                        node.metaData.push({'feature_type:':'vuforia_feature', 'type':data.type, 'signature':data.signature});
-                    }
-					let targetItemInfoDIV = document.getElementById('targetItemInfoDIV');
-					targetItemInfoDIV.innerHTML = "";
-                    for(let md of node.metaData) {
-						let imgSrc = '';
-						switch(md.feature_type) {
-						case 'general_feature':
-							if(md.signature.startsWith('FFD8') || md.signature === '89504E47')
-								imgSrc = '/assetRawData?assetId=' + node.pathArr[node.pathArr.length - 1].id + '&featureType=general_feature&' + (new Date().getTime());
-							break;
-						case 'vuforia_feature':
-							break;
-						}
-						if(imgSrc === '') {
-							targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
-						}
-						else {
-							targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><img src='" + imgSrc + "' class='card-img-top'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
-						}
-					}
-				}
-				else {
-					alert("The update has been completed, but this page contains expired information");
-				}
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-        fm.reset();
-        return false;
-	};
-	
-    function onSubmitMakeBinaryFromURI() {
-        document.getElementById('mkBinFromURIParentId').value = node.pathArr[node.pathArr.length - 1].id;
-        const fm = document.getElementById('makeBinaryFromURIForm');
-        const params = $(fm).serialize();
-        $.ajax({
-            url: fm.action,
-            type: fm.method,
-            data: params,
-            success: (child)=> {
-                node.children.push(child);
-                let assetTableBody = document.getElementById('assetTableBody');
-                let tr = document.createElement('tr');
-                tr.className = 'asseteList';
-                let td = document.createElement('td');
-                td.innerHTML = typeStr[child.item_type];
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                assetTableBody.appendChild(tr);
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-        fm.reset();
-        return false;
-    };
-    
-	function onSubmitMakeBinaryFromUpload() {
-		document.getElementById('mkBinFromUploadParentId').value = node.pathArr[node.pathArr.length - 1].id;
-		let fm = document.getElementById('makeBinaryFromUploadForm');
-		let fd = new FormData(fm);
-		fd.set('src', document.getElementById('mkBinFromUploadSrc').files[0]);
-		$.ajax({
-            url: fm.action,
-            type: fm.method,
-            data: fd,
-			cache: false,
-			contentType: false,
-			processData: false,
-			xhr: ()=>{
-				let xhrobj = $.ajaxSettings.xhr();
-				if (xhrobj.upload) {
-                    xhrobj.upload.addEventListener('progress', (e)=> {
-                        let percent = 0;
-                        let position = e.loaded || e.position;
-                        let total = e.total;
-                        if (e.lengthComputable) {
-                            percent = Math.ceil(position / total * 100);
-                        }
-                        console.log(percent + "% uploaded");
+            });
+        };
 
-                    }, false);
-                }
-				return xhrobj;
-			},
-            success: (child)=> {
-                node.children.push(child);
-                let assetTableBody = document.getElementById('assetTableBody');
-                let tr = document.createElement('tr');
-                tr.className = 'asseteList';
-                let td = document.createElement('td');
-                td.innerHTML = typeStr[child.item_type];
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                assetTableBody.appendChild(tr);
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-        fm.reset();
-        return false;
-	};
-	
-	function onSubmitMakeTemplate() {
-        document.getElementById('mkTemplateParentId').value = node.pathArr[node.pathArr.length - 1].id;
-        const fm = document.getElementById('makeTemplateForm');
-        const params = $(fm).serialize();
-        $.ajax({
-            url: fm.action,
-            type: fm.method,
-            data: params,
-            success: (child)=> {
-                node.children.push(child);
-                let assetTableBody = document.getElementById('assetTableBody');
-                let tr = document.createElement('tr');
-                tr.className = 'asseteList';
-                let td = document.createElement('td');
-                td.innerHTML = typeStr[child.item_type];
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
-                tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
-                td.width = '100em';
-                td.style.textAlign = 'center';
-                tr.appendChild(td);
-                assetTableBody.appendChild(tr);
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-        fm.reset();
-        return false;
-    };
-	
-	function codeImportFromURI() {
-		let uri = document.getElementById('codeURI').value;
-		if(uri.length === 0) return;
-		$.ajax({
-			url: uri,
-			type: 'GET',
-			success: (data)=>{
-				document.getElementById('source').value = data;
-			},
-			error:(err)=>{
-				alert("Code: " + err.status +"\n" + err.responseText);
-			}
-		});
-		document.getElementById('codeURI').value = '';
-	};
-	
-	function codeImportFromFile() {
-		let files = document.getElementById('codeFile').files;
-		if(files.length !== 1) return;
-		let selectedFile = files[0];
-		let reader = new FileReader();
-		reader.onload = function(evt) {
-			document.getElementById('source').value = evt.target.result;
-		};
-		reader.readAsText(selectedFile);
-	};
-	
-	function onCommitTemplateContent() {
-		document.getElementById('templateItemAstId').value = node.pathArr[node.pathArr.length - 1].id;
-		const fm = document.getElementById('templateContentForm');
-		const params = $(fm).serialize();
-		$.ajax({
-			url: fm.action,
-			type: fm.method,
-			data: params,
-			success: ()=>{
-                alert('Committed');
-				console.log('committed');
-			},
-			error: (err)=>{
-				alert("Code: " + err.status +"\n" + err.responseText);
-			}
-		});
-		return false;
-	};
-	
-    function onSubmitShareTo() {
-        let params = {};
-        params.astId = node.pathArr[node.pathArr.length - 1].id;
-        const fm = document.getElementById('shareToForm');
-        let targets = document.getElementById('shareTargetNames').value;
-        let targetArr = targets.split(',');
-        for(let idx = 0; idx < targetArr.length; ++idx) {
-            targetArr[idx] = targetArr[idx].trim();
-        }
-        params.targets = targetArr;
-        $.ajaxSettings.traditional = true;
-        $.ajax({
-            url: fm.action,
-            type: fm.method,
-            data: params,
-            success:(added)=>{
-                let shareToUL = document.getElementById('shareToUL');
-                for(let person of added) {
-                    node.shareTo.push(person);
-                    shareToUL.innerHTML += "<li class='list-group-item d-flex justify-content-between'>" + person.name + "(" + person.email + ")" + "<button btn btn-sm onclick='unshare(" + person.id + ");'>out</button></li>";
-                }
-            },
-            error:(err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-				fm.reset();
-            }
-        });
-        fm.reset();
-        return false;
-    };
-    
-    function unshare(targetId) {
-        $.ajax({
-            url: '/unshareAsset',
-            type: 'POST',
-            data: {'astId': node.pathArr[node.pathArr.length - 1].id, 'targetId': targetId},
-            success: ()=>{
-                let sz = node.shareTo.length;
-                let findIdx = -1;
-                for(let idx = 0; idx < sz; ++idx) {
-                    if(node.shareTo[idx].id === targetId) {
-                        findIdx = idx;
-                        break;
-                    }
-                }
-                node.shareTo.splice(findIdx, 1);
-                let shareToUL = document.getElementById('shareToUL');
-                shareToUL.innerHTML = "";
-                if(node.shareTo.length > 0) {
-                    for(let person of node.shareTo) {
-                        shareToUL.innerHTML += "<li class='list-group-item d-flex justify-content-between'>" + person.name + "(" + person.email + ")" + "<button btn btn-sm onclick='unshare(" + person.id + ");'>out</button></li>";
-                    }
-                }
-            },
-            error: (err)=>{
-                alert("Code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-	function toggleMkBinNav() {
-		const mkBinFromUploadForm = document.getElementById('makeBinaryFromUploadForm');
-		const mkBinFromURIForm = document.getElementById('makeBinaryFromURIForm');
-		const mkBinNavURI = document.getElementById('makeBinaryNavURI');
-		const mkBinNavUpload = document.getElementById('makeBinaryNavUpload');
-		mkBinNavURI.classList.toggle('active');
-		mkBinNavUpload.classList.toggle('active');
-		mkBinFromUploadForm.classList.toggle('d-none');
-		mkBinFromURIForm.classList.toggle('d-none');
-	};
+        function toggleMkBinNav() {
+            const mkBinFromUploadForm = document.getElementById('makeBinaryFromUploadForm');
+            const mkBinFromURIForm = document.getElementById('makeBinaryFromURIForm');
+            const mkBinNavURI = document.getElementById('makeBinaryNavURI');
+            const mkBinNavUpload = document.getElementById('makeBinaryNavUpload');
+            mkBinNavURI.classList.toggle('active');
+            mkBinNavUpload.classList.toggle('active');
+            mkBinFromUploadForm.classList.toggle('d-none');
+            mkBinFromURIForm.classList.toggle('d-none');
+        };
     </script>
     <style>
-    body {
-      display: flex;
-      align-items: center;
-      padding-top: 40px;
-      padding-bottom: 40px;
-      background-color: #f5f5f5;
-    }
-    .content {
-        width: 100%;
-        max-width: 1920px;
-        padding: 15px;
-        margin: auto;
-    }
+        body {
+            display: flex;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 1920px;
+            padding: 15px;
+            margin: auto;
+        }
     </style>
 </head>
+
 <body onload="getAssetInfo();">
     <header>
         <nav class="navbar navbar-dark fixed-top bg-dark">
@@ -709,8 +712,9 @@
             </form>
         </nav>
     </header>
-    
-    <div class="modal fade" id="makeDirectory" tabindex="-1" role="dialog" aria-labelledby="makeDirectoryTitle" aria-hidden="true">
+
+    <div class="modal fade" id="makeDirectory" tabindex="-1" role="dialog" aria-labelledby="makeDirectoryTitle"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -720,23 +724,28 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form" id="makeDirectoryForm" action="/makeDirectory" method="post" onsubmit="return onSubmitMakeDirectory();">
+                    <form class="form" id="makeDirectoryForm" action="/makeDirectory" method="post"
+                        onsubmit="return onSubmitMakeDirectory();">
                         <fieldset class="form-group">
-                            <input type="hidden" id="mkDirParendId" name="parentId"/>
+                            <input type="hidden" id="mkDirParendId" name="parentId" />
                             <label for="astName" class="col-form-label">name:</label>
-                            <input class="form-control" id="mkDirAstName" name="astName" type="text" maxlength="45" required autofocus placeholder="directory name" pattern = '(^[^\\/?%*:|"<>\.]+$)'/>
-                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit" onclick="$('#makeDirectory').modal('hide');">send</button>
+                            <input class="form-control" id="mkDirAstName" name="astName" type="text" maxlength="45"
+                                required autofocus placeholder="directory name" pattern='(^[^\\/?%*:|"<>\.]+$)' />
+                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+                                onclick="$('#makeDirectory').modal('hide');">send</button>
                         </fieldset>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="document.getElementById('makeDirectoryForm').reset();">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        onclick="document.getElementById('makeDirectoryForm').reset();">Close</button>
                 </div>
             </div>
         </div>
     </div>
-    
-	<div class="modal fade" id="makeTarget" tabindex="-1" role="dialog" aria-labelledby="makeTargetTitle" aria-hidden="true">
+
+    <div class="modal fade" id="makeTarget" tabindex="-1" role="dialog" aria-labelledby="makeTargetTitle"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -746,23 +755,28 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form" id="makeTargetForm" action="/makeTarget" method="post" onsubmit="return onSubmitMakeTarget();">
+                    <form class="form" id="makeTargetForm" action="/makeTarget" method="post"
+                        onsubmit="return onSubmitMakeTarget();">
                         <fieldset class="form-group">
-                            <input type="hidden" id="mkTargetParendId" name="parentId"/>
+                            <input type="hidden" id="mkTargetParendId" name="parentId" />
                             <label for="astName" class="col-form-label">Name:</label>
-                            <input class="form-control" id="mkTargetAstName" name="astName" type="text" maxlength="45" required autofocus placeholder="target name" pattern = '(^[^\\/?%*:|"<>\.]+$)'/>
-                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit" onclick="$('#makeTarget').modal('hide');">Send</button>
+                            <input class="form-control" id="mkTargetAstName" name="astName" type="text" maxlength="45"
+                                required autofocus placeholder="target name" pattern='(^[^\\/?%*:|"<>\.]+$)' />
+                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+                                onclick="$('#makeTarget').modal('hide');">Send</button>
                         </fieldset>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="document.getElementById('makeTargetForm').reset();">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        onclick="document.getElementById('makeTargetForm').reset();">Close</button>
                 </div>
             </div>
         </div>
     </div>
-	
-	<div class="modal fade" id="UploadGeneralFeature" tabindex="-1" role="dialog" aria-labelledby="UploadGeneralFeatureTitle" aria-hidden="true">
+
+    <div class="modal fade" id="UploadGeneralFeature" tabindex="-1" role="dialog"
+        aria-labelledby="UploadGeneralFeatureTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -772,25 +786,31 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form" id="UploadGeneralFeatureForm" action="/makeTargetGeneralFeature" method="post" onsubmit="return onSubmitUploadGeneralFeature();">
+                    <form class="form" id="UploadGeneralFeatureForm" action="/makeTargetGeneralFeature" method="post"
+                        onsubmit="return onSubmitUploadGeneralFeature();">
                         <fieldset class="form-group">
-                            <input type="hidden" id="UploadGeneralFeatureTargetId" name="targetId"/>
+                            <input type="hidden" id="UploadGeneralFeatureTargetId" name="targetId" />
                             <label for="width" class="col-form-label">Width(m):</label>
-                            <input class="form-control" id="UploadGeneralFeatureWidth" name="width" type="text" maxlength="15" required autofocus pattern = '(^[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$)'/>
+                            <input class="form-control" id="UploadGeneralFeatureWidth" name="width" type="text"
+                                maxlength="15" required autofocus pattern='(^[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$)' />
                             <label for="src" class="col-form-label">Upload file:</label>
-							<input type="file" class="form-control-file" id="UploadGeneralFeatureSrc" name="src" multiple="false" required />
-							<button class="btn btn-lg btn-primary btn-block mt-4" type="submit" onclick="$('#UploadGeneralFeature').modal('hide');">Send</button>
+                            <input type="file" class="form-control-file" id="UploadGeneralFeatureSrc" name="src"
+                                multiple="false" required />
+                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+                                onclick="$('#UploadGeneralFeature').modal('hide');">Send</button>
                         </fieldset>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="document.getElementById('UploadGeneralFeatureForm').reset();">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        onclick="document.getElementById('UploadGeneralFeatureForm').reset();">Close</button>
                 </div>
             </div>
         </div>
     </div>
-	
-	<div class="modal fade" id="UploadVuforiaFeature" tabindex="-1" role="dialog" aria-labelledby="UploadVuforiaFeatureTitle" aria-hidden="true">
+
+    <div class="modal fade" id="UploadVuforiaFeature" tabindex="-1" role="dialog"
+        aria-labelledby="UploadVuforiaFeatureTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -800,32 +820,38 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form" id="UploadVuforiaFeatureForm" action="/makeTargetVuforiaFeature" method="post" onsubmit="return onSubmitUploadVuforialFeature();">
+                    <form class="form" id="UploadVuforiaFeatureForm" action="/makeTargetVuforiaFeature" method="post"
+                        onsubmit="return onSubmitUploadVuforialFeature();">
                         <fieldset class="form-group">
-                            <input type="hidden" id="UploadVuforiaFeatureTargetId" name="targetId"/>
-							<label for="name">type</label>
-							<select class="form-control" id="UploadVuforiaFeatureType" name="type">
-							  <option>SingleImage</option>
-							  <option>Cuboid</option>
-							  <option>Cylinder</option>
-							  <option>3DObject</option>
-							</select>
+                            <input type="hidden" id="UploadVuforiaFeatureTargetId" name="targetId" />
+                            <label for="name">type</label>
+                            <select class="form-control" id="UploadVuforiaFeatureType" name="type">
+                                <option>SingleImage</option>
+                                <option>Cuboid</option>
+                                <option>Cylinder</option>
+                                <option>3DObject</option>
+                            </select>
                             <label for="xml" class="col-form-label">xml file:</label>
-                            <input type="file" class="form-control-file" id="UploadVuforiaFeatureXml" name="xml" multiple="false" required />
+                            <input type="file" class="form-control-file" id="UploadVuforiaFeatureXml" name="xml"
+                                multiple="false" required />
                             <label for="dat" class="col-form-label">dat file:</label>
-							<input type="file" class="form-control-file" id="UploadVuforiaFeatureDat" name="dat" multiple="false" required />
-							<button class="btn btn-lg btn-primary btn-block mt-4" type="submit" onclick="$('#UploadVuforiaFeature').modal('hide');">Send</button>
+                            <input type="file" class="form-control-file" id="UploadVuforiaFeatureDat" name="dat"
+                                multiple="false" required />
+                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+                                onclick="$('#UploadVuforiaFeature').modal('hide');">Send</button>
                         </fieldset>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="document.getElementById('UploadVuforiaFeatureForm').reset();">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        onclick="document.getElementById('UploadVuforiaFeatureForm').reset();">Close</button>
                 </div>
             </div>
         </div>
     </div>
-	
-    <div class="modal fade" id="makeBinary" tabindex="-1" role="dialog" aria-labelledby="makeBinaryTitle" aria-hidden="true">
+
+    <div class="modal fade" id="makeBinary" tabindex="-1" role="dialog" aria-labelledby="makeBinaryTitle"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -835,65 +861,84 @@
                     </button>
                 </div>
                 <div class="modal-body">
-					<nav class="nav nav-pills nav-justified">
-						<a class="nav-item nav-link active" id="makeBinaryNavURI" href="javascript:toggleMkBinNav();">From URI</a>
-						<a class="nav-item nav-link" id="makeBinaryNavUpload" href="javascript:toggleMkBinNav();">File Upload</a>
-					</nav>
-                    <form class="form" id="makeBinaryFromURIForm" action="/makeBinaryFromURI" method="post" onsubmit="return onSubmitMakeBinaryFromURI();">
+                    <nav class="nav nav-pills nav-justified">
+                        <a class="nav-item nav-link active" id="makeBinaryNavURI"
+                            href="javascript:toggleMkBinNav();">From URI</a>
+                        <a class="nav-item nav-link" id="makeBinaryNavUpload" href="javascript:toggleMkBinNav();">File
+                            Upload</a>
+                    </nav>
+                    <form class="form" id="makeBinaryFromURIForm" action="/makeBinaryFromURI" method="post"
+                        onsubmit="return onSubmitMakeBinaryFromURI();">
                         <fieldset class="form-group">
-                            <input type="hidden" id="mkBinFromURIParentId" name="parentId"/>
+                            <input type="hidden" id="mkBinFromURIParentId" name="parentId" />
                             <label for="astName" class="col-form-label">Name:</label>
-                            <input class="form-control" id="mkBinFromURIAstName" name="astName" type="text" maxlength="45" required autofocus placeholder="binary name" pattern = '(^[^<>:;,?"*|/]+$)'/>
+                            <input class="form-control" id="mkBinFromURIAstName" name="astName" type="text"
+                                maxlength="45" required autofocus placeholder="binary name"
+                                pattern='(^[^<>:;,?"*|/]+$)' />
                             <label for="srcURI" class="col-form-label">URI:</label>
-                            <input class="form-control" id="mkBinFromURISrcURI" name="srcURI" type="text" maxlength="255" required placeholder="https://"/>
-                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit" onclick="$('#makeBinary').modal('hide');">Send</button>
+                            <input class="form-control" id="mkBinFromURISrcURI" name="srcURI" type="text"
+                                maxlength="255" required placeholder="https://" />
+                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+                                onclick="$('#makeBinary').modal('hide');">Send</button>
                         </fieldset>
                     </form>
-					<form class="form d-none" id="makeBinaryFromUploadForm" action="/makeBinaryFromUpload" method="post" onsubmit="return onSubmitMakeBinaryFromUpload();">
+                    <form class="form d-none" id="makeBinaryFromUploadForm" action="/makeBinaryFromUpload" method="post"
+                        onsubmit="return onSubmitMakeBinaryFromUpload();">
                         <fieldset class="form-group">
-                            <input type="hidden" id="mkBinFromUploadParentId" name="parentId"/>
+                            <input type="hidden" id="mkBinFromUploadParentId" name="parentId" />
                             <label for="astName" class="col-form-label">Name:</label>
-                            <input class="form-control" id="mkBinFromUploadAstName" name="astName" type="text" maxlength="45" required autofocus placeholder="binary name" pattern = '(^[^<>:;,?"*|/]+$)'/>
-							<label for="src" class="col-form-label">Upload file:</label>
-							<input type="file" class="form-control-file" id="mkBinFromUploadSrc" name="src" multiple="false" required />
-                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit" onclick="$('#makeBinary').modal('hide');">Send</button>
+                            <input class="form-control" id="mkBinFromUploadAstName" name="astName" type="text"
+                                maxlength="45" required autofocus placeholder="binary name"
+                                pattern='(^[^<>:;,?"*|/]+$)' />
+                            <label for="src" class="col-form-label">Upload file:</label>
+                            <input type="file" class="form-control-file" id="mkBinFromUploadSrc" name="src"
+                                multiple="false" required />
+                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+                                onclick="$('#makeBinary').modal('hide');">Send</button>
                         </fieldset>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="document.getElementById('makeBinaryFromURIForm').reset(); document.getElementById('makeBinaryFromUploadForm').reset();">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        onclick="document.getElementById('makeBinaryFromURIForm').reset(); document.getElementById('makeBinaryFromUploadForm').reset();">Close</button>
                 </div>
             </div>
         </div>
     </div>
-    
-	<div class="modal fade" id="makeTemplate" tabindex="-1" role="dialog" aria-labelledby="makeTemplateTitle" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="makeTemplateTitle">Make Template</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+
+    <div class="modal fade" id="makeTemplate" tabindex="-1" role="dialog" aria-labelledby="makeTemplateTitle"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="makeTemplateTitle">Make Template</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-				</div>
-				<div class="modal-body">
-					<form class="form" id="makeTemplateForm" action="/makeTemplate" method="post" onsubmit="return onSubmitMakeTemplate();">
-						<fieldset class="form-group">
-							<input type="hidden" id="mkTemplateParentId" name="parentId"/>
-							<label for="astName" class="col-form-label">Name:</label>
-                            <input class="form-control" id="mkTemplateAstName" name="astName" type="text" maxlength="45" required autofocus placeholder="Template name" pattern = '(^[^<>:;,?"*|/]+$)'/>
-                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit" onclick="$('#makeTemplate').modal('hide');">Send</button>
-						</fieldset>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="document.getElementById('makeTemplateForm').reset();">Close</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	
-    <div class="modal fade" id="shareToDiv" tabindex="-1" role="dialog" aria-labelledby="shareToTitle" aria-hidden="true">
+                </div>
+                <div class="modal-body">
+                    <form class="form" id="makeTemplateForm" action="/makeTemplate" method="post"
+                        onsubmit="return onSubmitMakeTemplate();">
+                        <fieldset class="form-group">
+                            <input type="hidden" id="mkTemplateParentId" name="parentId" />
+                            <label for="astName" class="col-form-label">Name:</label>
+                            <input class="form-control" id="mkTemplateAstName" name="astName" type="text" maxlength="45"
+                                required autofocus placeholder="Template name" pattern='(^[^<>:;,?"*|/]+$)' />
+                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+                                onclick="$('#makeTemplate').modal('hide');">Send</button>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        onclick="document.getElementById('makeTemplateForm').reset();">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="shareToDiv" tabindex="-1" role="dialog" aria-labelledby="shareToTitle"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -903,27 +948,33 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form" id="shareToForm" action="/shareAsset" method="post" onsubmit="return onSubmitShareTo();">
+                    <form class="form" id="shareToForm" action="/shareAsset" method="post"
+                        onsubmit="return onSubmitShareTo();">
                         <fieldset class="form-group">
                             <label for="shareTargetNames" class="col-form-label">To:</label>
-                            <input class="form-control" id="shareTargetNames" name="shareTargetNames" type="text" maxlength="255" required autofocus placeholder="user1[, user2@mail.com[, ...]]"/>
-                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit" onclick="$('#shareToDiv').modal('hide');">Send</button>
+                            <input class="form-control" id="shareTargetNames" name="shareTargetNames" type="text"
+                                maxlength="255" required autofocus placeholder="user1[, user2@mail.com[, ...]]" />
+                            <button class="btn btn-lg btn-primary btn-block mt-4" type="submit"
+                                onclick="$('#shareToDiv').modal('hide');">Send</button>
                         </fieldset>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="document.getElementById('shareToForm').reset();">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        onclick="document.getElementById('shareToForm').reset();">Close</button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <div class="content my-4">
         <div class="d-inline-block" style="width:100px;" id="navBtnDiv">
-            <button class="btn btn-secondary btn-sm" onclick="navPrev();"><</button>
-            <button class="btn btn-secondary btn-sm" onclick="navNext();">></button>
-            <button class="btn btn-secondary btn-sm" onclick="navParent();">^</button>
-        </div><div class="d-inline-block" style="width:calc(100% - 100px);">
+            <button class="btn btn-secondary btn-sm" onclick="navPrev();">
+                << /button>
+                    <button class="btn btn-secondary btn-sm" onclick="navNext();">></button>
+                    <button class="btn btn-secondary btn-sm" onclick="navParent();">^</button>
+        </div>
+        <div class="d-inline-block" style="width:calc(100% - 100px);">
             <nav aria-label="breadcrumb" id="assetNav">
                 <ol class="breadcrumb" id="assetNavOl">
                 </ol>
@@ -946,64 +997,72 @@
                 </div>
                 <div class="d-none" id="binaryItemDIV">
                 </div>
-				<div class="d-none" id="targetItemDIV">
-					<div class="btn-group" role="group">
-						<button id="btnGroupUploadFeature" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							UploadFeature
-						</button>
-						<div class="dropdown-menu" aria-labelledby="btnGroupUploadFeature">
-							<a class="dropdown-item" href="javascript:$('#UploadGeneralFeature').modal();">general</a>
-							<a class="dropdown-item" href="javascript:$('#UploadVuforiaFeature').modal();">vuforia</a>
-						</div>
-					</div>
-					<div class="container" id="targetItemInfoDIV">
-					</div>
-				</div>
-				<div class="d-none" id="templateItemDIV">
-					<form class="form" id="templateContentForm" action="/commitContent" method="post" onsubmit="return onCommitTemplateContent();">
-						<fieldset class="form-group">
-							<input type="hidden" id="templateItemAstId" name="astId" />
-							<div class="input-group input-group-sm">
-								<div class="input-group-prepend">
-									<span class="input-group-text" id="prependURI">URI</span>
-								</div>
-								<input type="text" class="form-control" id="codeURI" aria-describedby="prependURI" />
-								<div class="input-group-append">
-									<button class="btn btn-outline-secondary" type="button" id="codeImportFromURIBtn" onclick="codeImportFromURI();">Import</button>
-								</div>
-							</div>
-							<div class="input-group input-group-sm">
-                                <input type="file" class="custom-file-input" id="codeFile" aria-describedby="codeImportBtn" onclick="this.value = '';" onchange="codeImportFromFile();" />
+                <div class="d-none" id="targetItemDIV">
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupUploadFeature" type="button" class="btn btn-secondary dropdown-toggle"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            UploadFeature
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupUploadFeature">
+                            <a class="dropdown-item" href="javascript:$('#UploadGeneralFeature').modal();">general</a>
+                            <a class="dropdown-item" href="javascript:$('#UploadVuforiaFeature').modal();">vuforia</a>
+                        </div>
+                    </div>
+                    <div class="container" id="targetItemInfoDIV">
+                    </div>
+                </div>
+                <div class="d-none" id="templateItemDIV">
+                    <form class="form" id="templateContentForm" action="/commitContent" method="post"
+                        onsubmit="return onCommitTemplateContent();">
+                        <fieldset class="form-group">
+                            <input type="hidden" id="templateItemAstId" name="astId" />
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="prependURI">URI</span>
+                                </div>
+                                <input type="text" class="form-control" id="codeURI" aria-describedby="prependURI" />
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="codeImportFromURIBtn"
+                                        onclick="codeImportFromURI();">Import</button>
+                                </div>
+                            </div>
+                            <div class="input-group input-group-sm">
+                                <input type="file" class="custom-file-input" id="codeFile"
+                                    aria-describedby="codeImportBtn" onclick="this.value = '';"
+                                    onchange="codeImportFromFile();" />
                                 <label class="custom-file-label" for="codeFile">Choose file</label>
-							</div>
-							<div class="input-group input-group-sm mb-3">
-								<div class="input-group-prepend">
-									<span class="input-group-text">Content Source</span>
-								</div>
-								<textarea class="form-control" style="height:400px;" aria-label="Content Source" id="source" name="source"></textarea>
-							</div>
-							<button id="btnCimmitContent" type="submit" class="btn btn-primary btn-block">
-								Commit
-							</button>
-						</fieldset>
-					</form>
-				</div>
+                            </div>
+                            <div class="input-group input-group-sm mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Content Source</span>
+                                </div>
+                                <textarea class="form-control" style="height:400px;" aria-label="Content Source"
+                                    id="source" name="source"></textarea>
+                            </div>
+                            <button id="btnCimmitContent" type="submit" class="btn btn-primary btn-block">
+                                Commit
+                            </button>
+                        </fieldset>
+                    </form>
+                </div>
             </div>
             <div class="col-md-3 border-right">
                 <span class="badge badge-secondary" id="assetType"></span>
-                <form class="form-inline" id="assetNameForm" action="/renameAsset" method="post" onsubmit="return onSubmitRename();">
+                <form class="form-inline" id="assetNameForm" action="/renameAsset" method="post"
+                    onsubmit="return onSubmitRename();">
                     <input class="form-control" id="assetName" name="astName" maxlength="45" required />
-                    <input hidden id="assetId" name="astId"/>
+                    <input hidden id="assetId" name="astId" />
                     <button class="form-control btn btn-sm" type="submit">mod</button>
                 </form>
                 <h3 id="detailHead"></h3>
                 <div class="mt-2 pt-2" id="directoryOptions">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="newAssetButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">New Asset</button>
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="newAssetButton"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">New Asset</button>
                     <div class="dropdown-menu" aria-labelledby="newAssetButton">
                         <a class="dropdown-item" href="javascript:$('#makeDirectory').modal();">Directory</a>
                         <a class="dropdown-item" href="javascript:$('#makeTarget').modal();">Target</a>
                         <a class="dropdown-item" href="javascript:$('#makeBinary').modal();">Binary</a>
-						<a class="dropdown-item" href="javascript:$('#makeTemplate').modal();">Template</a>
+                        <a class="dropdown-item" href="javascript:$('#makeTemplate').modal();">Template</a>
                     </div>
                     <button class="btn btn-secondary" onclick="remove();">Delete</button>
                 </div>

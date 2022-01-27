@@ -10,9 +10,9 @@ const { DBError } = require('../lib/errors');
 
 
 router.get('/', (request, response) => {
-    
+
     const sess = request.session;
-    if(!sess.uid) {
+    if (!sess.uid) {
         return response.redirect('/loginPage');
     }
 
@@ -20,7 +20,7 @@ router.get('/', (request, response) => {
 });
 
 router.get('/loginPage', async (request, response, next) => {
-    
+
     let data;
     try {
         const fileName = path.join(__dirname, '../public/loginPage.html');
@@ -31,22 +31,22 @@ router.get('/loginPage', async (request, response, next) => {
         return next(err);
     }
 
-    response.writeHead(200, {'Content-Type': 'text/html'});
+    response.writeHead(200, { 'Content-Type': 'text/html' });
     response.end(data);
 });
 
 router.post('/register', async (request, response, next) => {
-    
+
     const name = request.body.name;
     const email = request.body.email;
-    const pw = request.body.pw1; 
-    if(!name || !email || !pw) {
+    const pw = request.body.pw1;
+    if (!name || !email || !pw) {
         const err = new BadRequestError(`Any insertbox is empty`);
         return next(err);
     }
-    
+
     let conn, uid;
-    try{
+    try {
         conn = await dbPool.getConnection();
         await conn.beginTransaction();
 
@@ -57,7 +57,7 @@ router.post('/register', async (request, response, next) => {
         conn.commit();
         conn.release();
 
-    } catch(err) {
+    } catch (err) {
         if (conn) {
             conn.rollback();
             conn.release();
@@ -71,14 +71,14 @@ router.post('/register', async (request, response, next) => {
     request.session.name = name;
     request.session.email = email;
     request.session.is_admin = Buffer.alloc(1, 0x00);
-    
+
     response.status(200).end();
 });
 
 router.post('/removeAccount', async (request, response, next) => {
-    
+
     const uid = request.session.uid;
-    if(!uid) {
+    if (!uid) {
         const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
         return next(err);
     }
@@ -90,8 +90,8 @@ router.post('/removeAccount', async (request, response, next) => {
         conn.release();
 
     } catch (err) {
-        if (conn){
-            conn.release();    
+        if (conn) {
+            conn.release();
         }
 
         // conn error (500), query error (500)
@@ -103,10 +103,10 @@ router.post('/removeAccount', async (request, response, next) => {
 });
 
 router.post('/login', async (request, response, next) => {
-    
+
     const id = request.body.id;
     const pw = request.body.pw;
-    if(!id || !pw) {
+    if (!id || !pw) {
         const err = new UnauthorizedError(`ID or PW is empty.`);
         return next(err);
     }
@@ -116,7 +116,7 @@ router.post('/login', async (request, response, next) => {
     try {
         conn = await dbPool.getConnection();
         res1 = await conn.query(`select * from t_user where ${field} = ?`, [id]);
-        if(res1.length !== 1) {
+        if (res1.length !== 1) {
             throw new DBError('Fail : Nonexistent id', 406);
         }
 
@@ -124,13 +124,13 @@ router.post('/login', async (request, response, next) => {
         const pwHashResult = res2[0];
 
         // should change to hashing module?
-        if(res1[0].passwd !== pwHashResult.val) {
+        if (res1[0].passwd !== pwHashResult.val) {
             throw new DBError('Fail : Wrong password', 406);
         }
-    
+
         conn.release();
     } catch (err) {
-        if (conn){
+        if (conn) {
             conn.release();
         }
 
@@ -149,16 +149,16 @@ router.post('/login', async (request, response, next) => {
 });
 
 router.post('/logout', (request, response) => {
-    
+
     const id = request.session.uid;
-    if(!id) {
+    if (!id) {
         const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
         return next(err);
     }
 
     // await util.promisify(request.session.destroy)();
-    request.session.destroy((err)=>{
-        if(!err) {
+    request.session.destroy((err) => {
+        if (!err) {
             response.status(200).end();
         }
         else {
@@ -169,9 +169,9 @@ router.post('/logout', (request, response) => {
 });
 
 router.get('/editProfile', async (request, response, next) => {
-	
+
     let id = request.session.uid;
-    if(!id) {
+    if (!id) {
         return response.redirect('/');
     }
 
@@ -185,22 +185,22 @@ router.get('/editProfile', async (request, response, next) => {
         data = await fsp.readFile(fileName, { encoding: 'utf8' });
 
     } catch (err) {
-        if (conn){
-            conn.release();    
+        if (conn) {
+            conn.release();
         }
 
         // conn error (500), query error (500), read file error (500)
         return next(err);
     }
 
-    response.writeHead(200, {'Content-Type': 'text/html'});
-    response.end(ejs.render(data, {'avatar_infos' : res1}));
+    response.writeHead(200, { 'Content-Type': 'text/html' });
+    response.end(ejs.render(data, { 'avatar_infos': res1 }));
 });
 
 router.get('/profile', async (request, response, next) => {
-    
+
     const uid = request.session.uid;
-    if(!uid) {
+    if (!uid) {
         const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
         return next(err);
     }
@@ -209,15 +209,15 @@ router.get('/profile', async (request, response, next) => {
     try {
         conn = await dbPool.getConnection();
         res1 = await conn.query(`select name, email, avatar_id, vr_hand_sync from t_user where id = ?`, uid);
-        if(res1.length !== 1){
+        if (res1.length !== 1) {
             throw new DBError('Removed account', 412);
         }
 
         conn.release();
 
     } catch (err) {
-        if (conn){
-            conn.release();    
+        if (conn) {
+            conn.release();
         }
 
         // conn error (500), query error (500), Removed account (412)
@@ -230,9 +230,9 @@ router.get('/profile', async (request, response, next) => {
 });
 
 router.post('/alterUser', async (request, response, next) => {
-    
+
     const uid = request.session.uid;
-    if(!uid) {
+    if (!uid) {
         const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
         return next(err);
     }
@@ -240,7 +240,7 @@ router.post('/alterUser', async (request, response, next) => {
     let { name, email, pw, pw1, pw2, avatar, vrHandSync } = request.body;
     let new_pw = pw1;
     const avatar_id = parseInt(avatar);
-    if(!name || !email || !pw || !vrHandSync || isNaN(avatar_id)) {
+    if (!name || !email || !pw || !vrHandSync || isNaN(avatar_id)) {
         const err = new BadRequestError(`Any insertbox is empty`);
         return next(err);
     }
@@ -251,12 +251,12 @@ router.post('/alterUser', async (request, response, next) => {
         conn = await dbPool.getConnection();
 
         const res1 = await conn.query(`select SHA2(?, 256) = (select passwd from t_user where id=?) as valid`, [pw, uid]);
-        if(res1[0].valid !== 1) {
+        if (res1[0].valid !== 1) {
             throw new DBError('Nonexistent account or wrong password', 403);
         }
 
         let query, params;
-        if(new_pw) {
+        if (new_pw) {
             query = `update t_user set name=?, email=?, passwd=SHA2(?, 256), avatar_id=?, vr_hand_sync=b'${vrHandSync}' where id=?`;
             params = [name, email, new_pw, avatar_id, uid];
         }
@@ -269,11 +269,11 @@ router.post('/alterUser', async (request, response, next) => {
         conn.release();
 
     } catch (err) {
-        if (conn){
-            conn.release();    
+        if (conn) {
+            conn.release();
         }
 
-        // conn error (500), query error 1 (500), Nonexistent account or wrong password (403), Duplicate name or email (500)
+        // conn error (500), query error 1 (500), Nonexistent account or wrong password (406), Duplicate name or email (406)
         return next(err);
     }
 
@@ -281,9 +281,9 @@ router.post('/alterUser', async (request, response, next) => {
 });
 
 router.get('/invitationList', async (request, response, next) => {
-    
-    const uid = request.session.uid;    
-    if(!uid) {
+
+    const uid = request.session.uid;
+    if (!uid) {
         const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
         return next(err);
     }
@@ -295,8 +295,8 @@ router.get('/invitationList', async (request, response, next) => {
         conn.release();
 
     } catch (err) {
-        if (conn){
-            conn.release();    
+        if (conn) {
+            conn.release();
         }
 
         // conn error (500), query error (500)
@@ -307,9 +307,9 @@ router.get('/invitationList', async (request, response, next) => {
 });
 
 router.get('/main', async (request, response, next) => {
-    
+
     const id = request.session.uid;
-    if(!id) {
+    if (!id) {
         return response.redirect('/');
     }
 
@@ -318,25 +318,25 @@ router.get('/main', async (request, response, next) => {
         const fileName = path.join(__dirname, '../public/main.html');
         data = await fsp.readFile(fileName, { encoding: 'utf8' });
 
-    } catch(err) {
+    } catch (err) {
         // internal server error (500)
         return next(err);
     }
 
-    response.writeHead(200, {'Content-Type': 'text/html'});
+    response.writeHead(200, { 'Content-Type': 'text/html' });
     response.end(data);
 });
 
 router.get('/workspace', async (request, response, next) => {
 
     const uid = request.session.uid;
-    if(!uid) {
+    if (!uid) {
         const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
         return next(err);
     }
 
     const wid = request.query.id;
-    if(!wid) {
+    if (!wid) {
         const err = new BadRequestError(`There is no wid`);
         return next(err);
     }
@@ -346,20 +346,21 @@ router.get('/workspace', async (request, response, next) => {
     try {
         conn = await dbPool.getConnection();
         const res1 = await conn.query(`select u.name, p.rid from (select id, name from t_user where id = ?) as u join t_participation as p on p.uid = u.id where p.wid = ?`, [uid, wid]);
-        if(res1.length !== 1){
+        if (res1.length !== 1) {
+            //406
             throw new DBError('Unauthorized access', 403);
         }
 
         const res2 = await conn.query(`select id, name, created_date, content, vr_options from t_workspace where id = ?`, wid);
-        if(res2.length !== 1) {
+        if (res2.length !== 1) {
             throw new DBError('DB query error', 500);
         }
 
         const res3 = await conn.query(`select * from t_auth_role_relation where rid = ?`, res1[0].rid);
-        if(res3.length === 0) {
+        if (res3.length === 0) {
             throw new DBError('Unauthorized user role', 403);
         }
-        
+
         const fileName = path.join(__dirname, '../public/workspace.ejs');
         workspace = await fsp.readFile(fileName, { encoding: 'utf8' });
 
@@ -371,10 +372,10 @@ router.get('/workspace', async (request, response, next) => {
         data = '<a-entity><a-camera></a-camera></a-entity>' + res2[0].content;
         canWrite = false;
         canInvite = false;
-        for(let r of res3) {
-            if(r.aid === 5)
+        for (let r of res3) {
+            if (r.aid === 5)
                 canWrite = true;
-            else if(r.aid === 2)
+            else if (r.aid === 2)
                 canInvite = true;
         }
 
@@ -384,23 +385,23 @@ router.get('/workspace', async (request, response, next) => {
         conn.release();
 
     } catch (err) {
-        if (conn){
-            conn.release();    
+        if (conn) {
+            conn.release();
         }
-        
-        // conn error (500), res1 error (500), Unauthorized access (403), res2 error (500), res2 query error (500)
-        // res3 error (500), Unauthorized user role (403), file read error (500), part update error (500)
+
+        // conn error (500), res1 error (500), Unauthorized access (406), res2 error (500), res2 query error (500)
+        // res3 error (406), Unauthorized user role (403), file read error (500), part update error (500)
         return next(err);
     }
 
-    response.writeHead(200, {'Content-Type': 'text/html'});
-    response.end(ejs.render(workspace, {uname, wid, wname, created, rid, canWrite, canInvite, vrOptions, data }));
+    response.writeHead(200, { 'Content-Type': 'text/html' });
+    response.end(ejs.render(workspace, { uname, wid, wname, created, rid, canWrite, canInvite, vrOptions, data }));
 });
 
 router.get('/manageAssets', async (request, response) => {
 
     const uid = request.session.uid;
-    if(!uid) {
+    if (!uid) {
         const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
         return next(err);
     }
@@ -415,7 +416,7 @@ router.get('/manageAssets', async (request, response) => {
         return next(err);
     }
 
-    response.writeHead(200, {'Content-Type': 'text/html'});
+    response.writeHead(200, { 'Content-Type': 'text/html' });
     response.end(data);
 });
 

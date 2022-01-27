@@ -1,122 +1,128 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
-    <script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
-    <script src="/library/jquery-1.11.3.min.js"></script>
+	<script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
+	<script src="/library/jquery-1.11.3.min.js"></script>
 	<script src="/library/jquery.blockUI.js"></script>
 	<script src="/library/aframe-v1.2.0.min.js"></script>
-    <script src="/library/THREE.TransformControls.js"></script>
-    <script src="/library/THREE.PCDLoader.js"></script>
+	<script src="/library/THREE.TransformControls.js"></script>
+	<script src="/library/THREE.PCDLoader.js"></script>
 	<script src="/library/animation-mixer.js"></script>
-    <script src="/library/cube-env-map.js"></script>
+	<script src="/library/cube-env-map.js"></script>
 	<script src="/library/stack.js"></script>
-    <script src="/library/list.js"></script>
+	<script src="/library/list.js"></script>
 	<script src="/components/event-capturer.js"></script>
 	<script src="/components/flag+trigger.js"></script>
-    <script src="/primitives/a-flag.js"></script>
-    <script src="/primitives/a-trigger.js"></script>
+	<script src="/primitives/a-flag.js"></script>
+	<script src="/primitives/a-trigger.js"></script>
 	<script src="/components/position-observer.js"></script>
 	<script src="/components/rotation-observer.js"></script>
 	<script src="/components/scale-observer.js"></script>
 	<script src="/components/collision-observer.js"></script>
 	<script src="/components/two-state-animation.js"></script>
-    <script src="/components/two-state-embedded-animation.js"></script>
+	<script src="/components/two-state-embedded-animation.js"></script>
 	<script src="/components/transparency.js"></script>
 	<script src="/components/vr-slide.js"></script>
 	<script src="/components/vr-1axis-hinge.js"></script>
 	<script src="/components/vr-snap.js"></script>
-    <script src="/components/point-cloud.js"></script>
-    <script src="/primitives/a-point-cloud.js"></script>
-    <script src="/primitives/a-group.js"></script>
-    <script src="/components/binder.js"></script>
-    <script src="/components/hinge-animation.js"></script>
+	<script src="/components/point-cloud.js"></script>
+	<script src="/primitives/a-point-cloud.js"></script>
+	<script src="/primitives/a-group.js"></script>
+	<script src="/components/binder.js"></script>
+	<script src="/components/hinge-animation.js"></script>
 	<script src="/components/avatar.js"></script>
 	<script src="/primitives/a-user.js"></script>
-    <script src="/components/interaction-manger.js"></script>
-    <script src="/components/thd-mode-controls.js"></script>
-    <script src="/components/vr-mode-controls.js"></script>
+	<script src="/components/interaction-manger.js"></script>
+	<script src="/components/thd-mode-controls.js"></script>
+	<script src="/components/vr-mode-controls.js"></script>
 	<script src="/components/ar-mode-controls.js"></script>
-    <script src="/components/mode-changer.js"></script>
-    <script src="/components/target.js"></script>
-    <script src="/components/active-marker.js"></script>
-    <script src="/primitives/a-marker.js"></script>
-    <script src="/components/base-marker.js"></script>
-    <script src="/primitives/a-base.js"></script>
-    <script src="/components/color-scroll-material.js"></script>
+	<script src="/components/mode-changer.js"></script>
+	<script src="/components/target.js"></script>
+	<script src="/components/active-marker.js"></script>
+	<script src="/primitives/a-marker.js"></script>
+	<script src="/components/base-marker.js"></script>
+	<script src="/primitives/a-base.js"></script>
+	<script src="/components/color-scroll-material.js"></script>
 	<script src="/components/property-setter.js"></script>
-	
-    <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
-    <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
-	
+
+	<link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+	<link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+
 	<style>
 		.tutorialBox {
-			position : fixed;
-			z-index : 10000;
-			border-style : solid;
-			border-width : 3px;
-			border-color : red;
-			pointer-events : none;
+			position: fixed;
+			z-index: 10000;
+			border-style: solid;
+			border-width: 3px;
+			border-color: red;
+			pointer-events: none;
 		}
+
 		.tutorialMessageVert {
-			position : relative;
-			background : black;
-			opacity : 0.5;
-			width : 200px;
-			height : 300px;
-			pointer-events : auto;
-			cursor : default;
+			position: relative;
+			background: black;
+			opacity: 0.5;
+			width: 200px;
+			height: 300px;
+			pointer-events: auto;
+			cursor: default;
 		}
+
 		.tutorialMessageHori {
-			position : relative;
-			background : black;
-			opacity : 0.5;
-			width : 300px;
-			height : 150px;
-			pointer-events : auto;
-			cursor : default;
+			position: relative;
+			background: black;
+			opacity: 0.5;
+			width: 300px;
+			height: 150px;
+			pointer-events: auto;
+			cursor: default;
 		}
+
 		.tutorialMessageContent {
-			position : absolute;
-			width : calc(100% - 20px);
-			height : calc(100% - 50px);
-			left : 10px;
-			top : 10px;
-			color : white;
-			word-wrap:break-word;
+			position: absolute;
+			width: calc(100% - 20px);
+			height: calc(100% - 50px);
+			left: 10px;
+			top: 10px;
+			color: white;
+			word-wrap: break-word;
 		}
+
 		.tutorialButtonPrev {
-			position : absolute;
-			width : 50px;
-			height : 25px;
-			top : calc(100% - 30px);
-			left : calc(100% - 110px);
-			cursor : default;
+			position: absolute;
+			width: 50px;
+			height: 25px;
+			top: calc(100% - 30px);
+			left: calc(100% - 110px);
+			cursor: default;
 		}
+
 		.tutorialButtonNext {
-			position : absolute;
-			width : 50px;
-			height : 25px;
-			top : calc(100% - 30px);
-			left : calc(100% - 55px);
-			cursor : default;
+			position: absolute;
+			width: 50px;
+			height: 25px;
+			top: calc(100% - 30px);
+			left: calc(100% - 55px);
+			cursor: default;
 		}
 	</style>
-	
+
 	<script>
 		var step = 0;
 		var messages = [
@@ -192,33 +198,33 @@
 		var tutorialBoxs = new Array(5);
 		var tutorialBoxsChangeSteps = [27, 52, 60, 63];
 		var tutorialBoxIdx = 0;
-		
+
 		function next() {
-			if(step === messages.length - 1) return;
+			if (step === messages.length - 1) return;
 			++step;
-			if(buttonDescChangeSteps[buttonUIsIdx] === step) {
-				if(buttonUIs[buttonUIsIdx])
-					$(buttonUIs[buttonUIsIdx]).block({message:null});
-				if(buttonUIs[++buttonUIsIdx])
+			if (buttonDescChangeSteps[buttonUIsIdx] === step) {
+				if (buttonUIs[buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).block({ message: null });
+				if (buttonUIs[++buttonUIsIdx])
 					$(buttonUIs[buttonUIsIdx]).unblock();
 			}
-			if(tutorialBoxsChangeSteps[tutorialBoxIdx] === step) {
+			if (tutorialBoxsChangeSteps[tutorialBoxIdx] === step) {
 				hideTutorialBox(tutorialBoxIdx);
 				showTutorialBox(++tutorialBoxIdx);
 			}
 			let messageP = tutorialBoxs[tutorialBoxIdx].children[0].children[0];
 			messageP.innerHTML = messages[step];
 		}
-		
+
 		function prev() {
-			if(step === 0) return;
-			if(buttonDescChangeSteps[buttonUIsIdx - 1] === step) {
-				if(buttonUIs[buttonUIsIdx])
-					$(buttonUIs[buttonUIsIdx]).block({message:null});
-				if(buttonUIs[--buttonUIsIdx])
+			if (step === 0) return;
+			if (buttonDescChangeSteps[buttonUIsIdx - 1] === step) {
+				if (buttonUIs[buttonUIsIdx])
+					$(buttonUIs[buttonUIsIdx]).block({ message: null });
+				if (buttonUIs[--buttonUIsIdx])
 					$(buttonUIs[buttonUIsIdx]).unblock();
 			}
-			if(tutorialBoxsChangeSteps[tutorialBoxIdx - 1] === step) {
+			if (tutorialBoxsChangeSteps[tutorialBoxIdx - 1] === step) {
 				hideTutorialBox(tutorialBoxIdx);
 				showTutorialBox(--tutorialBoxIdx);
 			}
@@ -226,10 +232,9 @@
 			let messageP = tutorialBoxs[tutorialBoxIdx].children[0].children[0];
 			messageP.innerHTML = messages[step];
 		}
-		
-		function init()
-		{
-			for(let i = 0; i < 5; ++i) {
+
+		function init() {
+			for (let i = 0; i < 5; ++i) {
 				tutorialBoxs[i] = document.createElement('div');
 				$(tutorialBoxs[i]).addClass('tutorialBox');
 				tutorialBoxs[i].style.display = 'none';
@@ -250,33 +255,33 @@
 				$(buttonnext).addClass('tutorialButtonNext');
 				boxMessage.appendChild(buttonnext);
 			}
-			
+
 			let boxMessage;
 			boxMessage = tutorialBoxs[0].children[0];
 			$(boxMessage).addClass('tutorialMessageVert');
 			boxMessage.style.left = 'calc(100% + 10px)';
 			boxMessage.style.top = '0px';
-			
+
 			boxMessage = tutorialBoxs[1].children[0];
 			$(boxMessage).addClass('tutorialMessageVert');
 			boxMessage.style.left = '0px';
 			boxMessage.style.top = 'calc(100% + 10px)';
-			
+
 			boxMessage = tutorialBoxs[2].children[0];
 			$(boxMessage).addClass('tutorialMessageHori');
 			boxMessage.style.left = '0px';
 			boxMessage.style.top = '-160px';
-			
+
 			boxMessage = tutorialBoxs[3].children[0];
 			$(boxMessage).addClass('tutorialMessageHori');
 			boxMessage.style.left = '0px';
-			boxMessage.style.top  = '-160px';
-			
+			boxMessage.style.top = '-160px';
+
 			boxMessage = tutorialBoxs[4].children[0];
 			$(boxMessage).addClass('tutorialMessageVert');
 			boxMessage.style.left = '-210px';
-			boxMessage.style.top  = 'calc(100% - 300px)';
-			
+			boxMessage.style.top = 'calc(100% - 300px)';
+
 			buttonUIs.push(document.getElementById('CopyButtonUI'));
 			buttonUIs.push(document.getElementById('SaveButtonUI'));
 			buttonUIs.push(document.getElementById('InsertButtonUI'));
@@ -292,36 +297,36 @@
 			buttonUIs.push(document.getElementById('UndoButtonUI'));
 			buttonUIs.push(document.getElementById('RedoButtonUI'));
 			buttonUIs.push(document.getElementById('modeChangerLayer'));
-			
-			$('.buttonUI').block({message:null});
+
+			$('.buttonUI').block({ message: null });
 			showTutorialBox(tutorialBoxIdx);
 			tutorialBoxs[tutorialBoxIdx].children[0].children[0].innerHTML = messages[step];
-		}		
-		
+		}
+
 		function showTutorialBox(num) {
-			if(isNaN(num) || num < 0 || num > 5)
+			if (isNaN(num) || num < 0 || num > 5)
 				return;
 			let target;
-			if(num == 0) {
+			if (num == 0) {
 				target = document.getElementById('leftSideWindow');
 			}
-			else if(num == 4){
+			else if (num == 4) {
 				target = document.getElementById('modeChangerLayer');
 			}
 			else {
 				target = document.getElementById('UIGroup' + num);
 			}
-			
+
 			let tutorialBox = tutorialBoxs[num];
-			if(target.style.left !== '')
+			if (target.style.left !== '')
 				tutorialBox.style.left = target.style.left;
-			else if(target.style.right !== '')
+			else if (target.style.right !== '')
 				tutorialBox.style.right = target.style.right;
 			else
 				tutorialBox.style.left = '0px';
-			if(target.style.top !== '')
+			if (target.style.top !== '')
 				tutorialBox.style.top = target.style.top;
-			else if(target.style.bottom !== '')
+			else if (target.style.bottom !== '')
 				tutorialBox.style.bottom = target.style.bottom;
 			else
 				tutorialBox.style.top = '0px';
@@ -330,21 +335,23 @@
 			tutorialBox.style.width = 'calc(' + target.style.width + ' - 6px)';
 			tutorialBox.style.height = 'calc(' + target.style.height + ' - 6px)';
 		}
-		
+
 		function hideTutorialBox(num) {
-			if(isNaN(num) || num < 0 || num > 5)
+			if (isNaN(num) || num < 0 || num > 5)
 				return;
 			let tutorialBox = tutorialBoxs[num];
 			tutorialBox.style.display = 'none';
 		}
-		
-		
-		
+
+
+
 	</script>
 </head>
+
 <body>
-    <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
-    </a-scene>
+	<a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls
+		renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
+	</a-scene>
 	<script>
 		var scene = document.querySelector('a-scene');
 		if (scene.hasLoaded) {
@@ -353,10 +360,11 @@
 			scene.addEventListener('loaded', init);
 		}
 	</script>
-    <div id="modeChangerLayer" class="buttonUI">
-        <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
-        <img id="_ARButton" src="/img/icon/AR in circle.svg"/>
-        <img id="_3DButton" src="/img/icon/3D in circle.svg"/>
-    </div>
+	<div id="modeChangerLayer" class="buttonUI">
+		<img id="_VRButton" src="/img/icon/VR in circle.svg" />
+		<img id="_ARButton" src="/img/icon/AR in circle.svg" />
+		<img id="_3DButton" src="/img/icon/3D in circle.svg" />
+	</div>
 </body>
+
 </html>

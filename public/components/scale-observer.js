@@ -3,21 +3,21 @@
  */
 
 AFRAME.registerComponent('scale-observer', {
-    multiple: true,
+	multiple: true,
 	schema: {
-		goal : {type: 'vec3'}, //target scale vector
-		tolerance : {type: 'number', default: 0.1}, //Distance between scale and goal
-		flagName : {type: 'string'}, //Flag name to reflect the result
-		onWorldCoordinate : {default : false} //Indicates whether the goal property is a value in worldcoordinate
-    },
+		goal: { type: 'vec3' }, //target scale vector
+		tolerance: { type: 'number', default: 0.1 }, //Distance between scale and goal
+		flagName: { type: 'string' }, //Flag name to reflect the result
+		onWorldCoordinate: { default: false } //Indicates whether the goal property is a value in worldcoordinate
+	},
 
-    init: function () {
+	init: function () {
 		this.goalVec = null;
-    },
+	},
 
-    update: function (oldData) {
-		if(oldData.goal !== this.data.goal) {
-			if(!isNaN(this.data.goal.x) && !isNaN(this.data.goal.y) && !isNaN(this.data.goal.z)) {
+	update: function (oldData) {
+		if (oldData.goal !== this.data.goal) {
+			if (!isNaN(this.data.goal.x) && !isNaN(this.data.goal.y) && !isNaN(this.data.goal.z)) {
 				this.goalVec = new THREE.Vector3(this.data.goal.x, this.data.goal.y, this.data.goal.z);
 			}
 			else {
@@ -26,26 +26,26 @@ AFRAME.registerComponent('scale-observer', {
 		}
 	},
 
-    play: function() {
-    },
+	play: function () {
+	},
 
-    pause: function() {
-    },
+	pause: function () {
+	},
 
-    tick: function () {
-		if(!this.goalVec) {
+	tick: function () {
+		if (!this.goalVec) {
 			this.setFlag(false);
 			return;
 		}
 		this.updateFlag();
-    },
+	},
 
-    remove: function () {
-    },
-	
-	updateFlag: function() {
+	remove: function () {
+	},
+
+	updateFlag: function () {
 		let dl;
-		if(this.data.onWorldCoordinate) {
+		if (this.data.onWorldCoordinate) {
 			let thisScale = new THREE.Vector3();
 			this.el.object3D.getWorldScale(thisScale);
 			dl = thisScale.distanceTo(this.goalVec);
@@ -55,10 +55,10 @@ AFRAME.registerComponent('scale-observer', {
 		}
 		this.setFlag(dl <= this.data.tolerance);
 	},
-	
-	setFlag: function(flagVal) {
+
+	setFlag: function (flagVal) {
 		let ftManager = this.el.sceneEl.flagTriggerManager;
-		if(ftManager) {
+		if (ftManager) {
 			ftManager.setFlag(this.data.flagName, flagVal);
 		}
 	}

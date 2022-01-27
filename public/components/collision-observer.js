@@ -5,21 +5,21 @@
  */
 
 AFRAME.registerComponent('collision-observer', {
-    multiple: true,
+	multiple: true,
 	schema: {
-		target : {type: 'string'}, //CSS Selector
-		flagName : {type: 'string'} //Flag name to reflect the result
-    },
+		target: { type: 'string' }, //CSS Selector
+		flagName: { type: 'string' } //Flag name to reflect the result
+	},
 
-    init: function () {
+	init: function () {
 		this.targetEl = null;
 		this.targetColliders = [];
 		this.thisColliders = [];
-    },
+	},
 
-    update: function (oldData) {
-		if(this.data.target !== oldData.target) {
-			if(this.data.target !== '')
+	update: function (oldData) {
+		if (this.data.target !== oldData.target) {
+			if (this.data.target !== '')
 				this.targetEl = document.querySelector(this.data.target);
 			else
 				this.targetEl = null;
@@ -27,62 +27,62 @@ AFRAME.registerComponent('collision-observer', {
 		}
 	},
 
-    play: function() {
-    },
+	play: function () {
+	},
 
-    pause: function() {
-    },
+	pause: function () {
+	},
 
-    tick: function () {
-		if(!this.targetEl) return;
+	tick: function () {
+		if (!this.targetEl) return;
 		this.updateFlag();
-    },
+	},
 
-    remove: function () {
-    },
-	
-	updateFlag: function() {
-		if(!this.el.hasAttribute('collidable')) return;
-		if(!this.targetEl || !this.targetEl.hasAttribute('collidable')) return;
+	remove: function () {
+	},
+
+	updateFlag: function () {
+		if (!this.el.hasAttribute('collidable')) return;
+		if (!this.targetEl || !this.targetEl.hasAttribute('collidable')) return;
 		this.thisColliders = [];
 		this.collectColliders(this.el.object3D, this.thisColliders);
 		this.targetColliders = [];
 		this.collectColliders(this.targetEl.object3D, this.targetColliders);
-		
+
 		let collision = false;
-		for(let i = 0; i < this.thisColliders.length; ++i) {
+		for (let i = 0; i < this.thisColliders.length; ++i) {
 			let ci = this.el.object3D.localToWorld(this.thisColliders[i].clone());
-			for(let j = 0; j < this.targetColliders.length; ++j) {
+			for (let j = 0; j < this.targetColliders.length; ++j) {
 				let cj = this.targetEl.object3D.localToWorld(this.targetColliders[j].clone());
-				if(cj.radius !== undefined) {
+				if (cj.radius !== undefined) {
 					collision = ci.intersectsSphere(cj);
 				}
 				else {
 					collision = ci.intersectsBox(cj);
 				}
-				if(collision)
+				if (collision)
 					break;
 			}
-			if(collision)
+			if (collision)
 				break;
 		}
 		this.setFlag(collision);
 	},
-	
-	setFlag: function(flagVal) {
+
+	setFlag: function (flagVal) {
 		let ftManager = this.el.sceneEl.flagTriggerManager;
-		if(ftManager) {
+		if (ftManager) {
 			ftManager.setFlag(this.data.flagName, flagVal);
 		}
 	},
-	
+
 	//Colliders are formed at obscure points of time, so they inevitably need to be called every frame.
-	collectColliders: function(object3D, dst) {
-		for(let child of object3D.children) {
-			if(child.el !== object3D.el) continue;
-			if(child.geometry) {
+	collectColliders: function (object3D, dst) {
+		for (let child of object3D.children) {
+			if (child.el !== object3D.el) continue;
+			if (child.geometry) {
 				let bound = child.geometry.boundingSphere || child.geometry.boundingBox;
-				if(bound === null) {
+				if (bound === null) {
 					child.geometry.computeBoundingSphere();
 					bound = child.geometry.boundingSphere;
 				}

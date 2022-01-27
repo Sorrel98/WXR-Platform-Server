@@ -6,10 +6,10 @@
 
 AFRAME.registerComponent('two-state-embedded-animation', {
 	schema: {
-		state : {default: false},
-		timeScale: {default: 1},
-		triggerEvent: {type:'string'},
-		flagName: {type:'string'}
+		state: { default: false },
+		timeScale: { default: 1 },
+		triggerEvent: { type: 'string' },
+		flagName: { type: 'string' }
 	},
 
 	init: function () {
@@ -21,9 +21,9 @@ AFRAME.registerComponent('two-state-embedded-animation', {
 		this.activeActions = [];
 
 		this.playingClipNum = 0;
-		
+
 		this.duration = -1;
-		
+
 		const model = this.el.getObject3D('mesh');
 
 		if (model) {
@@ -33,7 +33,7 @@ AFRAME.registerComponent('two-state-embedded-animation', {
 				this.load(e.detail.model);
 			});
 		}
-		
+
 		this.playConvertAnimation = this.playConvertAnimation.bind(this);
 	},
 
@@ -41,17 +41,17 @@ AFRAME.registerComponent('two-state-embedded-animation', {
 		const el = this.el;
 		this.model = model;
 		this.mixer = new THREE.AnimationMixer(model);
-		this.mixer.addEventListener('finished', (e)=> {
-			if(--this.playingClipNum === 0) {
+		this.mixer.addEventListener('finished', (e) => {
+			if (--this.playingClipNum === 0) {
 				this.data.state = !this.data.state;
 				this.setFlag(this.data.state);
 			}
 		});
-		
+
 		const clips = model.animations || (model.geometry || {}).animations || [];
-		if(clips.length) {
+		if (clips.length) {
 			for (let clip, i = 0; (clip = clips[i]); ++i) {
-				if(this.duration < clip.duration)
+				if (this.duration < clip.duration)
 					this.duration = clip.duration;
 				const action = this.mixer.clipAction(clip, model);
 				action.clampWhenFinished = true;
@@ -65,18 +65,18 @@ AFRAME.registerComponent('two-state-embedded-animation', {
 		if (this.mixer) this.mixer.stopAllAction();
 	},
 
-    update: function (prevData) {
-		if(this.data.triggerEvent !== prevData.triggerEvent) {
-			if(prevData.triggerEvent && prevData.triggerEvent !== '') {
+	update: function (prevData) {
+		if (this.data.triggerEvent !== prevData.triggerEvent) {
+			if (prevData.triggerEvent && prevData.triggerEvent !== '') {
 				this.el.removeEventListener(prevData.triggerEvent, this.playConvertAnimation);
 			}
 			this.el.addEventListener(this.data.triggerEvent, this.playConvertAnimation);
 		}
-		if(this.data.state !== prevData.state) {
+		if (this.data.state !== prevData.state) {
 			this.onUpdateState();
 			this.setFlag(this.data.state);
 		}
-    },
+	},
 
 	stopAction: function () {
 		for (let i = 0; i < this.activeActions.length; i++) {
@@ -85,16 +85,16 @@ AFRAME.registerComponent('two-state-embedded-animation', {
 		this.activeActions.length = 0;
 	},
 
-	onUpdateState : function() {
-		if(!this.mixer) return;
-		if(this.activeActions.length > 0) {
-			for(let action of this.activeActions) {
+	onUpdateState: function () {
+		if (!this.mixer) return;
+		if (this.activeActions.length > 0) {
+			for (let action of this.activeActions) {
 				action.stop();
-				if(this.data.state === true) {
+				if (this.data.state === true) {
 					action.time = this.duration;
 				}
 				else {
-					action.time = 0 ;
+					action.time = 0;
 				}
 				action.setEffectiveTimeScale(0);
 				action.play();
@@ -103,12 +103,12 @@ AFRAME.registerComponent('two-state-embedded-animation', {
 		this.playingClipNum = 0;
 	},
 
-	playConvertAnimation: function() {
+	playConvertAnimation: function () {
 		if (!this.mixer || this.playingClipNum > 0) return;
-		if(this.activeActions.length > 0) {
-			for(let action of this.activeActions) {
+		if (this.activeActions.length > 0) {
+			for (let action of this.activeActions) {
 				action.stop();
-				if(this.data.state === true) { //reverse play
+				if (this.data.state === true) { //reverse play
 					action.time = this.duration;
 					action.setEffectiveTimeScale(-this.data.timeScale);
 				}
@@ -121,14 +121,14 @@ AFRAME.registerComponent('two-state-embedded-animation', {
 			}
 		}
 	},
-  
+
 	tick: function (t, dt) {
 		if (this.mixer && !isNaN(dt)) this.mixer.update(dt / 1000);
 	},
-	
-	setFlag: function(flagVal) {
+
+	setFlag: function (flagVal) {
 		let ftManager = this.el.sceneEl.flagTriggerManager;
-		if(ftManager) {
+		if (ftManager) {
 			ftManager.setFlag(this.data.flagName, flagVal);
 		}
 	}

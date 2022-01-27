@@ -13,10 +13,10 @@ const DBError = require('./lib/errors').DBError;
 
 // httpsOptions
 const httpsOptions = {
-	key: fs.readFileSync("cert/server.key"),	// server's private key
+    key: fs.readFileSync("cert/server.key"),	// server's private key
     cert: fs.readFileSync("cert/server.crt"), // server's certificate
-	ca : fs.readFileSync("cert/rootca.crt"), 		// CA's certificate
-	agent: false
+    ca: fs.readFileSync("cert/rootca.crt"), 		// CA's certificate
+    agent: false
 }
 
 // parse application/x-www-form-urlencoded
@@ -40,13 +40,13 @@ app.use('/', require('./routes/asset'));
 
 //For redirect http to https, Check the redirect location
 const httpServer = http.createServer(function (request, response) {
-	response.writeHead(302, {'Location': 'https://192.168.1.51'});
-	response.end();
-}).listen(80, function() {
-	console.log('Redirect server running');
+    response.writeHead(302, { 'Location': 'https://192.168.1.51' });
+    response.end();
+}).listen(80, function () {
+    console.log('Redirect server running');
 });
 
-const httpsServer = https.createServer(httpsOptions, app).listen(443, function() {
+const httpsServer = https.createServer(httpsOptions, app).listen(443, function () {
     console.log('https server is running');
 });
 
@@ -58,9 +58,9 @@ const sessionManager = require('./session').sessionManager.init(io);
 // Error Handling
 // **************************************************************************** //
 
-app.use(function dbErrorHandler(error, request, response, next){
+app.use(function dbErrorHandler(error, request, response, next) {
 
-    if(!(error instanceof DBError)){
+    if (!(error instanceof DBError)) {
         return next(error);
     }
 
@@ -72,13 +72,13 @@ app.use(function dbErrorHandler(error, request, response, next){
 })
 
 app.use(function dbPoolAPIErrorHandler(error, request, response, next) {
-    
-    if(!(error instanceof SqlError)){
+
+    if (!(error instanceof SqlError)) {
         return next(error);
     }
-    
+
     const { errno } = error;
-    switch(errno) {
+    switch (errno) {
         case 1152:
         case 45028:
             // Fail to connect DB

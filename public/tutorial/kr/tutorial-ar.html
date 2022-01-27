@@ -1,115 +1,121 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
-    <script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
-    <script src="/library/jquery-1.11.3.min.js"></script>
+	<script> var uname = ''; var wid = -1; var roleId = -1; var wname = ''; var created = ''; var canWrite = true; var canInvite = false;</script>
+	<script src="/library/jquery-1.11.3.min.js"></script>
 	<script src="/library/jquery.blockUI.js"></script>
 	<script src="/library/aframe-v1.2.0.min.js"></script>
-    <script src="/library/THREE.TransformControls.js"></script>
-    <script src="/library/THREE.PCDLoader.js"></script>
+	<script src="/library/THREE.TransformControls.js"></script>
+	<script src="/library/THREE.PCDLoader.js"></script>
 	<script src="/library/animation-mixer.js"></script>
-    <script src="/library/cube-env-map.js"></script>
+	<script src="/library/cube-env-map.js"></script>
 	<script src="/library/stack.js"></script>
-    <script src="/library/list.js"></script>
+	<script src="/library/list.js"></script>
 	<script src="/components/event-capturer.js"></script>
 	<script src="/components/flag+trigger.js"></script>
-    <script src="/primitives/a-flag.js"></script>
-    <script src="/primitives/a-trigger.js"></script>
+	<script src="/primitives/a-flag.js"></script>
+	<script src="/primitives/a-trigger.js"></script>
 	<script src="/components/position-observer.js"></script>
 	<script src="/components/rotation-observer.js"></script>
 	<script src="/components/scale-observer.js"></script>
 	<script src="/components/collision-observer.js"></script>
 	<script src="/components/two-state-animation.js"></script>
-    <script src="/components/two-state-embedded-animation.js"></script>
+	<script src="/components/two-state-embedded-animation.js"></script>
 	<script src="/components/transparency.js"></script>
 	<script src="/components/vr-slide.js"></script>
 	<script src="/components/vr-1axis-hinge.js"></script>
 	<script src="/components/vr-snap.js"></script>
-    <script src="/components/point-cloud.js"></script>
-    <script src="/primitives/a-point-cloud.js"></script>
-    <script src="/primitives/a-group.js"></script>
-    <script src="/components/binder.js"></script>
-    <script src="/components/hinge-animation.js"></script>
+	<script src="/components/point-cloud.js"></script>
+	<script src="/primitives/a-point-cloud.js"></script>
+	<script src="/primitives/a-group.js"></script>
+	<script src="/components/binder.js"></script>
+	<script src="/components/hinge-animation.js"></script>
 	<script src="/components/avatar.js"></script>
 	<script src="/primitives/a-user.js"></script>
-    <script src="/components/interaction-manger.js"></script>
-    <script src="/components/thd-mode-controls.js"></script>
-    <script src="/components/vr-mode-controls.js"></script>
+	<script src="/components/interaction-manger.js"></script>
+	<script src="/components/thd-mode-controls.js"></script>
+	<script src="/components/vr-mode-controls.js"></script>
 	<script src="/components/ar-mode-controls.js"></script>
-    <script src="/components/mode-changer.js"></script>
-    <script src="/components/target.js"></script>
-    <script src="/components/active-marker.js"></script>
-    <script src="/primitives/a-marker.js"></script>
-    <script src="/components/base-marker.js"></script>
-    <script src="/primitives/a-base.js"></script>
-    <script src="/components/color-scroll-material.js"></script>
+	<script src="/components/mode-changer.js"></script>
+	<script src="/components/target.js"></script>
+	<script src="/components/active-marker.js"></script>
+	<script src="/primitives/a-marker.js"></script>
+	<script src="/components/base-marker.js"></script>
+	<script src="/primitives/a-base.js"></script>
+	<script src="/components/color-scroll-material.js"></script>
 	<script src="/components/property-setter.js"></script>
-	
-    <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
-    <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
-	
+
+	<link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+	<link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+
 	<style>
 		.tutorialMessage {
-			position : absolute;
-			z-index : 10000;
-			background : black;
-			opacity : 0.5;
-			top : 50px;
-			pointer-events : none;
+			position: absolute;
+			z-index: 10000;
+			background: black;
+			opacity: 0.5;
+			top: 50px;
+			pointer-events: none;
 		}
+
 		.horizontal {
-			width : 400px;
-			height : 200px;
-			left : calc(50% - 200px);
+			width: 400px;
+			height: 200px;
+			left: calc(50% - 200px);
 		}
+
 		.vertical {
-			width : 300px;
-			height : 260px;
-			left : calc(50% - 150px);
+			width: 300px;
+			height: 260px;
+			left: calc(50% - 150px);
 		}
+
 		.tutorialMessageContent {
-			position : absolute;
-			width : calc(100% - 20px);
-			height : calc(100% - 50px);
-			left : 10px;
-			top : 10px;
-			color : white;
+			position: absolute;
+			width: calc(100% - 20px);
+			height: calc(100% - 50px);
+			left: 10px;
+			top: 10px;
+			color: white;
 		}
+
 		.tutorialButtonPrev {
-			position : absolute;
-			width : 50px;
-			height : 25px;
-			top : calc(100% - 30px);
-			left : calc(100% - 110px);
-			pointer-events : auto;
-			cursor : default;
+			position: absolute;
+			width: 50px;
+			height: 25px;
+			top: calc(100% - 30px);
+			left: calc(100% - 110px);
+			pointer-events: auto;
+			cursor: default;
 		}
+
 		.tutorialButtonNext {
-			position : absolute;
-			width : 50px;
-			height : 25px;
-			top : calc(100% - 30px);
-			left : calc(100% - 55px);
-			pointer-events : auto;
-			cursor : default;
+			position: absolute;
+			width: 50px;
+			height: 25px;
+			top: calc(100% - 30px);
+			left: calc(100% - 55px);
+			pointer-events: auto;
+			cursor: default;
 		}
 	</style>
-	
+
 	<script>
 		var step = 0;
 		var messages = [
@@ -142,18 +148,17 @@
 		];
 		var tutorialMessage;
 		function next() {
-			if(step === messages.length - 1) return;
+			if (step === messages.length - 1) return;
 			tutorialMessage.children[0].innerHTML = messages[++step];
 		}
 		function prev() {
-			if(step === 0) return;
+			if (step === 0) return;
 			tutorialMessage.children[0].innerHTML = messages[--step];
 		}
-		function init()
-		{
+		function init() {
 			tutorialMessage = document.createElement('div');
 			$(tutorialMessage).addClass('tutorialMessage');
-			if(window.innerHeight <= window.innerWidth) {
+			if (window.innerHeight <= window.innerWidth) {
 				$(tutorialMessage).addClass('horizontal');
 			}
 			else {
@@ -174,15 +179,15 @@
 			$(buttonNext).addClass('tutorialButtonNext');
 			tutorialMessage.appendChild(buttonNext);
 			tutorialMessage.children[0].innerHTML = messages[step];
-			window.addEventListener('resize', (e)=> {
-				if(window.innerHeight <= window.innerWidth) {
-					if($(tutorialMessage).hasClass('vertical')) {
+			window.addEventListener('resize', (e) => {
+				if (window.innerHeight <= window.innerWidth) {
+					if ($(tutorialMessage).hasClass('vertical')) {
 						$(tutorialMessage).removeClass('vertical');
 						$(tutorialMessage).addClass('horizontal');
 					}
 				}
 				else {
-					if($(tutorialMessage).hasClass('horizontal')) {
+					if ($(tutorialMessage).hasClass('horizontal')) {
 						$(tutorialMessage).removeClass('horizontal');
 						$(tutorialMessage).addClass('vertical');
 					}
@@ -191,16 +196,22 @@
 		}
 	</script>
 </head>
+
 <body>
-    <a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
+	<a-scene id="root" interaction-manger thd-mode-controls vr-mode-controls ar-mode-controls
+		renderer="colorManagement: true" vr-mode-ui="enabled: false" mode-changer="layer:#modeChangerLayer">
 		<a-group id="group" position="0 1.5 0" scale="0.1 0.1 0.1">
-			<a-box id="box" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" material geometry target="marker:#activeMarker"></a-box>
+			<a-box id="box" position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9" material geometry
+				target="marker:#activeMarker"></a-box>
 			<a-sphere id="sphere" position="0 1.25 -5" radius="1.25" color="#EF2D5E" material geometry></a-sphere>
-			<a-cylinder id="cylinder" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" material geometry></a-cylinder>
-			<a-plane id="plane" position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4" material geometry></a-plane>
+			<a-cylinder id="cylinder" position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D" material geometry>
+			</a-cylinder>
+			<a-plane id="plane" position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4" material
+				geometry></a-plane>
 		</a-group>
 		<a-base id="baseMarker" base-marker="src:/tutorial/baseMarker"></a-base>
-		<a-marker id="activeMarker" position="-0.06442432527531143 1.5498364186522497 -0.26463716440012536" rotation="90 45 0" active-marker="src:/tutorial/activeMarker"></a-marker>
+		<a-marker id="activeMarker" position="-0.06442432527531143 1.5498364186522497 -0.26463716440012536"
+			rotation="90 45 0" active-marker="src:/tutorial/activeMarker"></a-marker>
 		<a-sky id="sky" visible="true" material="src:/tutorial/background.png;" geometry="primitive:sphere;radius:500;">
 		</a-sky>
 	</a-scene>
@@ -212,10 +223,11 @@
 			scene.addEventListener('loaded', init);
 		}
 	</script>
-    <div id="modeChangerLayer" class="buttonUI">
-        <img id="_VRButton" src="/img/icon/VR in circle.svg"/>
-        <img id="_ARButton" src="/img/icon/AR in circle.svg"/>
-        <img id="_3DButton" src="/img/icon/3D in circle.svg"/>
-    </div>
+	<div id="modeChangerLayer" class="buttonUI">
+		<img id="_VRButton" src="/img/icon/VR in circle.svg" />
+		<img id="_ARButton" src="/img/icon/AR in circle.svg" />
+		<img id="_3DButton" src="/img/icon/3D in circle.svg" />
+	</div>
 </body>
+
 </html>

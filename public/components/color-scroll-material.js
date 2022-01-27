@@ -6,9 +6,9 @@
 
 AFRAME.registerComponent('color-scroll-material', {
     schema: {
-        color1: {type: 'color', default: '#00F'},
-        color2: {type: 'color', default: '#000'},
-        scroll: {type: 'number', default: 0.0, min: 0.0, max: 1.0},
+        color1: { type: 'color', default: '#00F' },
+        color2: { type: 'color', default: '#000' },
+        scroll: { type: 'number', default: 0.0, min: 0.0, max: 1.0 },
     },
 
     init: function () {
@@ -32,12 +32,12 @@ AFRAME.registerComponent('color-scroll-material', {
 
         this.mesh.material = new THREE.ShaderMaterial({
             uniforms: {
-                color1: {value: new THREE.Color(this.data.color1), type: 'color'},
-                color2: {value: new THREE.Color(this.data.color2), type: 'color'},
-                scroll: {type:'number', is: 'attribute', default: 0.0}
+                color1: { value: new THREE.Color(this.data.color1), type: 'color' },
+                color2: { value: new THREE.Color(this.data.color2), type: 'color' },
+                scroll: { type: 'number', is: 'attribute', default: 0.0 }
             },
             vertexShader:
-            `
+                `
                 varying vec2 vUv;
                 attribute float scroll;
                 varying float vScroll;
@@ -48,7 +48,7 @@ AFRAME.registerComponent('color-scroll-material', {
                 }
             `,
             fragmentShader:
-            `
+                `
                 varying vec2 vUv;
                 uniform vec3 color1;
                 uniform vec3 color2;

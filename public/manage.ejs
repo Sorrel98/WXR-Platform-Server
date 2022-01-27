@@ -1,7 +1,8 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
@@ -22,220 +23,223 @@
     <link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="/library/jquery-1.11.3.min.js"></script>
     <script>
-    // [auth], 1->alterWS, 3->editRole(M), 4->editRole(P)
-    var tmp = '<%= JSON.stringify(authority) %>';
-    tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
-    var authority = JSON.parse(tmp);
-    
-    //{id, name, thumbnail, description, created_date, owner, content}
-    var tmp = '<%= JSON.stringify(spaceInform) %>';
-    tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
-    var spaceInform = JSON.parse(tmp);
-    
-    // string
-    var tags = '<%= tags %>';
-    
-    //<id> -> {name, email, rid}
-    var tmp = '<%= JSON.stringify(participant) %>';
-    tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
-    tmp = JSON.parse(tmp);
-    var participants = new Map();
-    for(let t of tmp)
-        participants.set(t.id, {name: t.name, email: t.email, rid: t.rid});
-    
-    //<id> -> name
-    var tmp = '<%= JSON.stringify(roleInform) %>';
-    tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
-    tmp = JSON.parse(tmp);
-    var roleNames = new Map();
-    for(let t of tmp)
-        roleNames.set(t.id, t.name);
-    
-	function codeImportFromURI() {
-		let uri = document.getElementById('codeURI').value;
-		if(uri.length === 0) return;
-		$.ajax({
-			url: uri,
-			type: 'GET',
-			success: (data)=>{
-                document.querySelector('textarea[name="source"]').value = data;
-			},
-			error:(err)=>{
-				alert("code: " + err.status +"\n" + err.responseText);
-			}
-		});
-		document.getElementById('codeURI').value = '';
-	};
-	
-	function codeImportFromFile() {
-		let files = document.getElementById('codeFile').files;
-		if(files.length !== 1) return;
-		let selectedFile = files[0];
-		let reader = new FileReader();
-		reader.onload = function(evt) {
-            document.querySelector('textarea[name="source"]').value = evt.target.result;
-		};
-		reader.readAsText(selectedFile);
-	};
-	
-    function onSubmit() {
-        const fm = document.getElementById('fmAlter');
-        const params = $(fm).serialize();
-        $.ajax({
-			url: fm.action,
-			type: fm.method,
-			data: params,
-			success: ()=>{
-                alert("Attributes are changed");
-                location.href = '/main';
-			},
-			error: (err)=>{
-				alert("code: " + err.status +"\n" + err.responseText);
-			}
-		});
-        return false;
-    };
-    
-    function onRemove(wid) {
-        $.ajax({
-            url: '/removeWorkspace',
-            type: 'POST',
-            data: {'wid': wid},
-            success: ()=>{
-                location.href = '/main';
-            },
-            error: (err)=>{
-                alert("code: " + err.status +"\n" + err.responseText);
+        // [auth], 1->alterWS, 3->editRole(M), 4->editRole(P)
+        var tmp = '<%= JSON.stringify(authority) %>';
+        tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
+        var authority = JSON.parse(tmp);
+
+        //{id, name, thumbnail, description, created_date, owner, content}
+        var tmp = '<%= JSON.stringify(spaceInform) %>';
+        tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
+        var spaceInform = JSON.parse(tmp);
+
+        // string
+        var tags = '<%= tags %>';
+
+        //<id> -> {name, email, rid}
+        var tmp = '<%= JSON.stringify(participant) %>';
+        tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
+        tmp = JSON.parse(tmp);
+        var participants = new Map();
+        for (let t of tmp)
+            participants.set(t.id, { name: t.name, email: t.email, rid: t.rid });
+
+        //<id> -> name
+        var tmp = '<%= JSON.stringify(roleInform) %>';
+        tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
+        tmp = JSON.parse(tmp);
+        var roleNames = new Map();
+        for (let t of tmp)
+            roleNames.set(t.id, t.name);
+
+        function codeImportFromURI() {
+            let uri = document.getElementById('codeURI').value;
+            if (uri.length === 0) return;
+            $.ajax({
+                url: uri,
+                type: 'GET',
+                success: (data) => {
+                    document.querySelector('textarea[name="source"]').value = data;
+                },
+                error: (err) => {
+                    alert("code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            document.getElementById('codeURI').value = '';
+        };
+
+        function codeImportFromFile() {
+            let files = document.getElementById('codeFile').files;
+            if (files.length !== 1) return;
+            let selectedFile = files[0];
+            let reader = new FileReader();
+            reader.onload = function (evt) {
+                document.querySelector('textarea[name="source"]').value = evt.target.result;
+            };
+            reader.readAsText(selectedFile);
+        };
+
+        function onSubmit() {
+            const fm = document.getElementById('fmAlter');
+            const params = $(fm).serialize();
+            $.ajax({
+                url: fm.action,
+                type: fm.method,
+                data: params,
+                success: () => {
+                    alert("Attributes are changed");
+                    location.href = '/main';
+                },
+                error: (err) => {
+                    alert("code: " + err.status + "\n" + err.responseText);
+                }
+            });
+            return false;
+        };
+
+        function onRemove(wid) {
+            $.ajax({
+                url: '/removeWorkspace',
+                type: 'POST',
+                data: { 'wid': wid },
+                success: () => {
+                    location.href = '/main';
+                },
+                error: (err) => {
+                    alert("code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+
+        function onChangeSel() {
+            const sel = document.getElementById('sel_participant');
+            const role = document.getElementById('part_role');
+            const applyBtn = document.getElementById('applyBtn');
+            const exileBtn = document.getElementById('exileBtn');
+            const uid = parseInt(sel.value);
+            const rid = participants.get(uid).rid;
+            while (role.length !== 0) {
+                role.remove(0);
             }
-        });
-    };
-    
-    function onChangeSel() {
-        const sel = document.getElementById('sel_participant');
-        const role = document.getElementById('part_role');
-        const applyBtn = document.getElementById('applyBtn');
-        const exileBtn = document.getElementById('exileBtn');
-        const uid = parseInt(sel.value);
-        const rid = participants.get(uid).rid;
-        while(role.length !== 0) {
-            role.remove(0);
-        }
-        role.disabled = true;
-        applyBtn.disabled = true;
-        exileBtn.disabled = true;
-        if(uid === spaceInform.owner) {
-            let opt = document.createElement('option');
-            opt.value = 0;
-            opt.text = 'Owner';
-            role.add(opt);
-        }
-        else {
-            for(let [id, name] of roleNames) {
+            role.disabled = true;
+            applyBtn.disabled = true;
+            exileBtn.disabled = true;
+            if (uid === spaceInform.owner) {
                 let opt = document.createElement('option');
-                opt.value = id;
-                opt.text = name;
-                opt.disabled = true;
-                if(id === rid)
-                    opt.selected = true;
+                opt.value = 0;
+                opt.text = 'Owner';
                 role.add(opt);
             }
-            if(authority.indexOf(1) !== -1) {
-                role.disabled = false;
-                applyBtn.disabled = false;
-                exileBtn.disabled = false;
-                for(let opt of role.options) {
-                    opt.disabled = false;
+            else {
+                for (let [id, name] of roleNames) {
+                    let opt = document.createElement('option');
+                    opt.value = id;
+                    opt.text = name;
+                    opt.disabled = true;
+                    if (id === rid)
+                        opt.selected = true;
+                    role.add(opt);
                 }
-            }
-            else if(authority.indexOf(3) !== -1) {
-                for(let opt of role.options) {
-                    if(opt.value !== '1')
+                if (authority.indexOf(1) !== -1) {
+                    role.disabled = false;
+                    applyBtn.disabled = false;
+                    exileBtn.disabled = false;
+                    for (let opt of role.options) {
                         opt.disabled = false;
+                    }
+                }
+                else if (authority.indexOf(3) !== -1) {
+                    for (let opt of role.options) {
+                        if (opt.value !== '1')
+                            opt.disabled = false;
+                    }
+                }
+                else if (authority.indexOf(4) !== -1) {
+                    for (let opt of role.options) {
+                        if (opt.value === '4' || opt.value === '5')
+                            opt.disabled = false;
+                    }
+                }
+                if (!role.selectedOptions[0].disabled) {
+                    role.disabled = false;
+                    applyBtn.disabled = false;
+                    exileBtn.disabled = false;
                 }
             }
-            else if(authority.indexOf(4) !== -1) {
-                for(let opt of role.options) {
-                    if(opt.value === '4' || opt.value === '5')
-                        opt.disabled = false;
-                }
-            }
-            if(!role.selectedOptions[0].disabled) {
-                role.disabled = false;
-                applyBtn.disabled = false;
-                exileBtn.disabled = false;
-            }
-        }
-    };
-    
-    function onApplyRole() {
-        document.getElementById('typeNum').value = '1';
-        const fm = document.getElementById('fmEditPart');
-        const params = $(fm).serialize();
-        $.ajax({
-            url: fm.action,
-            type: 'POST',
-            data: params,
-            dataType: 'JSON',
-            success: (data)=>{
-                let target = participants.get(parseInt(data.uid));
-                target.rid = parseInt(data.rid);
-                
-                alert("Participant's role is chaged");
-            },
-            error: (err)=>{
-                alert("code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
-    
-    function onExile() {
-        document.getElementById('typeNum').value = '2';
-        const fm = document.getElementById('fmEditPart');
-        const params = $(fm).serialize();
-        $.ajax({
-            url: fm.action,
-            type: 'POST',
-            data: params,
-            dataType: 'JSON',
-            success: (data)=>{
-                participants.delete(parseInt(data.uid));
-                let sel = document.getElementById('sel_participant');
-                sel.remove(sel.selectedIndex--);
-                onChangeSel();
+        };
 
-                alert("Participant is exiled");
-            },
-            error: (err)=>{
-                alert("code: " + err.status +"\n" + err.responseText);
-            }
-        });
-    };
+        function onApplyRole() {
+            document.getElementById('typeNum').value = '1';
+            const fm = document.getElementById('fmEditPart');
+            const params = $(fm).serialize();
+            $.ajax({
+                url: fm.action,
+                type: 'POST',
+                data: params,
+                dataType: 'JSON',
+                success: (data) => {
+                    let target = participants.get(parseInt(data.uid));
+                    target.rid = parseInt(data.rid);
+
+                    alert("Participant's role is chaged");
+                },
+                error: (err) => {
+                    alert("code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+
+        function onExile() {
+            document.getElementById('typeNum').value = '2';
+            const fm = document.getElementById('fmEditPart');
+            const params = $(fm).serialize();
+            $.ajax({
+                url: fm.action,
+                type: 'POST',
+                data: params,
+                dataType: 'JSON',
+                success: (data) => {
+                    participants.delete(parseInt(data.uid));
+                    let sel = document.getElementById('sel_participant');
+                    sel.remove(sel.selectedIndex--);
+                    onChangeSel();
+
+                    alert("Participant is exiled");
+                },
+                error: (err) => {
+                    alert("code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
     </script>
     <style>
-    html,
-    body {
-      height: 100%;
-    }
-    body {
-      display: -ms-flexbox;
-      -ms-flex-align: center;
-      align-items: center;
-      padding-top: 40px;
-      padding-bottom: 40px;
-      background-color: #f5f5f5;
-    }
-    .form {
-      width: 100%;
-      max-width: 1024px;
-      padding: 15px;
-      margin: auto;
-    }
+        html,
+        body {
+            height: 100%;
+        }
 
-    .form .form-control:focus {
-      z-index: 2;
-    }
+        body {
+            display: -ms-flexbox;
+            -ms-flex-align: center;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+        }
+
+        .form {
+            width: 100%;
+            max-width: 1024px;
+            padding: 15px;
+            margin: auto;
+        }
+
+        .form .form-control:focus {
+            z-index: 2;
+        }
     </style>
 </head>
+
 <body class="text-center">
     <form class="form" id="fmAlter" action="/alter" method="post" onsubmit="return onSubmit();">
         <fieldset class="form-group" id="fsetAlter">
@@ -247,43 +251,46 @@
                 document.write("</div><div class='col-md-3'>");
                 document.write("<input class='form-control' id='tags' name='tags' type='text' placeholder='tag1, tag2, ...' pattern = '(^(\\s*[A-Za-z0-9]{1,45}\\s*,)*\\s*[A-Za-z0-9]{1,45}\\s*$)' value='" + tags + "'></input></div><div>");
                 document.write("</div></div><div class='mb-4'>");
-				document.write("<textarea class='form-control' name='description' placeholder='description...'>" + spaceInform.description + "</textarea></div>");
+                document.write("<textarea class='form-control' name='description' placeholder='description...'>" + spaceInform.description + "</textarea></div>");
                 document.write("<div class='input-group input-group-sm'><div class='input-group-prepend'><span class='input-group-text' id='prependURI'>URI</span></div><input type='text' class='form-control' id='codeURI' aria-describedby='prependURI'><div class='input-group-append'><button class='btn btn-outline-secondary' type='button' id='codeImportFromURIBtn' onclick='codeImportFromURI();'>Import</button></div></div>");
-				document.write("<div class='input-group input-group-sm'><input type='file' class='custom-file-input' id='codeFile' aria-describedby='codeImportBtn' onclick='this.value = \'\';' onchange='codeImportFromFile();'><label class='custom-file-label' for='codeFile'>Choose file</label></div>");
-				document.write("<div class='input-group input-group-sm'><div class='input-group-prepend'><span class='input-group-text'>Content Source</span></div><textarea class='form-control' style='height:400px;' aria-label='Content Source' name='source'>" + spaceInform.content + "</textarea></div>");
-				document.write("<button class='btn btn-sm btn-danger m-1' type='button' onclick='onRemove(" + spaceInform.id + ")' style='float:right;'>remove</button>");
+                document.write("<div class='input-group input-group-sm'><input type='file' class='custom-file-input' id='codeFile' aria-describedby='codeImportBtn' onclick='this.value = \'\';' onchange='codeImportFromFile();'><label class='custom-file-label' for='codeFile'>Choose file</label></div>");
+                document.write("<div class='input-group input-group-sm'><div class='input-group-prepend'><span class='input-group-text'>Content Source</span></div><textarea class='form-control' style='height:400px;' aria-label='Content Source' name='source'>" + spaceInform.content + "</textarea></div>");
+                document.write("<button class='btn btn-sm btn-danger m-1' type='button' onclick='onRemove(" + spaceInform.id + ")' style='float:right;'>remove</button>");
                 document.write("<button class='btn btn-sm btn-primary m-1' type='submit' style='float:right;'>apply</button>");
             </script>
         </fieldset>
     </form>
     <form class="form" id="fmEditPart" action="/editParticipant" method="post">
         <fieldset class="form-group" id="fsetEditPart">
-        <legend class="mb-3 font-weight-normal">Participants</legend>
-        <div>
-            <script>
-                document.write("<input type='hidden' name='wid' value=" + spaceInform.id + "></input>");
-                document.write("<select class='custom-select' id='sel_participant' name='participant' onchange='onChangeSel()'>");
-                let ownerInform = participants.get(spaceInform.owner);
-                document.write("<option value = " + spaceInform.owner + " selected>" + ownerInform.name + "(" + ownerInform.email + ")</option>");
-                for(let [pid, p] of participants) {
-                    if(pid !== spaceInform.owner) {
-                        document.write("<option value = " + pid + ">" + p.name + "(" + p.email + ")</option>");
-                    }
-                }
-                document.write("</select>");
-            </script>
-            <select class="custom-select" id="part_role" name="role" disabled>
+            <legend class="mb-3 font-weight-normal">Participants</legend>
+            <div>
                 <script>
-                    document.write("<option value = 0>Owner</option>");
+                    document.write("<input type='hidden' name='wid' value=" + spaceInform.id + "></input>");
+                    document.write("<select class='custom-select' id='sel_participant' name='participant' onchange='onChangeSel()'>");
+                    let ownerInform = participants.get(spaceInform.owner);
+                    document.write("<option value = " + spaceInform.owner + " selected>" + ownerInform.name + "(" + ownerInform.email + ")</option>");
+                    for (let [pid, p] of participants) {
+                        if (pid !== spaceInform.owner) {
+                            document.write("<option value = " + pid + ">" + p.name + "(" + p.email + ")</option>");
+                        }
+                    }
+                    document.write("</select>");
                 </script>
-            </select>
-        </div>
-        <button class="btn btn-sm btn-danger m-1" type="button" id="exileBtn" onclick="onExile()" disabled style="float:right;">Exile</button>
-        <button class="btn btn-sm btn-primary m-1" type="button" id="applyBtn" onclick="onApplyRole()" disabled style="float:right;">Apply</button>
-        <input type="hidden" id="typeNum" name="type" value="0"></input>
+                <select class="custom-select" id="part_role" name="role" disabled>
+                    <script>
+                        document.write("<option value = 0>Owner</option>");
+                    </script>
+                </select>
+            </div>
+            <button class="btn btn-sm btn-danger m-1" type="button" id="exileBtn" onclick="onExile()" disabled
+                style="float:right;">Exile</button>
+            <button class="btn btn-sm btn-primary m-1" type="button" id="applyBtn" onclick="onApplyRole()" disabled
+                style="float:right;">Apply</button>
+            <input type="hidden" id="typeNum" name="type" value="0"></input>
     </form>
     <script>
-            document.getElementById('fsetAlter').disabled = !authority.includes(1);
+        document.getElementById('fsetAlter').disabled = !authority.includes(1);
     </script>
 </body>
+
 </html>

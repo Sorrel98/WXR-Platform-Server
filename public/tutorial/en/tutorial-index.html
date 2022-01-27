@@ -1,35 +1,36 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="UTF-8"/>
-    <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
-    <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff"> 
-    <link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">    
-    <script src="/library/jquery-1.11.3.min.js"></script>
-    <script src="/library/bootstrap-4.4.1-dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/library/bootstrap-4.4.1-dist/js/bootstrap.min.js"></script>
+	<meta charset="UTF-8" />
+	<link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+	<link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+	<link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="/library/jquery-1.11.3.min.js"></script>
+	<script src="/library/bootstrap-4.4.1-dist/js/bootstrap.bundle.min.js"></script>
+	<script src="/library/bootstrap-4.4.1-dist/js/bootstrap.min.js"></script>
 	<script>
 		var languageEn = true;
-		function changeLanguage (toEnglish) {
-			if(languageEn === toEnglish) return;
+		function changeLanguage(toEnglish) {
+			if (languageEn === toEnglish) return;
 			languageEn = !languageEn;
 			//디스크립션 변경
-			if(languageEn) {
+			if (languageEn) {
 				document.getElementById("desc_en").classList.add('d-none');
 				document.getElementById("desc_kr").classList.remove('d-none');
 			}
@@ -39,35 +40,38 @@
 			}
 		}
 		function to3DTutorial() {
-			if(languageEn)
+			if (languageEn)
 				location.href = '/tutorial/en/tutorial-3d.html';
 			else
 				location.href = '/tutorial/kr/tutorial-3d.html';
 		}
 		function toVRTutorial() {
-			if(languageEn)
+			if (languageEn)
 				location.href = '/tutorial/en/tutorial-vr.html';
 			else
 				location.href = '/tutorial/kr/tutorial-vr.html';
 		}
 		function toARTutorial() {
-			if(languageEn)
+			if (languageEn)
 				location.href = '/tutorial/en/tutorial-ar.html';
 			else
 				location.href = '/tutorial/kr/tutorial-ar.html';
 		}
 	</script>
 </head>
+
 <body style="background-color:#f5f5f5;">
 	<div class="container" style="margin-top:100px;">
 		<div class="row justify-content-end" style="margin-bottom:30px;">
 			<div class="col-auto">
 				<div class="btn-group btn-group-toggle" data-toggle="buttons">
 					<label class="btn btn-secondary active">
-						<input type="radio" name="options" id="en" autocomplete="off" onclick="javascript:changeLanguage(true);" checked> English
+						<input type="radio" name="options" id="en" autocomplete="off"
+							onclick="javascript:changeLanguage(true);" checked> English
 					</label>
 					<label class="btn btn-secondary">
-						<input type="radio" name="options" id="kr" autocomplete="off" onclick="javascript:changeLanguage(false);"> 한국어
+						<input type="radio" name="options" id="kr" autocomplete="off"
+							onclick="javascript:changeLanguage(false);"> 한국어
 					</label>
 				</div>
 			</div>
@@ -85,40 +89,44 @@
 		</div>
 		<div class="row">
 			<div class="col-md">
-				<img id="_3DButton" src="/img/icon/3D in circle.svg" onclick="to3DTutorial()" style="cursor:pointer;"/>
+				<img id="_3DButton" src="/img/icon/3D in circle.svg" onclick="to3DTutorial()" style="cursor:pointer;" />
 			</div>
 			<div class="col-md">
-				<img id="_VRButton" src="/img/icon/VR in circle.svg" onclick="toVRTutorial()" style="cursor:pointer;"/>
+				<img id="_VRButton" src="/img/icon/VR in circle.svg" onclick="toVRTutorial()" style="cursor:pointer;" />
 			</div>
 			<div class="col-md">
-				<img id="_ARButton" src="/img/icon/AR in circle.svg" onclick="toARTutorial()" style="cursor:pointer;"/>
+				<img id="_ARButton" src="/img/icon/AR in circle.svg" onclick="toARTutorial()" style="cursor:pointer;" />
 			</div>
 		</div>
 		<div class="row" style="margin:30px; margin-top:80px;">
 			<div class="col text-center" style="margin-bottom:20px;">
 				<text id="desc_en" class='d-block'>
-					The images below are marker images for the AR tutorial. Download these images for the tutorial and print them out in 5.5cm * 5.5cm size.
-				</label>
-				<label id="desc_kr" class="d-none">
-					아래의 마커 이미지들은 AR 튜토리얼을 위한 이미지입니다. AR 튜토리얼을 위해 이 이미지들을 다운로드하고 5.5cm * 5.5cm 크기로 출력하세요.
-				</label>
-				</div>
-			</div>
-			<div class="w-100"></div>
-			<div class="col">
-				<img src="/tutorial/activeMarker/activeMarker.png"/>
-			</div>
-			<div class="col">
-				<img src="/tutorial/baseMarker/baseMarker.png"/>
-			</div>
-			<div class="w-100" style="margin-top:10px;"></div>
-			<div class="col">
-				<center><a class="btn btn-primary btn-lg" href="/tutorial/activeMarker/activeMarker.png" download="activeMarker.png">download</a></center>
-			</div>
-			<div class="col">
-				<center><a class="btn btn-primary btn-lg" href="/tutorial/baseMarker/baseMarker.png" download="baseMarker.png">download</a></center>
+					The images below are marker images for the AR tutorial. Download these images for the tutorial and
+					print them out in 5.5cm * 5.5cm size.
+					</label>
+					<label id="desc_kr" class="d-none">
+						아래의 마커 이미지들은 AR 튜토리얼을 위한 이미지입니다. AR 튜토리얼을 위해 이 이미지들을 다운로드하고 5.5cm * 5.5cm 크기로 출력하세요.
+					</label>
 			</div>
 		</div>
+		<div class="w-100"></div>
+		<div class="col">
+			<img src="/tutorial/activeMarker/activeMarker.png" />
+		</div>
+		<div class="col">
+			<img src="/tutorial/baseMarker/baseMarker.png" />
+		</div>
+		<div class="w-100" style="margin-top:10px;"></div>
+		<div class="col">
+			<center><a class="btn btn-primary btn-lg" href="/tutorial/activeMarker/activeMarker.png"
+					download="activeMarker.png">download</a></center>
+		</div>
+		<div class="col">
+			<center><a class="btn btn-primary btn-lg" href="/tutorial/baseMarker/baseMarker.png"
+					download="baseMarker.png">download</a></center>
+		</div>
+	</div>
 	</div>
 </body>
+
 </html>
