@@ -5,11 +5,11 @@
 
 AFRAME.registerComponent('vr-1axis-hinge', {
 	schema: {
-		axis : {default: 'x', oneOf:['x', 'y', 'z']}
-    },
-	init: function() {
+		axis: { default: 'x', oneOf: ['x', 'y', 'z'] }
 	},
-	update: function(oldData) {
+	init: function () {
+	},
+	update: function (oldData) {
 		this.orgPos = this.el.object3D.position.clone();
 		this.orgQuat = this.el.object3D.quaternion.clone();
 	}

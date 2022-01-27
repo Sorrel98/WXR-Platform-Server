@@ -19,9 +19,9 @@ CREATE TABLE t_user
     `name`      VARCHAR(45)    NOT NULL, 
     `email`     VARCHAR(45)    NOT NULL, 
     `passwd`    VARCHAR(64)    NOT NULL, 
-    `is_admin`  BIT(1)         NOT NULL,
+    `is_admin`  BIT(1)         NOT NULL    DEFAULT 0,
     `avatar_id` INT            NOT NULL    DEFAULT 0,
-    `vr_hand_sync`  BIT(1)         NOT NULL, 
+    `vr_hand_sync`  BIT(1)         NOT NULL    DEFAULT 0, 
     PRIMARY KEY (id)
 );
 ALTER TABLE t_user
@@ -45,8 +45,8 @@ CREATE TABLE t_workspace
     `vr_options`    VARCHAR(128)   DEFAULT 
 'enableOneHandTrigger:true;enableTwoHandTrigger:true;enableTwoHandGrip:true;floorHeight:0;moveSpeed:2',
     `content`       MEDIUMTEXT     NULL, 
-    `description`   TINYTEXT       NULL, 
     `thumbnail`     TEXT           NULL, 
+    `description`   TINYTEXT       NULL     DEFAULT '',
     PRIMARY KEY (id)
 );
 

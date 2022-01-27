@@ -1,178 +1,193 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8"/>
-        <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
-        <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
-        <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
-        <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
-        <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
-        <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
-        <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
-        <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
-        <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
-        <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
-        <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
-        <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
-        <meta name="msapplication-TileColor" content="#ffffff">
-        <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
-        <meta name="theme-color" content="#ffffff">    
-        <link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="/library/jquery-1.11.3.min.js"></script>
-        <script src="/library/bootstrap-4.4.1-dist/js/bootstrap.min.js"></script>
-        <script>
-			var tmp = '<%= JSON.stringify(avatar_infos) %>';
-			tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
-			var avatar_infos = JSON.parse(tmp);
-			
-            function getProfile() {
-                $.ajax({
-                    url: '/profile',
-                    type: 'GET',
-                    success: (profile)=>{
-                        document.getElementById('new_name').placeholder = profile.name;
-                        document.getElementById('new_email').placeholder = profile.email;
-						document.getElementById('new_avatar').options.selectedIndex = profile.avatar_id;
-                        let activedRadio;
-                        if (profile.vr_hand_sync.data[0] == true) {
-                            activedRadio = document.getElementById('vrHandGestureSyncRadio').children[0];
-                        }
-                        else {
-                            activedRadio = document.getElementById('vrHandGestureSyncRadio').children[1];
-                        }
-                        $(activedRadio).addClass('active');
-                        activedRadio.children[0].checked = true;
-                    },
-                    error: (err)=>{
-                        alert("Code: " + err.status +"\n" + err.responseText);
-                    }
-                });
-                return false;
-            };
 
-            function onSubmit() {
-                const fm = document.getElementById('alterForm');
-                const params = $(fm).serialize();
-                if(document.getElementById("new_pw1").value !== document.getElementById("new_pw2").value)
-                    alert("retype the same password");
-                else {
-                    $.ajax({
-                        url: fm.action,
-                        type: fm.method,
-                        data: params,
-                        success: ()=>{
-                            location.href = '/main';
-                        },
-                        error: (err)=>{
-                            alert("Code: " + err.status +"\n" + err.responseText);
-                        }
-                    });
+<head>
+    <meta charset="UTF-8" />
+    <link rel="apple-touch-icon" sizes="57x57" href="/img/icon/favicon-png.ico/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/img/icon/favicon-png.ico/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/img/icon/favicon-png.ico/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/img/icon/favicon-png.ico/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/img/icon/favicon-png.ico/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/img/icon/favicon-png.ico/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/img/icon/favicon-png.ico/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/img/icon/favicon-png.ico/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/icon/favicon-png.ico/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/icon/favicon-png.ico/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/favicon-png.ico/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/img/icon/favicon-png.ico/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/favicon-png.ico/favicon-16x16.png">
+    <link rel="manifest" href="/img/icon/favicon-png.ico/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/img/icon/favicon-png.ico/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <link href="/library/bootstrap-4.4.1-dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/library/jquery-1.11.3.min.js"></script>
+    <script src="/library/bootstrap-4.4.1-dist/js/bootstrap.min.js"></script>
+    <script>
+        var tmp = '<%= JSON.stringify(avatar_infos) %>';
+        tmp = tmp.replace(RegExp("\&#34;", "g"), '"');
+        var avatar_infos = JSON.parse(tmp);
+
+        function getProfile() {
+            $.ajax({
+                url: '/profile',
+                type: 'GET',
+                success: (profile) => {
+                    document.getElementById('new_name').placeholder = profile.name;
+                    document.getElementById('new_email').placeholder = profile.email;
+                    document.getElementById('new_avatar').options.selectedIndex = profile.avatar_id;
+                    let activedRadio;
+                    if (profile.vr_hand_sync.data[0] == true) {
+                        activedRadio = document.getElementById('vrHandGestureSyncRadio').children[0];
+                    }
+                    else {
+                        activedRadio = document.getElementById('vrHandGestureSyncRadio').children[1];
+                    }
+                    $(activedRadio).addClass('active');
+                    activedRadio.children[0].checked = true;
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
                 }
-                return false;
-            };
+            });
+            return false;
+        };
 
-            function onLeave() {
+        function onSubmit() {
+            const fm = document.getElementById('alterForm');
+            const params = $(fm).serialize();
+            if (document.getElementById("new_pw1").value !== document.getElementById("new_pw2").value)
+                alert("retype the same password");
+            else {
                 $.ajax({
-                    url: '/removeAccount',
-                    type: 'POST',
-                    success: ()=>{
-                        location.href = '/loginPage';
+                    url: fm.action,
+                    type: fm.method,
+                    data: params,
+                    success: () => {
+                        location.href = '/main';
                     },
-                    error: (err)=>{
-                        alert("Code: " + err.status +"\n" + err.responseText);
+                    error: (err) => {
+                        alert("Code: " + err.status + "\n" + err.responseText);
                     }
                 });
-            };
-        </script>
-        <style>
+            }
+            return false;
+        };
+
+        function onLeave() {
+            $.ajax({
+                url: '/removeAccount',
+                type: 'POST',
+                success: () => {
+                    location.href = '/loginPage';
+                },
+                error: (err) => {
+                    alert("Code: " + err.status + "\n" + err.responseText);
+                }
+            });
+        };
+    </script>
+    <style>
         html,
         body {
-          height: 100%;
+            height: 100%;
         }
+
         body {
-          display: -ms-flexbox;
-          display: flex;
-          -ms-flex-align: center;
-          align-items: center;
-          padding-top: 40px;
-          padding-bottom: 40px;
-          background-color: #f5f5f5;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
         }
+
         .form {
-          width: 100%;
-          max-width: 330px;
-          padding: 15px;
-          margin: auto;
+            width: 100%;
+            max-width: 330px;
+            padding: 15px;
+            margin: auto;
         }
+
         .form .form-control {
-          position: relative;
-          box-sizing: border-box;
-          height: auto;
-          padding: 10px;
-          font-size: 16px;
+            position: relative;
+            box-sizing: border-box;
+            height: auto;
+            padding: 10px;
+            font-size: 16px;
         }
+
         .form .form-control:focus {
-          z-index: 2;
+            z-index: 2;
         }
+
         .form input[type="text"] {
-          margin-bottom: -1px;
-          border-bottom-right-radius: 0;
-          border-bottom-left-radius: 0;
+            margin-bottom: -1px;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
         }
+
         .form input[type="password"] {
-          margin-bottom: -1px;
-          border-top-left-radius: 0;
-          border-top-right-radius: 0;
+            margin-bottom: -1px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
         }
-        </style>
-    </head>
-    <body class="text-center" onload="getProfile();">
-        <form class="form" id="alterForm" action = "/alterUser" method="post" onsubmit="return onSubmit();">
-            <fieldset class="form-group">
-                <legend class="mb-3 font-weight-normal">Edit profile</legend>
-                <div class="row mb-2">
-                    <label for="new_name">Name</label>
-                    <input class="form-control" id="new_name" name="name" type="text" maxlength="45" required autofocus  pattern = "(^[A-Za-z0-9]+$)"></input>
-				</div>
-                <div class="row mb-2">
-                    <label for="new_email">Email</label>
-                    <input class="form-control" id="new_email" name="email" type="text" maxlength="45" required pattern = "(^[A-Za-z0-9\.]+@(\w+\.)+\w+$)"></input>
+    </style>
+</head>
+
+<body class="text-center" onload="getProfile();">
+    <form class="form" id="alterForm" action="/alterUser" method="post" onsubmit="return onSubmit();">
+        <fieldset class="form-group">
+            <legend class="mb-3 font-weight-normal">Edit profile</legend>
+            <div class="row mb-2">
+                <label for="new_name">Name</label>
+                <input class="form-control" id="new_name" name="name" type="text" maxlength="45" required autofocus
+                    pattern="(^[A-Za-z0-9]+$)"></input>
+            </div>
+            <div class="row mb-2">
+                <label for="new_email">Email</label>
+                <input class="form-control" id="new_email" name="email" type="text" maxlength="45" required
+                    pattern="(^[A-Za-z0-9\.]+@(\w+\.)+\w+$)"></input>
+            </div>
+            <div class="row mb-2">
+                <label for="cur_pw">Current password</label>
+                <input class="form-control" id="cur_pw" name="pw" type="password" maxlength="20" required
+                    placeholder="●●●●●●"></input></input>
+            </div>
+            <div class="row mb-2">
+                <label for="new_pw1">New password</label>
+                <input class="form-control" id="new_pw1" name="pw1" type="password" maxlength="20"
+                    placeholder="●●●●●●"></input>
+                <input class="form-control" id="new_pw2" name="pw2" type="password" maxlength="20"
+                    placeholder="●●●●●●"></input>
+            </div>
+            <div class="row mb-2">
+                <label for="new_avatar">Avatar</label>
+                <select class="form-control" id="new_avatar" name="avatar">
+                    <script>
+                        for (let avatar_info of avatar_infos) {
+                            document.write("<option value = " + avatar_info.id + ">" + avatar_info.name + "</option>");
+                        }
+                    </script>
+                </select>
+            </div>
+            <div class="row mb-4 justify-content-between">
+                <label for="vrHandGestureSyncRadio">VR hand gesture</label>
+                <div class="btn-group btn-group-toggle" id="vrHandGestureSyncRadio" data-toggle="buttons">
+                    <label class="btn btn-sm btn-secondary">
+                        <input type="radio" name="vrHandSync" id="vrHandSyncOn" autocomplete="off" value="true"> On
+                    </label>
+                    <label class="btn btn-sm btn-secondary">
+                        <input type="radio" name="vrHandSync" id="vrHandSyncOff" autocomplete="off" value="false"> Off
+                    </label>
                 </div>
-                <div class="row mb-2">
-                    <label for="cur_pw">Current password</label>
-                    <input class="form-control" id="cur_pw" name="pw" type="password" maxlength="20" required placeholder="●●●●●●"></input></input>
-                </div>
-                <div class="row mb-2">
-                    <label for="new_pw1">New password</label>
-                    <input class="form-control" id="new_pw1" name="pw1" type="password" maxlength="20" placeholder="●●●●●●"></input>
-                    <input class="form-control" id="new_pw2" name="pw2" type="password" maxlength="20" placeholder="●●●●●●"></input>
-                </div>
-				<div class="row mb-2">
-					<label for="new_avatar">Avatar</label>
-					<select class="form-control" id="new_avatar" name="avatar">
-						<script>
-							for(let avatar_info of avatar_infos) {
-								document.write("<option value = " + avatar_info.id + ">" + avatar_info.name + "</option>");
-							}
-						</script>
-					</select>
-				</div>
-                <div class = "row mb-4 justify-content-between">
-                    <label for="vrHandGestureSyncRadio">VR hand gesture</label>
-                    <div class ="btn-group btn-group-toggle" id="vrHandGestureSyncRadio" data-toggle="buttons">
-                        <label class="btn btn-sm btn-secondary">
-                            <input type="radio" name="vrHandSync" id="vrHandSyncOn" autocomplete="off" value="true"> On
-                        </label>
-                        <label class="btn btn-sm btn-secondary">
-                            <input type="radio" name="vrHandSync" id="vrHandSyncOff" autocomplete="off" value="false"> Off
-                        </label>
-                    </div>
-                </div>
-                <button class="btn btn-sm btn-danger m-1" type="button" onclick="onLeave()" style="float:right;">Leave</button>
-                <button class="btn btn-sm btn-primary m-1" type="submit" style="float:right;">Submit</button>
-            </fieldset>
-        </form>
-    </body>
+            </div>
+            <button class="btn btn-sm btn-danger m-1" type="button" onclick="onLeave()"
+                style="float:right;">Leave</button>
+            <button class="btn btn-sm btn-primary m-1" type="submit" style="float:right;">Submit</button>
+        </fieldset>
+    </form>
+</body>
+
 </html>
