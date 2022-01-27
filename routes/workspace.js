@@ -15,10 +15,8 @@ router.get('/makePage', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        return next(new DBError("Session has no uid", 401));
+        // return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
     let data;
@@ -38,18 +36,14 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        return next(new DBError("Session has no uid.", 401));
+        // return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
     
     let { workspaceName, tags, source } = request.body;
     if(!workspaceName) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        return next(new DBError("There is no Workspace name.", 400));
+        // return next(new BadRequestError(`There is no Workspace name. request.body: ${util.inspect(request.body, true, 2, true)}`));
     }
 
     let tagArr = tags.split(',').map(tag => tag.trim());
@@ -92,24 +86,16 @@ router.post('/removeWorkspace', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        return next(new DBError("Session has no uid.", 401));
     }
 
     const wid = request.body.wid;
     if(!wid) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        return next(new DBError("There is no wid", 400));
     }
 	if(sessionManager.isLiveSession(parseInt(wid))) {
-        // return next(new AuthError(400));
-		response.writeHead(400);
-		response.end('There is a running session');
-		return;
+        // 정확한 상태코드 확인 필요
+        return next(new DBError(`This Workspace(${wid}) is running in other session`, 401));
 	}
 
     let conn;
@@ -118,7 +104,7 @@ router.post('/removeWorkspace', async (request, response, next) => {
 
         const res1 = await conn.query(`select owner from t_workspace where id = ?`, wid);
         if(res1.length !== 1 || res1[0].owner !== uid) {
-            throw new DBError('Unauthorized access', 403);     // The owner can remove only
+            throw new DBError(`You are not owner of this workspace (or There is no such workspace(wid:${wid})` , 403);     // The owner can remove only
         }
 
         await conn.query(`delete from t_workspace where id = ?`, wid);
@@ -142,19 +128,13 @@ router.post('/setBookmark', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        return next(new DBError("Session has no uid.", 401));
     }
 
     const wid = parseInt(request.body.wid);
     const val = parseInt(request.body.val);
     if(isNaN(wid) || isNaN(val) || val > 1 || val < 0) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        return next(new DBError(`There is no such workspace(${wid}) or Invalid value is in 'val' variable ('val' variable indicate bookmark)`, 400));
     }
 
     let conn;
@@ -162,8 +142,8 @@ router.post('/setBookmark', async (request, response, next) => {
         conn = await dbPool.getConnection();
         
         const res1 = await conn.query(`update t_participation set bookmark=? where uid=? and wid=?`, [val, uid, wid]);
-        if(res1.affectedRows !== 0) {
-            throw new DBError('Unauthorized access', 412);     // You are not participant
+        if(res1.affectedRows === 0) {
+            throw new DBError("Try to change bookmark state that you doesn't participate", 412);     // You are not participant
         }
         
         conn.release();
@@ -184,8 +164,7 @@ router.get('/wsList', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
-        return next(err);
+        next(new DBError("Session has no uid.", 401));
     }
 
     const parseBoolean = (x) => {
@@ -198,8 +177,9 @@ router.get('/wsList', async (request, response, next) => {
     [page, rows, order] = [page, rows, order].map( x => parseInt(x) );
     [desc, bmonly] = [desc, bmonly].map(parseBoolean);
     if(isNaN(page) || isNaN(rows) || isNaN(order) || order > 3 || desc === undefined || bmonly === undefined) {
-        const err = new BadRequestError(`Invalid parameters - parameters: ${util.inspect({ page, rows, order, desc, bmonly, keyword }, true, 2, true)}`);
-        return next(err);
+        next(new DBError(`Invalid parameters - parameters: ${util.inspect({ page, rows, order, desc, bmonly, keyword }, true, 2, true)}`, 400))
+        // const err = new BadRequestError(`Invalid parameters - parameters: ${util.inspect({ page, rows, order, desc, bmonly, keyword }, true, 2, true)}`);
+        // return next(err);
     }
     
     const orderCols = ['name', 'size', 'access_date', 'owner_name'];
@@ -247,18 +227,12 @@ router.post('/invite', async (request, response, next) => {
     
     const senderId = request.session.uid;
     if(!senderId) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const { receiver, message, workspaceId } = request.body;
     if(!receiver || !workspaceId) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no input for receiver or workspace.", 400));
     }
     
     let conn;
@@ -302,18 +276,12 @@ router.post('/join', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const iid = request.body.inviteId;
     if(!iid) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no inviteId.", 400));
     }
 
     let conn;
@@ -324,8 +292,8 @@ router.post('/join', async (request, response, next) => {
         if(res1.length !== 1) {
             throw new DBError('Unauthorized access', 412);     // You haven't been invited
         }
-
-        const wid = result1[0].workspace_id;
+        
+        const wid = res1[0].workspace_id;
         await conn.beginTransaction();
 
         await conn.query(`insert into t_participation(uid, wid, rid, bookmark) values(?, ?, 5, b'0')`, [uid, wid, iid]);
@@ -351,18 +319,12 @@ router.post('/removeInvite', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const iid = request.body.inviteId;
     if(!iid) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no inviteId.", 400));
     }
 
     let conn;
@@ -394,18 +356,12 @@ router.get('/manage', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const wid = request.query.id;
     if(!wid) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no wid.", 400));
     }
 
     let conn;
@@ -437,6 +393,8 @@ router.get('/manage', async (request, response, next) => {
 
             const fileName = path.join(__dirname, '../public/manage.ejs');
             manage = await fsp.readFile(fileName, { encoding: 'utf8' });
+        } else {
+            throw new DBError("Doesn't have authority to manage workspace", 401);
         }
 
         conn.release();
@@ -459,18 +417,12 @@ router.post('/alter', async (request, response, next) => { //todo: Check the con
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const { wid, wname } = request.body;
     if(!wid || !wname) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no wid or wname", 400));
     }
 
 	if(sessionManager.isLiveSession(parseInt(wid))) {
@@ -491,19 +443,18 @@ router.post('/alter', async (request, response, next) => { //todo: Check the con
     let conn;
     try {
         conn = await dbPool.getConnection();
-
         const res1 = await conn.query(`select aid from t_auth_role_relation where rid = (select rid from t_participation where uid = ? and wid = ?)`, [uid, wid]);
         const hasAlterAuth = res1.map( auth => auth.aid ).filter( aid => aid === 1 ).length > 0;
         if (!hasAlterAuth) {
             throw new DBError('Unauthorized access', 403);     // Has no privilege to workspace settings
         }
-
+        
         await conn.beginTransaction();
         const res2 = await conn.query(`update t_workspace set name=?, description=?, content=? where id=?`, [wname, description, source, wid]);
         const res3 = await conn.query(`delete from t_tag where wid = ?`, wid);
 
         // Array of [wid, tag] pair
-        if (tagArr.length != 0) {
+        if (tagArr.length > 0){
             const values = tagArr.map( tag => [wid, tag] );
             await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
         }
@@ -529,18 +480,12 @@ router.post('/leave', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
     
     const wid = request.body.wid;
     if(!wid) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("There is no wid.", 400));
     }
 
     let conn;
@@ -576,19 +521,13 @@ router.post('/editParticipant', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     let { wid, participant, role, type } = request.body;
     [wid, participant, role] = [wid, participant, role].map( x => parseInt(x) );
     if(isNaN(wid) || isNaN(participant) || (type === '1' && isNaN(role)) || (type !== '1' && type !== '2')) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("Doesn't meet condition to edit participant.", 400));
     }
 
     let conn, result;
@@ -658,18 +597,12 @@ router.post('/save', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        next(new DBError("Session has no uid.", 401));
     }
 
     const { wid, content, vroptions, screenshot } = request.body;
     if(!wid || !content || !screenshot) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        next(new DBError("Doesn't meet condition to save workspace.", 400));
     }
 
     let conn;
