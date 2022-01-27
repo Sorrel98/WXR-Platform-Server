@@ -143,6 +143,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                 },
                 success: (result) => {
                     console.log('success to save');
+                    alert("Workspace is saved");
                 },
                 error: (err) => {
                     console.log(err);
