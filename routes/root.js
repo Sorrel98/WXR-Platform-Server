@@ -41,7 +41,7 @@ router.post('/register', async (request, response, next) => {
     const email = request.body.email;
     const pw = request.body.pw1; 
     if(!name || !email || !pw) {
-        const err = new BadRequestError(`Some insertbox is empty`);
+        const err = new BadRequestError(`Any insertbox is empty`);
         return next(err);
     }
     
