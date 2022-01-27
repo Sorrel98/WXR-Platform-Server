@@ -61,11 +61,11 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
         const res2 = await conn.query(`insert into t_participation(uid, wid, rid, bookmark, access_date) values(?, ?, 1, b'0', NULL)`, [uid, res1.insertId]);
 
         // Array of [wid, tag] pair
-        if(tagArr.length > 0){
+        if (tagArr.length > 0) {
             const values = tagArr.map( tag => [res1.insertId, tag] );
             await conn.batch(`insert into t_tag(wid, name) values(?, ?)`, values);
         }
-
+        
         conn.commit();
         conn.release();
 
