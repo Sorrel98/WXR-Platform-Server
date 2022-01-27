@@ -41,10 +41,8 @@ router.post('/register', async (request, response, next) => {
     const email = request.body.email;
     const pw = request.body.pw1; 
     if(!name || !email || !pw) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        const err = new BadRequestError(`Any insertbox is empty`);
+        return next(err);
     }
     
     let conn, uid;
@@ -81,10 +79,8 @@ router.post('/removeAccount', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
     let conn;
@@ -111,10 +107,8 @@ router.post('/login', async (request, response, next) => {
     const id = request.body.id;
     const pw = request.body.pw;
     if(!id || !pw) {
-        // return next(new AuthError(401));
-        response.writeHead(400);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`ID or PW is empty.`);
+        return next(err);
     }
 
     const field = (id.indexOf('@') == -1) ? 'name' : 'email';
@@ -158,10 +152,8 @@ router.post('/logout', (request, response) => {
     
     const id = request.session.uid;
     if(!id) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
     // await util.promisify(request.session.destroy)();
@@ -170,9 +162,8 @@ router.post('/logout', (request, response) => {
             response.status(200).end();
         }
         else {
-            response.writeHead(500);
-            response.end('Internal Server Error');
-            console.log(err);
+            //internal server : destroy error(500)
+            return next(err);
         }
     });
 });
@@ -210,10 +201,8 @@ router.get('/profile', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
     let conn, res1;
@@ -244,22 +233,19 @@ router.post('/alterUser', async (request, response, next) => {
     
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
-    let { name, email, pw, new_pw, avatar, vrHandSync } = request.body;
+    let { name, email, pw, pw1, pw2, avatar, vrHandSync } = request.body;
+    let new_pw = pw1;
     const avatar_id = parseInt(avatar);
     if(!name || !email || !pw || !vrHandSync || isNaN(avatar_id)) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        const err = new BadRequestError(`Any insertbox is empty`);
+        return next(err);
     }
 
-    vrHandSync == (vrHandSync == 'true') ? 1 : 0;
+    vrHandSync = (vrHandSync == 'true') ? 1 : 0;
     let conn;
     try {
         conn = await dbPool.getConnection();
@@ -298,10 +284,8 @@ router.get('/invitationList', async (request, response, next) => {
     
     const uid = request.session.uid;    
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
     let conn, res1;
@@ -347,18 +331,14 @@ router.get('/workspace', async (request, response, next) => {
 
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
     const wid = request.query.id;
     if(!wid) {
-        // return next(new AuthError(400));
-        response.writeHead(400);
-        response.end();
-        return;
+        const err = new BadRequestError(`There is no wid`);
+        return next(err);
     }
 
     let conn;
@@ -421,10 +401,8 @@ router.get('/manageAssets', async (request, response) => {
 
     const uid = request.session.uid;
     if(!uid) {
-        // return next(new AuthError(401));
-        response.writeHead(401);
-        response.end();
-        return;
+        const err = new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`);
+        return next(err);
     }
 
     let data;
