@@ -64,6 +64,8 @@ AFRAME.registerComponent('target', {
 
     setRelativeMatrix: function () {
         if (this.markerEl) {
+            this.markerEl.object3D.updateWorldMatrix();
+            this.el.object3D.updateWorldMatrix();
             this.markerToThisMatrix.copy(this.markerEl.object3D.matrixWorld).invert();
             this.markerToThisMatrix.multiply(this.el.object3D.matrixWorld);
         }
