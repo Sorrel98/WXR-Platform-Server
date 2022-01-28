@@ -8,7 +8,7 @@ const ejs = require('ejs');
 
 const sessionManager = require('../session').sessionManager;
 const dbPool = require('../lib/DBpool').dbPool;
-const { BadRequestError, DBError, UnauthorizedError } = require('../lib/errors');
+const { BadRequestError, DBError, UnauthorizedError, NotFoundError } = require('../lib/errors');
 
 
 router.get('/makePage', async (request, response, next) => {
@@ -623,6 +623,51 @@ router.post('/save', async (request, response, next) => {
 
     sessionManager.onSaved(uid, parseInt(wid));
     response.status(200).end();
+});
+
+router.get('/workspace/sessions', async (request, response, next) => {
+
+    const { uid } = request.session;
+    if (!uid) {
+        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
+    }
+
+    const { id, sid } = request.query;
+    if (!id) {
+        return next(new BadRequestError(`Invalid asset id. request.query: ${util.inspect(request.query, true, 2, true)}`));
+    }
+
+    // TODO: Check access validation
+    let conn;
+    try {
+        conn = await dbPool.getConnection();
+
+        if (!sid) {
+
+            const res1 = await conn.query(`select id, start_time, end_time from t_workspace_session where wid=?`, id);
+            response.status(200).json(res1);
+
+        }
+        else {
+
+            const res1 = await conn.query(`select t_workspace.name as w_name, start_time, concat('[', substring(log_msgs from 2), ']') as logs from t_workspace_session join t_workspace on t_workspace.id = t_workspace_session.wid where t_workspace_session.id=?`, sid);
+            if (res1.length !== 1) {
+                throw new NotFoundError(`Couldn't find session log. sid: ${sid}`);
+            }
+
+            response.setHeader('Content-disposition', `attachment; filename=${encodeURIComponent(res1[0].w_name + '_' + res1[0].start_time)}.log`);
+            response.status(200).end(res1[0].logs, 'binary');
+
+        }
+
+    } catch (err) {
+        if (conn) {
+            conn.release();
+        }
+
+        return next(err);
+    }
+
 });
 
 module.exports = router;

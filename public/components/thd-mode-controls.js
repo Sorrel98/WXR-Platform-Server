@@ -197,6 +197,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.initEditWindow();
         this.initleftSideWindow();
         this.initHelpWindow();
+        this.initSessionListWindow();
         this.initUILayer();
 
         window.addEventListener('keydown', (event) => {
@@ -1164,6 +1165,95 @@ AFRAME.registerComponent('thd-mode-controls', {
     },
 
     /**
+     * Initialize the sessionListWindow to display the list of session logs.
+     */
+    initSessionListWindow: function () {
+        let tdModeControlsComp = this;
+        this.sessionListWindow = document.createElement('div');
+        this.sessionListWindow.innerHTML = "<div id='session_list_panel' style='position:absolute; overflow:auto; width:780px; height:550px; top:10px; left:10px;'><table width=100% height=100%><tr><th>session id</th><th>start</th><th>end</th></tr></table></div><div style='position:absolute; width:780px; left:10px; top:570px; text-align:right;'><button id='session_list_close'>Close</button></div>";
+        this.sessionListWindow.style.backgroundColor = 'lightblue';
+        this.sessionListWindow.style.display = 'none';
+        this.sessionListWindow.style.position = 'fixed';
+        this.sessionListWindow.style.width = '80%';
+        this.sessionListWindow.style.height = '60%';
+        this.sessionListWindow.style.maxWidth = '800px';
+        this.sessionListWindow.style.maxHeight = '600px';
+        this.sessionListWindow.style.top = '15%';
+        this.sessionListWindow.style.overflow = 'auto';
+
+        $("body").prepend(this.sessionListWindow);
+
+        let onResize = (e) => {
+            tdModeControlsComp.sessionListWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (tdModeControlsComp.sessionListWindow.offsetWidth / 2)) + 'px';
+        };
+
+        let onKeydown = (e) => {
+            if (e.keyCode === 27) {//esc
+                tdModeControlsComp.closeSessionList();
+            }
+        };
+
+        this.sessionListWindowHandlerLoader = () => {
+            window.addEventListener('resize', onResize);
+            window.addEventListener('keydown', onKeydown);
+        };
+
+        this.sessionListWindowHandlerUnloader = () => {
+            window.removeEventListener('resize', onResize);
+            window.removeEventListener('keydown', onKeydown);
+        };
+
+        this.closeSessionList = (e) => {
+            tdModeControlsComp.sessionListWindow.style.zIndex = '0';
+            tdModeControlsComp.sessionListWindow.style.display = 'none';
+            tdModeControlsComp.el.addEventListener('mousedown', tdModeControlsComp.onMouseDown, false);
+            tdModeControlsComp.el.addEventListener('touchstart', tdModeControlsComp.onTouchStart, false);
+            tdModeControlsComp.enableKeyEvent = true;
+            const wasdControlsEl = document.querySelector('[wasd-controls]');
+            if (wasdControlsEl !== null)
+                wasdControlsEl.getAttribute('wasd-controls').enabled = true;
+            document.activeElement.blur();
+            tdModeControlsComp.sessionListWindowHandlerUnloader();
+        };
+
+        this.loadSessionList = () => {
+            tdModeControlsComp.sessionListWindow.style.zIndex = '10000';
+            tdModeControlsComp.sessionListWindow.style.display = 'block';
+            tdModeControlsComp.el.removeEventListener('mousedown', tdModeControlsComp.onMouseDown);
+            tdModeControlsComp.el.removeEventListener('touchstart', tdModeControlsComp.onTouchStart);
+            tdModeControlsComp.enableKeyEvent = false;
+            const wasdControlsEl = document.querySelector('[wasd-controls]');
+            if (wasdControlsEl !== null)
+                wasdControlsEl.getAttribute('wasd-controls').enabled = false;
+            tdModeControlsComp.sessionListWindowHandlerLoader();
+            tdModeControlsComp.sessionListWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (this.helpWindow.offsetWidth / 2)) + 'px'; // for dynamic resizing
+
+            let table = document.querySelector('#session_list_panel table');
+            table.innerHTML = "Loading...";
+            let wid = window.wid;
+
+            $.ajax({
+                url: '/workspace/sessions?id=' + wid,
+                type: 'GET',
+                success: (result) => {
+                    table.innerHTML = "<tr><th>session id</th><th>start</th><th>end</th></tr>";
+                    for (const session of result) {
+                        let row = document.createElement('tr');
+                        row.innerHTML = `<td>${session.id}</td><td>${session.start_time}</td><td>${session.end_time}</td><td><a href="/workspace/sessions?id=${wid}&sid=${session.id}">download</a></td>`;
+                        table.appendChild(row);
+                    }
+                },
+                error: (err) => {
+                    table.innerHTML = err.toString();
+                    console.log(err);
+                }
+            });
+        };
+
+        document.querySelector('#session_list_close').addEventListener('click', this.closeSessionList);
+    },
+
+    /**
      * Initialize the UI buttons that are overlaid on the scene viewport.
      */
     initUILayer: function () {
@@ -1182,9 +1272,26 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.UILayer1.style.zIndex = 9999;
         this.UILayer1.style.height = unitSize + 'px';
         this.UILayer1.style.minHeight = '40px';
-        this.UILayer1.style.width = (this.UILayer1.offsetHeight * 6) + 'px';
+        this.UILayer1.style.width = (this.UILayer1.offsetHeight * 7) + 'px';
         this.UILayer1.style.top = '2px';
         this.UILayer1.style.left = (this.el.offsetLeft + this.el.offsetWidth - this.UILayer1.offsetWidth - 2) + 'px';
+
+        let sessionButtonUI = document.createElement('div');
+        sessionButtonUI.id = 'sessionButtonUI';
+        $(sessionButtonUI).addClass('buttonUI');
+        sessionButtonUI.style.display = 'inline-block';
+        sessionButtonUI.style.height = '100%';
+        this.UILayer1.appendChild(sessionButtonUI);
+
+        this.sessionButton = document.createElement('img');
+        this.sessionButton.setAttribute('src', '/img/icon/history in circle.svg');
+        this.sessionButton.style.height = 'calc(100% - 4px)';
+        this.sessionButton.style.cursor = 'pointer';
+        this.sessionButton.style.padding = '2px';
+        this.sessionButton.addEventListener('click', () => {
+            this.loadSessionList();
+        });
+        sessionButtonUI.appendChild(this.sessionButton);
 
         let copyButtonUI = document.createElement('div');
         copyButtonUI.id = 'CopyButtonUI';

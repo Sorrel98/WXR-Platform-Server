@@ -4,9 +4,10 @@ const dbPool = require('./lib/DBpool').dbPool;
 
 
 class WSSession {
-	constructor(wid) {
+	constructor(wid, sid) {
 		console.log(`New WSSession on ${wid}`);
 		this.wid = wid;
+		this.sid = sid;
 		this.participantSocketsFromSessionName = new Map(); // {key:sessionName, value: socket}
 		/*
 		socket.userData = {
@@ -24,6 +25,8 @@ class WSSession {
 		this.streamerSocket = null;
 		this.streamerOwner = null;
 		this.workHistory = [];
+		this.sessionLogs = [];
+		this.sessionLoggingTimer = null;
 	}
 
 	onSaved() {
@@ -95,6 +98,51 @@ class WSSession {
 		socket.on('moving', (pose) => {
 			socket.userData.pose = pose;
 			socket.to(this.wid).emit('userPose', { sessionName: socket.userData.sessionName, pose: pose });
+
+			// Logging user pose data
+			let msg = { user_sname: socket.userData.sessionName, xr_mode: socket.userData.mode, pose: pose };
+			let currTime = (new Date).toISOString();
+			let log = { time: currTime, msg: msg };
+			this.sessionLogs.push(log);
+			let executeQuery = async () => {
+				let logCount = this.sessionLogs.length;
+				if (logCount === 0) {
+					return;
+				}
+
+				let sid = this.sid;
+				let logs = ',' + JSON.stringify(this.sessionLogs).slice(1, -1);
+				this.sessionLogs = [];
+
+				let conn;
+				try {
+
+					conn = await dbPool.getConnection();
+					const res1 = await conn.query(`update t_workspace_session set log_msgs=concat(log_msgs, ?) where id=?`, [logs, sid]);
+					console.log(`inserted ${logCount} logs`);
+
+					conn.release();
+
+				} catch (err) {
+					if (conn) {
+						conn.release();
+					}
+
+					console.log(err);
+				}
+			}
+
+			if (this.sessionLogs.length > 10_000) {
+				clearTimeout(this.sessionLoggingTimer);
+				this.sessionLoggingTimer = null;
+				(async () => await executeQuery())();
+			}
+			else if (!this.sessionLoggingTimer) {
+				this.sessionLoggingTimer = setTimeout(() => {
+					this.sessionLoggingTimer = null;
+					(async () => await executeQuery())();
+				}, 3000); // 3 seconds
+			}
 		});
 		socket.on('vrHandMoving', (vrHandPose) => {
 			if (!socket.userData.enableSyncVRHand || socket.userData.mode !== 1) return;
@@ -159,7 +207,7 @@ class WSSession {
 		}
 
 		//Notification of new users to existing users
-		socket.userData = { sessionName: sessionName, pose: { pos: [0.0, 0.0, 0.0], rot: [0.0, 0.0, 0.0] }, avatarPath: avatarPath, canWrite: false, mode: 0, enableSyncVRHand: enableSyncVRHand, vrHandPose: null, vrHandGesture: [0, 0] };
+		socket.userData = { uid: socket.handshake.session.uid, sessionName: sessionName, pose: { pos: [0.0, 0.0, 0.0], rot: [0.0, 0.0, 0.0] }, avatarPath: avatarPath, canWrite: false, mode: 0, enableSyncVRHand: enableSyncVRHand, vrHandPose: null, vrHandGesture: [0, 0] };
 		this.participantSocketsFromSessionName.set(sessionName, socket);
 		socket.join(this.wid);
 		socket.to(this.wid).emit('createUser', sessionName, avatarPath, enableSyncVRHand);
@@ -291,10 +339,32 @@ class SessionManager {
 				// socket.userData.wsSession = getWSSessionByWID.get(wid);
 				wsSession = getWSSessionByWID.get(wid);
 				if (!wsSession) {
-					wsSession = new WSSession('' + wid);
-					getWSSessionByWID.set(wid, wsSession);
+
+					let conn;
+					try {
+
+						conn = await dbPool.getConnection();
+
+						const res1 = await conn.query(`insert into t_workspace_session(wid) values(?)`, wid);
+
+						wsSession = new WSSession(String(wid), res1.insertId);
+						getWSSessionByWID.set(wid, wsSession);
+						await wsSession.join(socket, name, avatarPath, enableSyncVRHand);
+
+						conn.release();
+
+					} catch (err) {
+						if (conn) {
+							conn.release();
+						}
+
+						console.log(err);
+					}
+
 				}
-				await wsSession.join(socket, name, avatarPath, enableSyncVRHand);
+				else {
+					await wsSession.join(socket, name, avatarPath, enableSyncVRHand);
+				}
 			});
 
 			socket.on('joinWSasStreamer', (wid, token) => {
@@ -307,12 +377,48 @@ class SessionManager {
 				}
 			});
 
-			socket.on('disconnect', () => {
+			socket.on('disconnect', async () => {
 				console.log(`socket disconnected : ${name}`);
 				if (wsSession) {
 					console.log(`Leave ${name} from ${wsSession.wid}`);
 					wsSession.leave(socket);
 					if (wsSession.getPartNum() === 0) {
+
+						let sid = wsSession.sid;
+						let logCount = wsSession.sessionLogs.length;
+						let log_msgs = ',' + JSON.stringify(wsSession.sessionLogs).slice(1, -1);
+						let end_time = (new Date).toISOString().slice(0, -1);
+
+						clearTimeout(wsSession.sessionLoggingTimer);
+
+						let conn;
+						try {
+
+							conn = await dbPool.getConnection();
+
+							let query, params;
+							if (logCount === 0) {
+								query = `update t_workspace_session set end_time=? where id=?`;
+								params = [end_time, sid];
+							}
+							else {
+								query = `update t_workspace_session set end_time=?, log_msgs=concat(log_msgs, ?) where id=?`;
+								params = [end_time, log_msgs, sid];
+							}
+
+							console.log(`inserted ${logCount} logs`);
+							console.log("sucessfully ending a session");
+
+							conn.release();
+
+						} catch (err) {
+							if (conn) {
+								conn.release();
+							}
+
+							console.log(err);
+						}
+
 						getWSSessionByWID.delete(parseInt(wsSession.wid));
 						wsSession = null;
 					}
