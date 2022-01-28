@@ -11,6 +11,8 @@ class ARTracker {
 		this.lastRenderArFrameNumber;
 		this.lastRenderArFrame = null;
 		this.ready = false;
+		this.bindedGeometryMap = new Map();
+		this.defaultVisible = new Map(); // Map <key: uuid, value: visible>
 	}
 
 	setCameraProjection(near, far, fov, aspect) {
@@ -121,8 +123,12 @@ class ARTracker {
 		let sceneEl = this.arModeComp.el;
 
 		let dfs = (el, val) => {
-			if (involveSky || el.tagName !== 'A-SKY')
-				el.setAttribute('visible', val);
+			if (involveSky || el.tagName !== 'A-SKY') {
+				let uuid = el.object3D.uuid;
+				let visible = this.defaultVisible.get(uuid);
+				visible = (visible === undefined ? true : visible) && val;
+				el.setAttribute('visible', visible);
+			}
 			for (let child of el.children) {
 				if (child.components)
 					dfs(child, val);
@@ -153,6 +159,42 @@ class ARTracker {
 	popBaseMarker(oldSrc) {
 		this.arModeComp.callNative('unloadTarget', oldSrc);
 	}
+
+	pushBindedObject(markerSrc, object3D) {
+		let findGeometry = (obj) => {
+			if (obj.geometry) {
+				let key = obj.uuid;
+				this.bindedGeometryMap.set(key, obj);
+				this.arModeComp.callNative('loadBindedGeometry',
+					markerSrc,
+					key,
+					obj.geometry.attributes.position.array,
+					obj.geometry.index.array);
+			}
+			for (let child of obj.children) {
+				findGeometry(child);
+			}
+		};
+		findGeometry(object3D);
+	}
+
+	makeDefaultVisibility() {
+		let sceneEl = this.arModeComp.el;
+		let dfs = (el) => {
+			let uuid = el.object3D.uuid;
+			let visible = el.getAttribute('visible');
+			this.defaultVisible.set(uuid, visible);
+			for (let child of el.children) {
+				if (child.components)
+					dfs(child);
+			}
+		};
+		for (let child of sceneEl.children) {
+			if (child.components) {
+				dfs(child);
+			}
+		}
+	}
 };
 
 /**
@@ -165,26 +207,19 @@ AFRAME.registerComponent('ar-mode-controls', {
 	init: function () {
 		if (this.el !== this.el.sceneEl) return;
 		let sceneEl = this.el;
-		this.callNative = (funcName, arg1, arg2) => {
-		};
-		if (window.webkit) { //for iOS
-			this.callNative = (funcName, arg1, arg2) => {
-				window.webkit.messageHandlers[funcName].postMessage({ arg1, arg2 });
+		if (window.webkit) {	// for iOS
+			this.callNative = (funcName, ...args) => {
+				argv = {}
+				for (let key in args) {
+					argv['arg' + (key * 1 + 1)] = args[key];
+				}
+				console.log(argv);
+				window.webkit.messageHandlers[funcName].postMessage(argv);
 			};
 		}
-		else if (window.androidFunction) { //for android
-			this.callNative = (funcName, arg1, arg2) => {
-				if (arg1 !== undefined) {
-					if (arg2 !== undefined) {
-						window.androidFunction[funcName](arg1, arg2);
-					}
-					else {
-						window.androidFunction[funcName](arg1);
-					}
-				}
-				else {
-					window.androidFunction[funcName]();
-				}
+		else if (window.androidFunction) {	//for android
+			this.callNative = (funcName, ...args) => {
+				window.androidFunction[funcName](...args);
 			};
 		}
 		this.ARTracker = new ARTracker(this);
@@ -198,6 +233,51 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.streamingUILayer.style.bottom = '10px';
 		this.streamingUILayer.style.display = 'none';
 		document.body.appendChild(this.streamingUILayer);
+
+		/**
+		 * Environment (point cloud or scene geometry) streaming thorugh WebRTC.
+		 * In one workspace session, streaming rights are exclusive 
+		 * and only users who have been issued a token from the server can stream.
+		 * When the streaming ends, the token is returned to the server.
+		 */
+		this.envGeoStreamingStatus = false;
+		this.envGeoStreamingButton = document.createElement('button');
+		this.envGeoStreamingButton.innerHTML = 'share env';
+		this.envGeoStreamingButton.style.width = '100px';
+		this.envGeoStreamingButton.style.height = '50px';
+		this.envGeoStreamingButton.style.left = '5px';
+		this.envGeoStreamingButton.style.bottom = '5px';
+		this.envGeoStreamingButton.style.position = 'relative';
+		this.envGeoStreamingButton.onclick = () => {
+			if (this.envGeoStreamingStatus) {
+				this.envGeoStreamingStatus = false;
+				this.envGeoStreamingButton.innerHTML = 'share env';
+				this.callNative('onRemoveStreamingChannel', 1);
+			}
+			else {
+				if (this.streamingToken !== null) {
+					this.envGeoStreamingStatus = true;
+					this.envGeoStreamingButton.innerHTML = 'unshare env';
+					this.callNative('onAddStreamingChannel', 1);
+				}
+				else {
+					let syncComp = this.el.components['sync'];
+					if (syncComp) {
+						syncComp.getArStreamingToken().then((token) => {
+							this.streamingToken = token;
+							this.envGeoStreamingStatus = true;
+							this.envGeoStreamingButton.innerHTML = 'unshare env';
+							this.callNative('onInitStreaming', wid, token);
+							this.callNative('onAddStreamingChannel', 1);
+						})
+							.catch(() => {
+								console.log('token is unavailable');
+							});
+					}
+				}
+			}
+		};
+		this.streamingUILayer.appendChild(this.envGeoStreamingButton);
 
 		/**
 		 * Screen sharing thorugh WebRTC.
@@ -262,14 +342,59 @@ AFRAME.registerComponent('ar-mode-controls', {
 					sceneEl.camera.el.setAttribute('look-controls', 'enabled', false);
 					sceneEl.addState('ar-mode');
 					sceneEl.emit('enter-ar', { target: sceneEl });
+					this.ARTracker.makeDefaultVisibility();
 					this.ARTracker.setVisible(false, true);
 					this.ARTracker.arFrame = new Map();
 					this.ARTracker.lastRenderArFrame = null;
 					this.ARTracker.lastRenderArFrameNumber = -1;
 					this.ARTracker.ready = true;
+					this.envGeoStreamingButton.innerHTML = 'share env';
+					this.envGeoStreamingStatus = false;
 					this.videoStreamingButton.innerHTML = 'share screen';
 					this.videoStreamingStatus = false;
 					this.streamingUILayer.style.display = 'block';
+
+					let resultMap1 = new Map();
+					let amArray = Array.from(this.ARTracker.activeMarkers);
+					let findTargetingObj = (el) => {
+						if (!el.id) return;
+						let targetComp = el.components['target'];
+						if (targetComp) {
+							let markerId = targetComp.data.marker.substr(1);
+							let src, markerComp;
+							[url, markerComp] = amArray.find(entry => entry[1].el.id == markerId);
+							if (markerComp) {
+								resultMap1.set(el.id, { markerURL: url, object3D: el.object3D });
+							}
+						}
+						for (let child of el.children) {
+							findTargetingObj(child);
+						}
+					};
+					findTargetingObj(sceneEl);
+					for ([key, val] of resultMap1) {
+						this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
+					}
+
+					let resultMap2 = new Map();
+					let findBindingObj = (el) => {
+						if (!el.id) return;
+						let binderComp = el.components['binder'];
+						if (binderComp) {
+							let targetingItem = resultMap1.get(binderComp.data.reference.substr(1));
+							if (targetingItem) {
+								resultMap2.set(el.id, { marker: targetingItem.markerURL, object3D: el.object3D });
+							}
+						}
+						for (let child of el.children) {
+							findBindingObj(child);
+						}
+					};
+					findBindingObj(sceneEl);
+					for ([key, val] of resultMap2) {
+						this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
+					}
+
 					this.callNative('onEnterAR');
 				}
 				else {
@@ -308,6 +433,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 			}
 			this.streamingToken = null;
 			this.ARTracker.setVisible(true, true);
+			this.ARTracker.bindedGeometryMap.clear();
 			this.ARTracker.arFrame.clear();
 			this.ARTracker.lastRenderArFrame = null;
 			this.ARTracker.lastRenderArFrameNumber = -1;
