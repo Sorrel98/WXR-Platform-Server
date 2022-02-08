@@ -398,7 +398,7 @@ router.get('/workspace', async (request, response, next) => {
     response.end(ejs.render(workspace, { uname, wid, wname, created, rid, canWrite, canInvite, vrOptions, data }));
 });
 
-router.get('/manageAssets', async (request, response) => {
+router.get('/manageAssets', async (request, response, next) => {
 
     const uid = request.session.uid;
     if (!uid) {
