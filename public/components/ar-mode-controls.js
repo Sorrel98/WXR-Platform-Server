@@ -207,6 +207,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 	init: function () {
 		if (this.el !== this.el.sceneEl) return;
 		let sceneEl = this.el;
+		this.callNative = (funcName, ...args) => {};	// On a desktop, this function do no actions.
 		if (window.webkit) {	// for iOS
 			this.callNative = (funcName, ...args) => {
 				argv = {}

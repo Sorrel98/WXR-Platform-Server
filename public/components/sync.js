@@ -209,76 +209,6 @@ AFRAME.registerComponent('sync', {
 					this.socket.emit('voiceNewIceCandidate', name, event.candidate);
 				}
 			};
-			pc.ondatachannel = (event) => {
-				let channel = event.channel;
-				channel.onopen = (e) => {
-					console.log(channel.label + ' channel open');
-					if (channel.label === "envPoints") {
-						this.envPoints = new EnvPoints(this.el.object3D);
-					}
-					else if (channel.label === "envPointSet") {
-						this.envPointSet = new EnvPoints(this.el.object3D);
-					}
-				};
-				channel.onclose = (e) => {
-					console.log(channel.label + ' strings channel close');
-					if (channel.label === "envPoints") {
-						this.envPoints.destroy();
-						this.envPoints = null;
-					}
-					else if (channel.label === "envPointSet") {
-						// this.envPointSet.destroy();
-						// this.envPointSet = null;
-					}
-				};
-				if (channel.label === "strings") {
-					channel.onmessage = (e) => {
-						console.log(e.data);
-					};
-				}
-				else if (channel.label === "envPoints") {
-					channel.onmessage = (e) => {
-						let floatView = new DataView(e.data);
-						let byteArray = new Uint8Array(e.data);
-						let x = floatView.getFloat32(0, false);
-						let y = floatView.getFloat32(4, false);
-						let z = floatView.getFloat32(8, false);
-						let R = byteArray[12];
-						let G = byteArray[13];
-						let B = byteArray[14];
-						this.envPoints.addPoint(x, y, z, R / 255, G / 255, B / 255);
-					};
-				}
-				else if (channel.label === "envPointSet") {
-					channel.onmessage = (e) => {
-						let addPoint = (buffer) => {
-							let floatView = new DataView(buffer);
-							let byteArray = new Uint8Array(buffer);
-							let numOfPoint = floatView.getUint16(0, false)
-							let endI = 2 + numOfPoint * 15;
-							for (i = 2; i < endI; i += 15) {
-								// if (Math.random() > 0.1) continue;
-								let x = floatView.getFloat32(i, false);
-								let y = floatView.getFloat32(i + 4, false);
-								let z = floatView.getFloat32(i + 8, false);
-								let R = byteArray[i + 12];
-								let G = byteArray[i + 13];
-								let B = byteArray[i + 14];
-								this.envPointSet.addPoint(x, y, z, R / 255, G / 255, B / 255);
-							}
-						}
-						if (e.data.constructor.name === 'Blob')
-							e.data.arrayBuffer().then(buffer => addPoint(buffer));
-						else
-							addPoint(e.data);
-					};
-				}
-				else if (channel.label === "envGeometry") {
-					channel.onmessage = (e) => {
-
-					};
-				}
-			};
 			pc.ontrack = (event) => {
 				console.log('ontrack');
 				if (peer.voiceTrack) {
@@ -350,6 +280,76 @@ AFRAME.registerComponent('sync', {
 				}
 			};
 			pc.onnegotiationneeded = () => {
+			};
+			pc.ondatachannel = (event) => {
+				let channel = event.channel;
+				channel.onopen = (e) => {
+					console.log(channel.label + ' channel open');
+					if (channel.label === "envPoints") {
+						this.envPoints = new EnvPoints(this.el.object3D);
+					}
+					else if (channel.label === "envPointSet") {
+						this.envPointSet = new EnvPoints(this.el.object3D);
+					}
+				};
+				channel.onclose = (e) => {
+					console.log(channel.label + ' strings channel close');
+					if (channel.label === "envPoints") {
+						this.envPoints.destroy();
+						this.envPoints = null;
+					}
+					else if (channel.label === "envPointSet") {
+						// this.envPointSet.destroy();
+						// this.envPointSet = null;
+					}
+				};
+				if (channel.label === "strings") {
+					channel.onmessage = (e) => {
+						console.log(e.data);
+					};
+				}
+				else if (channel.label === "envPoints") {
+					channel.onmessage = (e) => {
+						let floatView = new DataView(e.data);
+						let byteArray = new Uint8Array(e.data);
+						let x = floatView.getFloat32(0, false);
+						let y = floatView.getFloat32(4, false);
+						let z = floatView.getFloat32(8, false);
+						let R = byteArray[12];
+						let G = byteArray[13];
+						let B = byteArray[14];
+						this.envPoints.addPoint(x, y, z, R / 255, G / 255, B / 255);
+					};
+				}
+				else if (channel.label === "envPointSet") {
+					channel.onmessage = (e) => {
+						let addPoint = (buffer) => {
+							let floatView = new DataView(buffer);
+							let byteArray = new Uint8Array(buffer);
+							let numOfPoint = floatView.getUint16(0, false)
+							let endI = 2 + numOfPoint * 15;
+							for (i = 2; i < endI; i += 15) {
+								// if (Math.random() > 0.1) continue;
+								let x = floatView.getFloat32(i, false);
+								let y = floatView.getFloat32(i + 4, false);
+								let z = floatView.getFloat32(i + 8, false);
+								let R = byteArray[i + 12];
+								let G = byteArray[i + 13];
+								let B = byteArray[i + 14];
+								this.envPointSet.addPoint(x, y, z, R / 255, G / 255, B / 255);
+							}
+						}
+						if (e.data.constructor.name === 'Blob')
+							e.data.arrayBuffer().then(buffer => addPoint(buffer));
+						else
+							addPoint(e.data);
+					};
+				}
+				else if (channel.label === "envGeometry") {
+					channel.onmessage = (e) => {
+
+					};
+				}
 			};
 			pc.ontrack = (event) => {
 				this.receivedArStreamPC.videoTrack = event.track;
