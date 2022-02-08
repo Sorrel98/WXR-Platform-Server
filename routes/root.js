@@ -1,4 +1,5 @@
 const fsp = require('fs').promises;
+const util = require('util');
 const path = require('path');
 
 const express = require('express');
@@ -6,7 +7,7 @@ const router = express.Router();
 const ejs = require('ejs');
 
 const dbPool = require('../lib/DBpool').dbPool;
-const { DBError } = require('../lib/errors');
+const { BadRequestError, UnauthorizedError, ForbiddenError, InternalServerError } = require('../lib/errors');
 
 
 router.get('/', (request, response) => {
@@ -41,7 +42,7 @@ router.post('/register', async (request, response, next) => {
     const email = request.body.email;
     const pw = request.body.pw1;
     if (!name || !email || !pw) {
-        const err = new BadRequestError(`Any insertbox is empty`);
+        const err = new BadRequestError(`Any insertbox is empty. request.body: ${util.inspect(request.body, 2, true, 2)}`);
         return next(err);
     }
 
@@ -107,7 +108,7 @@ router.post('/login', async (request, response, next) => {
     const id = request.body.id;
     const pw = request.body.pw;
     if (!id || !pw) {
-        const err = new UnauthorizedError(`ID or PW is empty.`);
+        const err = new BadRequestError(`ID or PW is empty. request.body: ${util.inspect(request.body, 2, true, 2)}`);
         return next(err);
     }
 
@@ -117,7 +118,7 @@ router.post('/login', async (request, response, next) => {
         conn = await dbPool.getConnection();
         res1 = await conn.query(`select * from t_user where ${field} = ?`, [id]);
         if (res1.length !== 1) {
-            throw new DBError('Fail : Nonexistent id', 406);
+            throw new BadRequestError(`The user is not exist. field: ${field}, value: ${id}`);
         }
 
         const res2 = await conn.query(`select SHA2(?, 256) as val`, [pw]);
@@ -125,7 +126,7 @@ router.post('/login', async (request, response, next) => {
 
         // should change to hashing module?
         if (res1[0].passwd !== pwHashResult.val) {
-            throw new DBError('Fail : Wrong password', 406);
+            throw new BadRequestError(`The password is not matching. field: ${field}, value: ${id}`);
         }
 
         conn.release();
@@ -210,7 +211,7 @@ router.get('/profile', async (request, response, next) => {
         conn = await dbPool.getConnection();
         res1 = await conn.query(`select name, email, avatar_id, vr_hand_sync from t_user where id = ?`, uid);
         if (res1.length !== 1) {
-            throw new DBError('Removed account', 412);
+            throw new BadRequestError(`The user is not exist. uid: ${uid}`);
         }
 
         conn.release();
@@ -241,7 +242,7 @@ router.post('/alterUser', async (request, response, next) => {
     let new_pw = pw1;
     const avatar_id = parseInt(avatar);
     if (!name || !email || !pw || !vrHandSync || isNaN(avatar_id)) {
-        const err = new BadRequestError(`Any insertbox is empty`);
+        const err = new BadRequestError(`Any insertbox is empty. request.body: ${util.inspect(request.body, 2, true, 2)}`);
         return next(err);
     }
 
@@ -252,7 +253,7 @@ router.post('/alterUser', async (request, response, next) => {
 
         const res1 = await conn.query(`select SHA2(?, 256) = (select passwd from t_user where id=?) as valid`, [pw, uid]);
         if (res1[0].valid !== 1) {
-            throw new DBError('Nonexistent account or wrong password', 403);
+            throw new BadRequestError(`The current password is not matching. uid: ${uid}`);
         }
 
         let query, params;
@@ -337,7 +338,7 @@ router.get('/workspace', async (request, response, next) => {
 
     const wid = request.query.id;
     if (!wid) {
-        const err = new BadRequestError(`There is no wid`);
+        const err = new BadRequestError(`There is no wid. request.query: ${util.inspect(request.query, 2, true, 2)}`);
         return next(err);
     }
 
@@ -347,18 +348,17 @@ router.get('/workspace', async (request, response, next) => {
         conn = await dbPool.getConnection();
         const res1 = await conn.query(`select u.name, p.rid from (select id, name from t_user where id = ?) as u join t_participation as p on p.uid = u.id where p.wid = ?`, [uid, wid]);
         if (res1.length !== 1) {
-            //406
-            throw new DBError('Unauthorized access', 403);
+            throw new ForbiddenError(`The user has no permission to access this workspace. uid: ${uid}, wid: ${wid}`);
         }
 
         const res2 = await conn.query(`select id, name, created_date, content, vr_options from t_workspace where id = ?`, wid);
         if (res2.length !== 1) {
-            throw new DBError('DB query error', 500);
+            throw new InternalServerError(`The requested information of the workspace does not exist in DB. wid: ${wid}`);
         }
 
         const res3 = await conn.query(`select * from t_auth_role_relation where rid = ?`, res1[0].rid);
         if (res3.length === 0) {
-            throw new DBError('Unauthorized user role', 403);
+            throw new InternalServerError(`The user has undefined role. user: ${util.inspect(res1[0], 2, true, 2)}`);
         }
 
         const fileName = path.join(__dirname, '../public/workspace.ejs');
