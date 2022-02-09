@@ -622,7 +622,7 @@ router.post('/save', async (request, response, next) => {
     }
 
     sessionManager.onSaved(uid, parseInt(wid));
-    response.status(200).end();
+    response.status(200).send('ok').end();
 });
 
 router.post('/savePCD', async (request, response, next) => {
@@ -658,7 +658,7 @@ router.post('/savePCD', async (request, response, next) => {
         return next(err);
     }
 
-    response.status(200).end();
+    response.status(200).send('ok').end();
 });
 
 router.get('/workspace/sessions', async (request, response, next) => {
