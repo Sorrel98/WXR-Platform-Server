@@ -54,9 +54,6 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
     let conn;
     try {
 
-
-
-        
         conn = await dbPool.getConnection();
         await conn.beginTransaction();
 
@@ -625,6 +622,42 @@ router.post('/save', async (request, response, next) => {
     }
 
     sessionManager.onSaved(uid, parseInt(wid));
+    response.status(200).end();
+});
+
+router.post('/savePCD', async (request, response, next) => {
+    const uid = request.session.uid;
+    if (!uid) {
+        next(new DBError("Session has no uid.", 401));
+    }
+    const { wid, astName, data } = request.body;
+    if (!wid) {
+        next(new DBError("Doesn't meet condition to save workspace.", 400));
+    }
+
+    let conn;
+    try {
+        conn = await dbPool.getConnection();
+
+        let parentId = 3;
+        const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [parentId, uid]);
+        if (res1.length !== 1) {
+            throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${parentId}, uid: ${uid}`);
+        }
+        await conn.beginTransaction();
+        const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, parentId, res1[0].owner_id]);
+        console.log(res2.insertId);
+        const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, data]);
+        conn.commit();
+        conn.release();
+    }
+    catch (err) {
+        if (conn) {
+            conn.release();
+        }
+        return next(err);
+    }
+
     response.status(200).end();
 });
 

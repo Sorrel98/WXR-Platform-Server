@@ -151,6 +151,65 @@ AFRAME.registerComponent('thd-mode-controls', {
             });
         };
 
+        this._savePCD = () => {
+            const sceneEl = tdModeControlsComp.el;
+            sceneEl.components.screenshot.data.width = 128;
+            sceneEl.components.screenshot.data.height = 96;
+            let wid = window.wid;
+            let newid = document.querySelector('#PCD_id').value;
+            let pcd_position = document.querySelector('#pcd').object3D.children[0].geometry.attributes.position;
+            let pcd_color = document.querySelector('#pcd').object3D.children[0].geometry.attributes.color;
+            let width = pcd_position.count;
+
+            function roundToSix(num) {
+                return +(Math.round(num + "e+5") + "e-5");
+            }
+
+            let data = `# .PCD v.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z rgb\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\nWIDTH ${width}\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ${width}\nDATA ascii\n`;
+
+            let r = 0;
+            let g = 0;
+            let b = 0;
+            for (i = 0; i < width * 3; i++) {
+                data = data.concat(String(roundToSix(pcd_position.array[i])));
+                data = data + " ";
+                if (i % 3 == 0) {
+                    r = (pcd_color.array[i]) * 255;
+                }
+                else if (i % 3 == 1) {
+                    g = (pcd_color.array[i]) * 255;
+                }
+                else {
+                    b = (pcd_color.array[i]) * 255;
+                    rgb = Math.floor((r + g / 256 + b / (256 * 256)) * 256 * 256).toPrecision(6);
+                    if (i != width * 3 - 1) {
+                        data = data.concat(String(rgb) + "\n");
+                    }
+                    else {
+                        data = data.concat(String(rgb));
+                    }
+                }
+            }
+            console.log(data);
+
+            $.ajax({
+                url: '/savePCD',
+                type: 'POST',
+                traditional: true,
+                data: {
+                    wid: wid,
+                    astName: newid,
+                    data: data
+                },
+                success: (result) => {
+                    alert("Success : PCD file is saved to asset manager");
+                },
+                error: (err) => {
+                    console.log(err);
+                }
+            });
+        };
+
         /**
          * Toggles the reference coordinate system of the gizmo between world coordinate system and local coordinate system.
          */
@@ -194,6 +253,7 @@ AFRAME.registerComponent('thd-mode-controls', {
 
         this.initTransformControls();
         this.initInsertWindow();
+        this.initPCDwindow();
         this.initEditWindow();
         this.initleftSideWindow();
         this.initHelpWindow();
@@ -639,6 +699,100 @@ AFRAME.registerComponent('thd-mode-controls', {
 
         document.querySelector('#insert_cancel').addEventListener('click', this.onInsertCancel);
         document.querySelector('#insert_ok').addEventListener('click', this.onInsertOK);
+    },
+
+    /**
+     * Initializes PCDWindow for adding point cloud data to Asset DB
+     */
+    initPCDwindow: function () {
+        let tdModeControlsComp = this;
+        let interactionManagerComp = this.el.components['interaction-manager'];
+        this.PCDWindow = document.createElement('div');
+        this.PCDWindow.innerHTML = "<div><table><tr><td align = 'center'>File Name : </td><td colspan = '2'><input id='PCD_id' type='text' style='width:200px'></td></tr><tr align = 'center'></tr></table><center><table style='border-spacing:30px 0px'><tr><td><button id='PCD_ok' style='width:60px'>OK</button></td><td><button id='PCD_cancel' style='width:60px'>Cancel</button></td></tr></table></center></div>";
+        this.PCDWindow.style.backgroundColor = 'lightblue';
+        this.PCDWindow.style.display = 'none';
+        this.PCDWindow.style.padding = '10px';
+        this.PCDWindow.style.position = 'fixed';
+        this.PCDWindow.style.width = '300px';
+        this.PCDWindow.style.height = '55px';
+        this.PCDWindow.style.left = '35%';
+        this.PCDWindow.style.top = '50%';
+        $("body").prepend(this.PCDWindow);
+
+        let onResize = (e) => {
+            tdModeControlsComp.PCDWindow.style.left = '35%';
+            tdModeControlsComp.PCDWindow.style.top = '50%';
+        };
+
+        let onKeydown = (e) => {
+            if (e.key === "Enter") {
+                tdModeControlsComp.onPCDOK();
+            }
+            else if (e.key === "Escape") {
+                tdModeControlsComp.onPCDCancel();
+            }
+        };
+
+        this.PCDWindowHandlerLoader = () => {
+            window.addEventListener('resize', onResize);
+            window.addEventListener('keydown', onKeydown);
+        };
+
+        this.PCDWindowHandlerUnloader = () => {
+            window.removeEventListener('resize', onResize);
+            window.removeEventListener('keydown', onKeydown);
+        };
+
+        this.onPCDCancel = (e) => {
+            document.querySelector('#PCD_id').value = "";
+            tdModeControlsComp.PCDWindow.style.zIndex = '0';
+            tdModeControlsComp.PCDWindow.style.display = 'none';
+            tdModeControlsComp.el.addEventListener('mousedown', tdModeControlsComp.onMouseDown, false);
+            tdModeControlsComp.el.addEventListener('touchstart', tdModeControlsComp.onTouchStart, false);
+            tdModeControlsComp.enableKeyEvent = true;
+            const wasdControlsEl = document.querySelector('[wasd-controls]');
+            if (wasdControlsEl !== null)
+                wasdControlsEl.getAttribute('wasd-controls').enabled = true;
+            document.activeElement.blur();
+            tdModeControlsComp.leftSideMultiTab.activate = true;
+            tdModeControlsComp.PCDWindowHandlerUnloader();
+        };
+
+        this.onPCDOK = (e) => {
+            const newid = document.querySelector('#PCD_id').value;
+            if (newid === '') {
+                tdModeControlsComp.onPCDCancel();
+                return;
+            }
+            if (document.querySelector('#' + newid) === null) {
+                this._savePCD();
+                tdModeControlsComp.onPCDCancel();
+            } else {
+                console.log('id duplicated!');
+                if (!isFlag) {
+                    tdModeControlsComp.transformControls.attach(document.querySelector('#' + newid).object3D);
+                    tdModeControlsComp.el.emit('target-attached', { el: document.querySelector('#' + newid) }, false);
+                }
+                tdModeControlsComp.onPCDCancel();
+            }
+        };
+
+        this.loadPCDWindow = () => {
+
+            tdModeControlsComp.PCDWindow.style.zIndex = '10000';
+            tdModeControlsComp.PCDWindow.style.display = 'block';
+
+            tdModeControlsComp.el.removeEventListener('mousedown', tdModeControlsComp.onMouseDown);
+            tdModeControlsComp.el.removeEventListener('touchstart', tdModeControlsComp.onTouchStart);
+            tdModeControlsComp.enableKeyEvent = false;
+            const wasdControlsEl = document.querySelector('[wasd-controls]');
+            if (wasdControlsEl !== null)
+                wasdControlsEl.getAttribute('wasd-controls').enabled = false;
+            tdModeControlsComp.PCDWindowHandlerLoader();
+        };
+
+        document.querySelector('#PCD_cancel').addEventListener('click', this.onPCDCancel);
+        document.querySelector('#PCD_ok').addEventListener('click', this.onPCDOK);
     },
 
     /**
@@ -1272,7 +1426,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.UILayer1.style.zIndex = 9999;
         this.UILayer1.style.height = unitSize + 'px';
         this.UILayer1.style.minHeight = '40px';
-        this.UILayer1.style.width = (this.UILayer1.offsetHeight * 7) + 'px';
+        this.UILayer1.style.width = (this.UILayer1.offsetHeight * 8) + 'px';
         this.UILayer1.style.top = '2px';
         this.UILayer1.style.left = (this.el.offsetLeft + this.el.offsetWidth - this.UILayer1.offsetWidth - 2) + 'px';
 
@@ -1313,6 +1467,24 @@ AFRAME.registerComponent('thd-mode-controls', {
             });
         });
         copyButtonUI.appendChild(this.copyButton);
+
+        let PCDstoringButtonUI = document.createElement('div');
+        PCDstoringButtonUI.id = 'PCDstoringButtonUI';
+        $(PCDstoringButtonUI).addClass('buttonUI');
+        PCDstoringButtonUI.style.display = 'inline-block';
+        PCDstoringButtonUI.style.height = '100%';
+        this.UILayer1.appendChild(PCDstoringButtonUI);
+
+        this.PCDstoringButton = document.createElement('img');
+        this.PCDstoringButton.setAttribute('src', '/img/icon/PCD.svg');
+        this.PCDstoringButton.style.height = 'calc(100% - 4px)';
+        this.PCDstoringButton.style.cursor = 'pointer';
+        this.PCDstoringButton.style.padding = '2px';
+        this.PCDstoringButton.addEventListener('click', () => {
+            this.loadPCDWindow();
+            console.log("PCD storing button clicked");
+        });
+        PCDstoringButtonUI.appendChild(this.PCDstoringButton);
 
         let saveButtonUI = document.createElement('div');
         saveButtonUI.id = 'SaveButtonUI';
@@ -1535,7 +1707,7 @@ AFRAME.registerComponent('thd-mode-controls', {
 
             let unitSize = Math.floor(this.el.offsetWidth * 0.04);
             this.UILayer1.style.height = unitSize + 'px';
-            this.UILayer1.style.width = (this.UILayer1.offsetHeight * 6) + 'px';
+            this.UILayer1.style.width = (this.UILayer1.offsetHeight * 8) + 'px';
             this.UILayer2.style.height = unitSize + 'px';
             this.UILayer2.style.width = (this.UILayer2.offsetHeight * 4) + 'px';
             this.UILayer3.style.height = unitSize + 'px';
