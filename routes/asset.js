@@ -59,9 +59,10 @@ router.get('/assetInfo', async (request, response, next) => {
 		};
 		const pathArr = await bottomUpSearch([{ id: astId, name: null }]);
 
-		const curItemName = pathArr[pathArr.length - 1].name;
-		const [assetType, isPrivate] = curItemName.slice(-2).split('');
-		pathArr[pathArr.length - 1].name = curItemName.slice(0, -2);
+		const curItemName = pathArr[pathArr.length - 1].name.split('');
+		const isPrivate = curItemName.pop() === 'r' ? true : false;
+		const assetType = curItemName.pop();
+		pathArr[pathArr.length - 1].name = curItemName.join('');
 
 		let res3 = [];
 		if (astId) {

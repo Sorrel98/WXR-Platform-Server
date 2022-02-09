@@ -968,14 +968,11 @@
     </div>
 
     <div class="content my-4">
-        <div class="d-inline-block" style="width:100px;" id="navBtnDiv">
-            <button class="btn btn-secondary btn-sm" onclick="navPrev();">
-                << /button>
-                    <button class="btn btn-secondary btn-sm" onclick="navNext();">></button>
-                    <button class="btn btn-secondary btn-sm" onclick="navParent();">^</button>
-        </div>
-        <div class="d-inline-block" style="width:calc(100% - 100px);">
-            <nav aria-label="breadcrumb" id="assetNav">
+        <div class="d-flex align-items-baseline">
+            <button class="btn btn-secondary btn-sm mr-1" onclick="navPrev();"><</button>
+            <button class="btn btn-secondary btn-sm mr-1" onclick="navNext();">></button>
+            <button class="btn btn-secondary btn-sm mr-1" onclick="navParent();">^</button>
+            <nav class="flex-grow-1 ml-1" aria-label="breadcrumb" id="assetNav">
                 <ol class="breadcrumb" id="assetNavOl">
                 </ol>
             </nav>
