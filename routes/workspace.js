@@ -632,7 +632,7 @@ router.post('/savePCD', async (request, response, next) => {
     }
     const { wid, astName, data } = request.body;
     if (!wid) {
-        next(new DBError("Doesn't meet condition to save workspace.", 400));
+        next(new DBError("Doesn't meet condition to save PCD.", 400));
     }
 
     let conn;
