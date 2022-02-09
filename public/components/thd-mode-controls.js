@@ -181,7 +181,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                 }
                 else {
                     b = (pcd_color.array[i]) * 255;
-                    rgb = Math.floor((r + g / 256 + b / (256 * 256)) * 256 * 256).toPrecision(6);
+                    rgb = Math.floor((r + g / 256 + b / (256 * 256)) * 256 * 256).toPrecision(7);
                     if (i != width * 3 - 1) {
                         data = data.concat(String(rgb) + "\n");
                     }
@@ -190,7 +190,6 @@ AFRAME.registerComponent('thd-mode-controls', {
                     }
                 }
             }
-            console.log(data);
 
             $.ajax({
                 url: '/savePCD',
