@@ -132,10 +132,10 @@
                                         break;
                                 }
                                 if (imgSrc === '') {
-                                    targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
+                                    targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + " (" + md.width + "m" + (md.height ? " x " + md.height + "m" + (md.depth ? " x " + md.depth + "m" : "") : "") + ")</p></div></div>";
                                 }
                                 else {
-                                    targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><img src='" + imgSrc + "' class='card-img-top'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + "</p></div></div>";
+                                    targetItemInfoDIV.innerHTML += "<div class='card my-2 d-inline-block' style='width:20rem;'><img src='" + imgSrc + "' class='card-img-top'><div class='card-body'><h5 class='card-title'>" + md.feature_type + "</h5><p class='card-text'>" + md.type + " (" + md.width + "m" + (md.height ? " x " + md.height + "m" + (md.depth ? " x " + md.depth + "m" : "") : "") + ")</p></div></div>";
                                 }
                             }
                             break;
