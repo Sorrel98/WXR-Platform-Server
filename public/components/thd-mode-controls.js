@@ -1226,7 +1226,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             if (wasdControlsEl !== null)
                 wasdControlsEl.getAttribute('wasd-controls').enabled = false;
             tdModeControlsComp.sessionListWindowHandlerLoader();
-            tdModeControlsComp.sessionListWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (this.helpWindow.offsetWidth / 2)) + 'px'; // for dynamic resizing
+            tdModeControlsComp.sessionListWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (this.sessionListWindow.offsetWidth / 2)) + 'px'; // for dynamic resizing
 
             let table = document.querySelector('#session_list_panel table');
             table.innerHTML = "Loading...";
