@@ -406,8 +406,10 @@ class SessionManager {
 								params = [end_time, log_msgs, sid];
 							}
 
+							await conn.query(query, params);
+
 							console.log(`inserted ${logCount} logs`);
-							console.log("sucessfully ending a session");
+							console.log("successfully ending a session");
 
 							conn.release();
 
