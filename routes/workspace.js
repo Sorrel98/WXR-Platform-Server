@@ -644,7 +644,7 @@ router.get('/workspace/sessions', async (request, response, next) => {
 
         if (!sid) {
 
-            const res1 = await conn.query(`select id, date_add(start_time, interval 9 hour) as start_time, date_add(end_time, interval 9 hour) as end_time from t_workspace_session where wid=?`, id);
+            const res1 = await conn.query(`select id, date_add(start_time, interval 9 hour) as start_time, date_add(end_time, interval 9 hour) as end_time, length(log_msgs) as size from t_workspace_session where wid=?`, id);
             response.status(200).json(res1);
 
         }
@@ -669,6 +669,42 @@ router.get('/workspace/sessions', async (request, response, next) => {
 
         return next(err);
     }
+
+});
+
+router.delete('/workspace/sessions', async (request, response, next) => {
+
+    const { uid } = request.session;
+    if (!uid) {
+        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
+    }
+
+    const { id, sid } = request.query;
+    if (!id | !sid) {
+        return next(new BadRequestError(`Invalid asset id. request.query: ${util.inspect(request.query, true, 2, true)}`));
+    }
+
+    // TODO: Check access validation
+    let conn;
+    try {
+        conn = await dbPool.getConnection();
+
+        const res1 = await conn.query(`delete from t_workspace_session where id=?`, sid);
+        if (res1.affectedRows !== 1) {
+            throw new BadRequestError(`The requested session log does not exist. sid: ${sid}`);
+        }
+
+        conn.release();
+
+    } catch (err) {
+        if (conn) {
+            conn.release();
+        }
+
+        return next(err);
+    }
+
+    response.status(200).end();
 
 });
 

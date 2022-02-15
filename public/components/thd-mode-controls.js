@@ -1170,7 +1170,7 @@ AFRAME.registerComponent('thd-mode-controls', {
     initSessionListWindow: function () {
         let tdModeControlsComp = this;
         this.sessionListWindow = document.createElement('div');
-        this.sessionListWindow.innerHTML = "<div id='session_list_panel' style='position:absolute; overflow:auto; width:780px; height:550px; top:10px; left:10px;'><table width=100% height=100%><tr><th>session id</th><th>start</th><th>end</th></tr></table></div><div style='position:absolute; width:780px; left:10px; top:570px; text-align:right;'><button id='session_list_close'>Close</button></div>";
+        this.sessionListWindow.innerHTML = "<div id='session_list_panel' style='position:absolute; overflow:auto; width:780px; height:550px; top:10px; left:10px;'><table width=100% height=100%><tr><th>session id</th><th>start</th><th>end</th><th>size</th><th>download</th><th>delete</th></tr></table></div><div style='position:absolute; width:780px; left:10px; top:570px; text-align:right;'><button id='session_list_close'>Close</button></div>";
         this.sessionListWindow.style.backgroundColor = 'lightblue';
         this.sessionListWindow.style.display = 'none';
         this.sessionListWindow.style.position = 'fixed';
@@ -1236,10 +1236,10 @@ AFRAME.registerComponent('thd-mode-controls', {
                 url: '/workspace/sessions?id=' + wid,
                 type: 'GET',
                 success: (result) => {
-                    table.innerHTML = "<tr><th>session id</th><th>start</th><th>end</th></tr>";
+                    table.innerHTML = "<tr><th>session id</th><th>start</th><th>end</th><th>size</th><th>download</th><th>delete</th></tr>";
                     for (const session of result) {
                         let row = document.createElement('tr');
-                        row.innerHTML = `<td>${session.id}</td><td>${session.start_time}</td><td>${session.end_time}</td><td><a href="/workspace/sessions?id=${wid}&sid=${session.id}">download</a></td>`;
+                        row.innerHTML = `<td>${session.id}</td><td>${session.start_time}</td><td>${session.end_time}</td><td>${session.size}</td><td><a href="/workspace/sessions?id=${wid}&sid=${session.id}">download</a></td><td><a href="javascript:void(0);" onclick="$.ajax({url:'/workspace/sessions?id=${wid}&sid=${session.id}', type:'DELETE', success: (result)=>{this.closest('tr').remove();}, error: (err)=>{console.log(err);}});">delete</a></td>`;
                         table.appendChild(row);
                     }
                 },
