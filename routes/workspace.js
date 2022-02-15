@@ -655,6 +655,8 @@ router.get('/workspace/sessions', async (request, response, next) => {
                 throw new NotFoundError(`Couldn't find session log. sid: ${sid}`);
             }
 
+            conn.release();
+
             response.setHeader('Content-disposition', `attachment; filename=${encodeURIComponent(res1[0].w_name + '_' + res1[0].start_time)}.log`);
             response.status(200).end(res1[0].logs, 'binary');
 
