@@ -644,7 +644,7 @@ router.get('/workspace/sessions', async (request, response, next) => {
 
         if (!sid) {
 
-            const res1 = await conn.query(`select id, start_time, end_time from t_workspace_session where wid=?`, id);
+            const res1 = await conn.query(`select id, date_add(start_time, interval 9 hour) as start_time, date_add(end_time, interval 9 hour) as end_time from t_workspace_session where wid=?`, id);
             response.status(200).json(res1);
 
         }
