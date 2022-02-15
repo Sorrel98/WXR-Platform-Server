@@ -157,56 +157,107 @@ AFRAME.registerComponent('thd-mode-controls', {
             sceneEl.components.screenshot.data.height = 96;
             let wid = window.wid;
             let newid = document.querySelector('#PCD_id').value;
-            let pcd_position = document.querySelector('#pcd').object3D.children[0].geometry.attributes.position;
-            let pcd_color = document.querySelector('#pcd').object3D.children[0].geometry.attributes.color;
-            let width = pcd_position.count;
 
-            function roundToSix(num) {
-                return +(Math.round(num + "e+5") + "e-5");
+            let pcd_position = document.querySelector('#root').components['sync'].envPointSet.geometry.attributes.position;
+            let pcd_color = document.querySelector('#root').components['sync'].envPointSet.geometry.attributes.color;
+            let width = document.querySelector('#root').components['sync'].envPointSet.geometry.drawRange.count;
+
+            function printFile(filetemp) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    console.log("printfile\n" + evt.target.result);
+                };
+                reader.readAsText(filetemp);
             }
 
-            let data = `# .PCD v.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z rgb\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\nWIDTH ${width}\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ${width}\nDATA ascii\n`;
+            var workerBlob = new Blob(
+                [workerRunner.toString().replace(/^function .+\{?|\}$/g, '')],
+                { type: 'text/javascript' }
+            );
+            var worker = new Worker(URL.createObjectURL(workerBlob));
 
-            let r = 0;
-            let g = 0;
-            let b = 0;
-            for (i = 0; i < width * 3; i++) {
-                data = data.concat(String(roundToSix(pcd_position.array[i])));
-                data = data + " ";
-                if (i % 3 == 0) {
-                    r = (pcd_color.array[i]) * 255;
-                }
-                else if (i % 3 == 1) {
-                    g = (pcd_color.array[i]) * 255;
-                }
-                else {
-                    b = (pcd_color.array[i]) * 255;
-                    rgb = Math.floor((r + g / 256 + b / (256 * 256)) * 256 * 256).toPrecision(7);
-                    if (i != width * 3 - 1) {
-                        data = data.concat(String(rgb) + "\n");
-                    }
-                    else {
-                        data = data.concat(String(rgb));
-                    }
-                }
-            }
+            let file;
+            worker.onmessage = function (event) {
+                file = new File([event.data], "data.txt", {
+                    type: false
+                });
+                printFile(file);
 
-            $.ajax({
-                url: '/savePCD',
-                type: 'POST',
-                traditional: true,
-                data: {
-                    wid: wid,
-                    astName: newid,
-                    data: data
-                },
-                success: (result) => {
-                    alert("Success : PCD file is saved to asset manager");
-                },
-                error: (err) => {
-                    console.log(err);
+                let fd = new FormData();
+                fd.append('wid', wid);
+                fd.append('astName', newid);
+                fd.append('pcdFile', file);
+
+                $.ajax({
+                    url: '/savePCD',
+                    type: 'POST',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'JSON',
+                    enctype: 'multipart/form-data',
+                    data: fd,
+                    headers: {
+                        'Content-Length': fd.length
+                    },
+                    // xhr: () => {
+                    //     let xhrobj = $.ajaxSettings.xhr();
+
+                    //     if (xhrobj.upload) {
+                    //         xhrobj.upload.addEventListener('progress', (e) => {
+                    //             let percent = 0;
+                    //             let position = e.loaded || e.position;
+                    //             let total = e.total;
+                    //             if (e.lengthComputable) {
+                    //                 percent = Math.ceil(position / total * 100);
+                    //             }
+                    //             console.log(percent + "% uploaded");
+
+                    //         }, false);
+                    //     }
+                    //     return xhrobj;
+                    // },
+                    success: (result) => {
+                        alert("Success : PCD file is saved to asset manager");
+                    },
+                    error: (err) => {
+                        alert("Code: " + err.status + "\n" + err.responseText);
+                        console.log(err);
+                    }
+                });
+            };
+            worker.postMessage([width, pcd_position, pcd_color]);
+
+            function workerRunner() {
+                self.onmessage = function (event) {
+                    function roundToSix(num) {
+                        return +(Math.round(num + "e+5") + "e-5");
+                    }
+
+                    let width = event.data[0];
+                    let pcd_position = event.data[1];
+                    let pcd_color = event.data[2];
+                    let data = `# .PCD v.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z rgb\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\nWIDTH ${width}\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ${width}\nDATA ascii\n`;
+                    let r = 0, g = 0, b = 0;
+                    for (i = 0; i < width * 3; i++) {
+                        data = data.concat(String(roundToSix(pcd_position.array[i]))) + " ";
+                        switch (i % 3) {
+                            case 0: r = (pcd_color.array[i]) * 255; break;
+                            case 1: g = (pcd_color.array[i]) * 255; break;
+                            default:
+                                b = (pcd_color.array[i]) * 255;
+                                rgb = Math.floor((r + g / 256 + b / (256 * 256)) * 256 * 256);
+                                if (i != width * 3 - 1) {
+                                    data = data.concat(String(rgb) + "\n");
+                                }
+                                else {
+                                    data = data.concat(String(rgb));
+                                }
+                        }
+                    }
+                    self.postMessage(data);
                 }
-            });
+            };
         };
 
         /**

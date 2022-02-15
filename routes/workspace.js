@@ -9,6 +9,9 @@ const ejs = require('ejs');
 const sessionManager = require('../session').sessionManager;
 const dbPool = require('../lib/DBpool').dbPool;
 const { BadRequestError, DBError, UnauthorizedError, NotFoundError } = require('../lib/errors');
+const { TextureDataType } = require('three');
+var multiparty = require('multiparty');
+const fs = require('fs');
 
 
 router.get('/makePage', async (request, response, next) => {
@@ -630,35 +633,67 @@ router.post('/savePCD', async (request, response, next) => {
     if (!uid) {
         next(new DBError("Session has no uid.", 401));
     }
-    const { wid, astName, data } = request.body;
-    if (!wid) {
-        next(new DBError("Doesn't meet condition to save PCD.", 400));
-    }
-
-    let conn;
-    try {
-        conn = await dbPool.getConnection();
-
-        let parentId = 3;
-        const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [parentId, uid]);
-        if (res1.length !== 1) {
-            throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${parentId}, uid: ${uid}`);
+    
+    let wid;
+    let astName;
+    let pcdfile;
+    
+    let form = new multiparty.Form();
+    form.on('field', async (name, value) => {
+        switch(name){
+            case 'wid': wid = parseInt(value); break;
+            case 'astName': astName = value; break;
         }
-        await conn.beginTransaction();
-        const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, parentId, res1[0].owner_id]);
-        console.log(res2.insertId);
-        const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, data]);
-        conn.commit();
-        conn.release();
-    }
-    catch (err) {
-        if (conn) {
+    });
+    
+    form.on('part', async (partDataStream)=>{
+        console.log("partDataStream");
+        if(partDataStream.name !== 'pcdFile'){
+            partDataStream.resume();
+            console.log('this is not pcdfile :', partDataStream.name);
+            return;
+        }
+        else{
+            console.log('this is pcd: ', partDataStream.name);
+        }
+        
+        
+        if (!wid) {
+            next(new DBError("Doesn't meet condition to save PCD.", 400));
+        }
+        let conn;
+        try {
+            conn = await dbPool.getConnection();
+    
+            let parentId = 3;
+            const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [parentId, uid]);
+            if (res1.length !== 1) {
+                throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${parentId}, uid: ${uid}`);
+            }
+            await conn.beginTransaction();
+            const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, parentId, res1[0].owner_id]);
+            if(pcdfile){
+                const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, pcdfile]);
+            }
+            else{
+                const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, partDataStream]);
+            }
+            conn.commit();
             conn.release();
         }
-        return next(err);
-    }
+        catch (err) {
+            console.log(err.constructor.name);
+            if (conn) {
+                conn.release();
+            }
+            console.log('err');
+            return next(err);
+        }
+    
+        response.status(200).send('ok').end();
+    });
+    form.parse(request);
 
-    response.status(200).send('ok').end();
 });
 
 router.get('/workspace/sessions', async (request, response, next) => {
