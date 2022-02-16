@@ -326,6 +326,51 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.streamingUILayer.appendChild(this.videoStreamingButton);
 
 		/**
+		 * 360video sharing thorugh WebRTC.
+		 * In one workspace session, streaming rights are exclusive 
+		 * and only users who have been issued a token from the server can stream.
+		 * When the streaming ends, the token is returned to the server.
+		 */
+		this.video360StreamingStatus = false;
+		this.video360StreamingButton = document.createElement('button');
+		this.video360StreamingButton.innerHTML = 'share 360 Video';
+		this.video360StreamingButton.style = width = '100px';
+		this.video360StreamingButton.style.height = '50px';
+		this.video360StreamingButton.style.left = '15px';
+		this.video360StreamingButton.style.bottom = '5px';
+		this.video360StreamingButton.style.position = 'relative';
+		this.video360StreamingButton.onclick = () => {
+			if (this.video360StreamingStatus) {
+				this.video360StreamingStatus = false;
+				this.video360StreamingButton.innerHTML = 'share 360Video';
+				this.callNative('onRemoveStreamingChannel', 3);
+			}
+			else {
+				if (this.streamingToken !== null) {
+					this.video360StreamingStatus = true;
+					this.video360StreamingButton.innerHTML = 'unshare 360Video';
+					this.callNative('onAddStreamingChannel', 3);
+				}
+				else {
+					let syncComp = this.el.components['sync'];
+					if (syncComp) {
+						syncComp.getArStreamingToken().then((token) => {
+							this.streamingToken = token;
+							this.video360StreamingStatus = true;
+							this.video360StreamingButton.innerHTML = 'unshare 360Video';
+							this.callNative('onInitStreaming', wid, token);
+							this.callNative('onAddStreamingChannel', 3);
+						})
+							.catch(() => {
+								console.log('token is unavailable');
+							});
+					}
+				}
+			}
+		};
+		this.streamingUILayer.appendChild(this.video360StreamingButton);
+
+		/**
 		 * It is asynchronous function.
 		 * It return a promise to be resolved when interaction mode change to AR.
 		 */
@@ -355,46 +400,47 @@ AFRAME.registerComponent('ar-mode-controls', {
 					this.videoStreamingStatus = false;
 					this.streamingUILayer.style.display = 'block';
 
-					let resultMap1 = new Map();
-					let amArray = Array.from(this.ARTracker.activeMarkers);
-					let findTargetingObj = (el) => {
-						if (!el.id) return;
-						let targetComp = el.components['target'];
-						if (targetComp) {
-							let markerId = targetComp.data.marker.substr(1);
-							let src, markerComp;
-							[url, markerComp] = amArray.find(entry => entry[1].el.id == markerId);
-							if (markerComp) {
-								resultMap1.set(el.id, { markerURL: url, object3D: el.object3D });
-							}
-						}
-						for (let child of el.children) {
-							findTargetingObj(child);
-						}
-					};
-					findTargetingObj(sceneEl);
-					for ([key, val] of resultMap1) {
-						this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
-					}
+					/* 이 부분 주석을 해제하면 태블릿에서 ARmode로 들어가도 카메라 화면이 보이지 않음 */
+					// let resultMap1 = new Map();
+					// let amArray = Array.from(this.ARTracker.activeMarkers);
+					// let findTargetingObj = (el) => {
+					// 	if (!el.id) return;
+					// 	let targetComp = el.components['target'];
+					// 	if (targetComp) {
+					// 		let markerId = targetComp.data.marker.substr(1);
+					// 		let src, markerComp;
+					// 		[url, markerComp] = amArray.find(entry => entry[1].el.id == markerId);
+					// 		if (markerComp) {
+					// 			resultMap1.set(el.id, { markerURL: url, object3D: el.object3D });
+					// 		}
+					// 	}
+					// 	for (let child of el.children) {
+					// 		findTargetingObj(child);
+					// 	}
+					// };
+					// findTargetingObj(sceneEl);
+					// for ([key, val] of resultMap1) {
+					// 	this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
+					// }
 
-					let resultMap2 = new Map();
-					let findBindingObj = (el) => {
-						if (!el.id) return;
-						let binderComp = el.components['binder'];
-						if (binderComp) {
-							let targetingItem = resultMap1.get(binderComp.data.reference.substr(1));
-							if (targetingItem) {
-								resultMap2.set(el.id, { marker: targetingItem.markerURL, object3D: el.object3D });
-							}
-						}
-						for (let child of el.children) {
-							findBindingObj(child);
-						}
-					};
-					findBindingObj(sceneEl);
-					for ([key, val] of resultMap2) {
-						this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
-					}
+					// let resultMap2 = new Map();
+					// let findBindingObj = (el) => {
+					// 	if (!el.id) return;
+					// 	let binderComp = el.components['binder'];
+					// 	if (binderComp) {
+					// 		let targetingItem = resultMap1.get(binderComp.data.reference.substr(1));
+					// 		if (targetingItem) {
+					// 			resultMap2.set(el.id, { marker: targetingItem.markerURL, object3D: el.object3D });
+					// 		}
+					// 	}
+					// 	for (let child of el.children) {
+					// 		findBindingObj(child);
+					// 	}
+					// };
+					// findBindingObj(sceneEl);
+					// for ([key, val] of resultMap2) {
+					// 	this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
+					// }
 
 					this.callNative('onEnterAR');
 				}
