@@ -647,14 +647,9 @@ router.post('/savePCD', async (request, response, next) => {
     });
     
     form.on('part', async (partDataStream)=>{
-        console.log("partDataStream");
         if(partDataStream.name !== 'pcdFile'){
             partDataStream.resume();
-            console.log('this is not pcdfile :', partDataStream.name);
             return;
-        }
-        else{
-            console.log('this is pcd: ', partDataStream.name);
         }
         
         
@@ -689,8 +684,7 @@ router.post('/savePCD', async (request, response, next) => {
             console.log('err');
             return next(err);
         }
-    
-        response.status(200).send('ok').end();
+        response.status(200).send('.').end();
     });
     form.parse(request);
 
