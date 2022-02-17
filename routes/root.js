@@ -146,7 +146,7 @@ router.post('/login', async (request, response, next) => {
     sess.is_admin = res1[0].is_admin;
 
     console.log(`[${id}] login`);
-    response.status(200).end();
+    response.status(200).send('.').end();
 });
 
 router.post('/logout', (request, response) => {

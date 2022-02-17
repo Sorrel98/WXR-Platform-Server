@@ -625,7 +625,7 @@ router.post('/save', async (request, response, next) => {
     }
 
     sessionManager.onSaved(uid, parseInt(wid));
-    response.status(200).end();
+    response.status(200).send('.').end();
 });
 
 router.get('/workspace/sessions', async (request, response, next) => {
