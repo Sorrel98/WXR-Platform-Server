@@ -107,7 +107,7 @@
                                 td.style.textAlign = 'center';
                                 tr.appendChild(td);
                                 td = document.createElement('td');
-                                td.innerHTML = "<a href='javascript:getAssetInfo(" + asset.id + ");'>" + asset.name + "</a>";
+                                td.innerHTML = "<a href='javascript:getAssetInfo(" + asset.id + ");void(0);'>" + asset.name + "</a>";
                                 tr.appendChild(td);
                                 td = document.createElement('td');
                                 td.innerHTML = (asset.owner_id !== null ? 'private' : 'public');
@@ -863,8 +863,8 @@
                 <div class="modal-body">
                     <nav class="nav nav-pills nav-justified">
                         <a class="nav-item nav-link active" id="makeBinaryNavURI"
-                            href="javascript:toggleMkBinNav();">From URI</a>
-                        <a class="nav-item nav-link" id="makeBinaryNavUpload" href="javascript:toggleMkBinNav();">File
+                            href="javascript:toggleMkBinNav();void(0);">From URI</a>
+                        <a class="nav-item nav-link" id="makeBinaryNavUpload" href="javascript:toggleMkBinNav();void(0);">File
                             Upload</a>
                     </nav>
                     <form class="form" id="makeBinaryFromURIForm" action="/makeBinaryFromURI" method="post"
@@ -1001,8 +1001,8 @@
                             UploadFeature
                         </button>
                         <div class="dropdown-menu" aria-labelledby="btnGroupUploadFeature">
-                            <a class="dropdown-item" href="javascript:$('#UploadGeneralFeature').modal();">general</a>
-                            <a class="dropdown-item" href="javascript:$('#UploadVuforiaFeature').modal();">vuforia</a>
+                            <a class="dropdown-item" href="javascript:$('#UploadGeneralFeature').modal();void(0);">general</a>
+                            <a class="dropdown-item" href="javascript:$('#UploadVuforiaFeature').modal();void(0);">vuforia</a>
                         </div>
                     </div>
                     <div class="container" id="targetItemInfoDIV">
@@ -1056,10 +1056,10 @@
                     <button class="btn btn-secondary dropdown-toggle" type="button" id="newAssetButton"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">New Asset</button>
                     <div class="dropdown-menu" aria-labelledby="newAssetButton">
-                        <a class="dropdown-item" href="javascript:$('#makeDirectory').modal();">Directory</a>
-                        <a class="dropdown-item" href="javascript:$('#makeTarget').modal();">Target</a>
-                        <a class="dropdown-item" href="javascript:$('#makeBinary').modal();">Binary</a>
-                        <a class="dropdown-item" href="javascript:$('#makeTemplate').modal();">Template</a>
+                        <a class="dropdown-item" href="javascript:$('#makeDirectory').modal();void(0);">Directory</a>
+                        <a class="dropdown-item" href="javascript:$('#makeTarget').modal();void(0);">Target</a>
+                        <a class="dropdown-item" href="javascript:$('#makeBinary').modal();void(0);">Binary</a>
+                        <a class="dropdown-item" href="javascript:$('#makeTemplate').modal();void(0);">Template</a>
                     </div>
                     <button class="btn btn-secondary" onclick="remove();">Delete</button>
                 </div>
