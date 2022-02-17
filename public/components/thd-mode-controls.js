@@ -153,7 +153,7 @@ AFRAME.registerComponent('thd-mode-controls', {
 
         this._savePCD = () => {
             let layer4 = document.querySelector('#UIGroup4');
-            layer4.style.display="block";
+            layer4.style.display = "block";
             layer4.style.left = (this.el.offsetLeft + this.el.offsetWidth - 320 - 2) + 'px';
             const sceneEl = tdModeControlsComp.el;
             sceneEl.components.screenshot.data.width = 128;
@@ -210,7 +210,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                                 let percent = 0;
                                 let position = e.loaded || e.position;
                                 let total = e.total;
-                                
+
                                 if (e.lengthComputable) {
                                     percent = Math.ceil(position / total * 100);
                                 }
@@ -1764,10 +1764,10 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.UILayer4.style.height = '10px';
         this.UILayer4.style.minHeight = '10px';
         this.UILayer4.style.display = 'none';
-        this.UILayer4.style.top = (this.UILayer1.offsetHeight+2)+'px';
+        this.UILayer4.style.top = (this.UILayer1.offsetHeight + 2) + 'px';
         this.UILayer4.style.width = '320px';
         this.UILayer4.style.left = (this.el.offsetLeft + this.el.offsetWidth - 320 - 2) + 'px';
-        
+
         let progressBarUI = document.createElement('progress');
         progressBarUI.id = 'progressBarUI';
         $(progressBarUI).addClass('progress-bar');
@@ -1791,7 +1791,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             this.UILayer2.style.width = (this.UILayer2.offsetHeight * 4) + 'px';
             this.UILayer3.style.height = unitSize + 'px';
             this.UILayer3.style.width = (this.UILayer3.offsetHeight * 2) + 'px';
-            this.UILayer4.style.top = (this.UILayer1.offsetHeight+2)+'px';
+            this.UILayer4.style.top = (this.UILayer1.offsetHeight + 2) + 'px';
             this.UILayer4.style.width = '320px';
 
             this.UILayer1.style.left = (this.el.offsetLeft + this.el.offsetWidth - this.UILayer1.offsetWidth - 2) + 'px';

@@ -633,26 +633,25 @@ router.post('/savePCD', async (request, response, next) => {
     if (!uid) {
         next(new DBError("Session has no uid.", 401));
     }
-    
+
     let wid;
     let astName;
     let pcdfile;
-    
+
     let form = new multiparty.Form();
     form.on('field', async (name, value) => {
-        switch(name){
+        switch (name) {
             case 'wid': wid = parseInt(value); break;
             case 'astName': astName = value; break;
         }
     });
-    
-    form.on('part', async (partDataStream)=>{
-        if(partDataStream.name !== 'pcdFile'){
+
+    form.on('part', async (partDataStream) => {
+        if (partDataStream.name !== 'pcdFile') {
             partDataStream.resume();
             return;
         }
-        
-        
+
         if (!wid) {
             next(new DBError("Doesn't meet condition to save PCD.", 400));
         }
@@ -667,10 +666,10 @@ router.post('/savePCD', async (request, response, next) => {
             }
             await conn.beginTransaction();
             const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, res0[0].id, res1[0].owner_id]);
-            if(pcdfile){
+            if (pcdfile) {
                 const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, pcdfile]);
             }
-            else{
+            else {
                 const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, partDataStream]);
             }
             conn.commit();
