@@ -1755,6 +1755,31 @@ AFRAME.registerComponent('thd-mode-controls', {
         });
         redoButtonUI.appendChild(this.redoButton);
 
+        this.UILayer4 = document.createElement('div');
+        $("body").prepend(this.UILayer4);
+        $(this.UILayer4).addClass('progress');
+        this.UILayer4.id = 'UIGroup4';
+        this.UILayer4.style.position = 'fixed';
+        this.UILayer4.style.zIndex = 9999;
+        this.UILayer4.style.height = '10px';
+        this.UILayer4.style.minHeight = '10px';
+        this.UILayer4.style.display = 'none';
+        this.UILayer4.style.top = (this.UILayer1.offsetHeight+2)+'px';
+        this.UILayer4.style.width = '320px';
+        this.UILayer4.style.left = (this.el.offsetLeft + this.el.offsetWidth - 320 - 2) + 'px';
+        
+        let progressBarUI = document.createElement('progress');
+        progressBarUI.id = 'progressBarUI';
+        $(progressBarUI).addClass('progress-bar');
+        progressBarUI.style.width = '100%';
+        progressBarUI.style.display = 'inline-block';
+        progressBarUI.style.height = '100%';
+        this.UILayer4.appendChild(progressBarUI);
+
+        let progressText = document.createElement('div');
+        progressText.innerHTML = 'Uploading...';
+        this.UILayer4.appendChild(progressText);
+
         window.addEventListener('resize', (e) => {
             if (!this.el.is('ar-mode') && !this.el.is('vr-mode'))
                 this.toggleUIDisplay(window.innerHeight <= window.innerWidth);
@@ -1766,10 +1791,13 @@ AFRAME.registerComponent('thd-mode-controls', {
             this.UILayer2.style.width = (this.UILayer2.offsetHeight * 4) + 'px';
             this.UILayer3.style.height = unitSize + 'px';
             this.UILayer3.style.width = (this.UILayer3.offsetHeight * 2) + 'px';
+            this.UILayer4.style.top = (this.UILayer1.offsetHeight+2)+'px';
+            this.UILayer4.style.width = '320px';
 
             this.UILayer1.style.left = (this.el.offsetLeft + this.el.offsetWidth - this.UILayer1.offsetWidth - 2) + 'px';
             this.UILayer2.style.left = (this.el.offsetLeft + (this.el.offsetWidth / 2) * 0.8) + 'px';
             this.UILayer3.style.left = (this.el.offsetLeft + 2) + 'px';
+            this.UILayer4.style.left = (this.el.offsetLeft + this.el.offsetWidth - this.UILayer4.offsetWidth - 2) + 'px';
         });
         this.toggleUIDisplay(window.innerHeight <= window.innerWidth);
     },
@@ -1785,6 +1813,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             this.UILayer1.style.display = 'none';
             this.UILayer2.style.display = 'none';
             this.UILayer3.style.display = 'none';
+            this.UILayer4.style.display = 'none';
             this.leftSideWindow.style.display = 'none';
             this.el.style.left = '0px';
             this.el.style.width = '100%';
