@@ -4,6 +4,7 @@ Look https://www.wxr.onl/ for detail.
 
 
 # WXR Mode Interface
+###### 2022.2.18 수정
 > Control WXR mode especially 360 Mode
 
 ar-mode-control 컴포넌트에서 현장 작업자가 AR mode에서 360 영상 스트리밍을 시작, 끝내는 버튼을 추가했습니다.

@@ -71,14 +71,6 @@ class EnvPoints {
  * It also supports voice chat between session participants.
  */
 AFRAME.registerComponent('sync', {
-	// 360 비디오 스트리밍 트랙 인스턴스에 대한 참조를 저장할 프로퍼티
-	// 커스텀 프로퍼티를 만들면서 오류 발생
-	// schema : {
-	// 	envSphericalTrack : {
-	// 		type : 'MediaStreamTrack'
-	// 	}
-	// },
-
 	createVideosphere: function () {
 		this.video360 = document.createElement('a-videosphere');
 		this.video360.setAttribute('side', 'double');
@@ -135,14 +127,6 @@ AFRAME.registerComponent('sync', {
 		this.receivedAudioEl.hidden = true;
 		this.receivedAudioEl.autoplay = true;
 		rtcDiv.appendChild(this.receivedAudioEl);
-
-		// this.video360 = document.createElement('a-videosphere');
-		// this.video360.setAttribute('side', 'double');
-		// this.video360.setAttribute('src', '');
-		// this.el.appendChild(this.video360);
-
-		// a-videosphere 에 envSpherical 컴포넌트 추가
-		// this.video360.setAttribute("envSpherical");
 
 		this.videoasset = document.createElement('video');
 		this.videoasset.id = 'video';
@@ -420,7 +404,7 @@ AFRAME.registerComponent('sync', {
 			pc.ontrack = (event) => {
 				this.receivedArStreamPC.videoTrack = event.track;
 				// this.envSphericalTrack = this.receivedArStreamPC
-				if (event.streams[0].id == 'screen_sharing'){
+				if (event.streams[0].id == 'screen_sharing') {
 					this.receivedVideoEl.srcObject.addTrack(event.track);
 				} else if (event.streams[0].id == 'spherial_360') {
 					this.videoasset.srcObject = event.streams[0];

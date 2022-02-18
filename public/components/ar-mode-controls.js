@@ -207,7 +207,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 	init: function () {
 		if (this.el !== this.el.sceneEl) return;
 		let sceneEl = this.el;
-		this.callNative = (funcName, ...args) => {};	// On a desktop, this function do no actions.
+		this.callNative = (funcName, ...args) => { };	// On a desktop, this function do no actions.
 		if (window.webkit) {	// for iOS
 			this.callNative = (funcName, ...args) => {
 				argv = {}
@@ -400,47 +400,46 @@ AFRAME.registerComponent('ar-mode-controls', {
 					this.videoStreamingStatus = false;
 					this.streamingUILayer.style.display = 'block';
 
-					/* 이 부분 주석을 해제하면 태블릿에서 ARmode로 들어가도 카메라 화면이 보이지 않음 */
-					// let resultMap1 = new Map();
-					// let amArray = Array.from(this.ARTracker.activeMarkers);
-					// let findTargetingObj = (el) => {
-					// 	if (!el.id) return;
-					// 	let targetComp = el.components['target'];
-					// 	if (targetComp) {
-					// 		let markerId = targetComp.data.marker.substr(1);
-					// 		let src, markerComp;
-					// 		[url, markerComp] = amArray.find(entry => entry[1].el.id == markerId);
-					// 		if (markerComp) {
-					// 			resultMap1.set(el.id, { markerURL: url, object3D: el.object3D });
-					// 		}
-					// 	}
-					// 	for (let child of el.children) {
-					// 		findTargetingObj(child);
-					// 	}
-					// };
-					// findTargetingObj(sceneEl);
-					// for ([key, val] of resultMap1) {
-					// 	this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
-					// }
+					let resultMap1 = new Map();
+					let amArray = Array.from(this.ARTracker.activeMarkers);
+					let findTargetingObj = (el) => {
+						if (!el.id) return;
+						let targetComp = el.components['target'];
+						if (targetComp) {
+							let markerId = targetComp.data.marker.substr(1);
+							let src, markerComp;
+							[url, markerComp] = amArray.find(entry => entry[1].el.id == markerId);
+							if (markerComp) {
+								resultMap1.set(el.id, { markerURL: url, object3D: el.object3D });
+							}
+						}
+						for (let child of el.children) {
+							findTargetingObj(child);
+						}
+					};
+					findTargetingObj(sceneEl);
+					for ([key, val] of resultMap1) {
+						this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
+					}
 
-					// let resultMap2 = new Map();
-					// let findBindingObj = (el) => {
-					// 	if (!el.id) return;
-					// 	let binderComp = el.components['binder'];
-					// 	if (binderComp) {
-					// 		let targetingItem = resultMap1.get(binderComp.data.reference.substr(1));
-					// 		if (targetingItem) {
-					// 			resultMap2.set(el.id, { marker: targetingItem.markerURL, object3D: el.object3D });
-					// 		}
-					// 	}
-					// 	for (let child of el.children) {
-					// 		findBindingObj(child);
-					// 	}
-					// };
-					// findBindingObj(sceneEl);
-					// for ([key, val] of resultMap2) {
-					// 	this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
-					// }
+					let resultMap2 = new Map();
+					let findBindingObj = (el) => {
+						if (!el.id) return;
+						let binderComp = el.components['binder'];
+						if (binderComp) {
+							let targetingItem = resultMap1.get(binderComp.data.reference.substr(1));
+							if (targetingItem) {
+								resultMap2.set(el.id, { marker: targetingItem.markerURL, object3D: el.object3D });
+							}
+						}
+						for (let child of el.children) {
+							findBindingObj(child);
+						}
+					};
+					findBindingObj(sceneEl);
+					for ([key, val] of resultMap2) {
+						this.ARTracker.pushBindedObject(val.markerURL, val.object3D);
+					}
 
 					this.callNative('onEnterAR');
 				}
