@@ -161,7 +161,6 @@ AFRAME.registerComponent('thd-mode-controls', {
             let wid = window.wid;
             let newid = document.querySelector('#PCD_id').value;
 
-
             const envPointSet = document.querySelector('#root').components['sync'].envPointSet;
             let pcd_position = envPointSet.geometry.attributes.position;
             let pcd_color = envPointSet.geometry.attributes.color;
@@ -200,6 +199,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                                 let percent = 0;
                                 let position = e.loaded || e.position;
                                 let total = e.total;
+
                                 if (e.lengthComputable) {
                                     percent = Math.ceil(position / total * 100);
                                 }
@@ -1755,6 +1755,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.UILayer4.style.top = (this.UILayer1.offsetHeight + 2) + 'px';
         this.UILayer4.style.width = '320px';
         this.UILayer4.style.left = (this.el.offsetLeft + this.el.offsetWidth - 320 - 2) + 'px';
+        
         let progressBarUI = document.createElement('progress');
         progressBarUI.id = 'progressBarUI';
         $(progressBarUI).addClass('progress-bar');
