@@ -1755,7 +1755,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.UILayer4.style.top = (this.UILayer1.offsetHeight + 2) + 'px';
         this.UILayer4.style.width = '320px';
         this.UILayer4.style.left = (this.el.offsetLeft + this.el.offsetWidth - 320 - 2) + 'px';
-        
+
         let progressBarUI = document.createElement('progress');
         progressBarUI.id = 'progressBarUI';
         $(progressBarUI).addClass('progress-bar');
