@@ -1502,12 +1502,21 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.copyButton.style.height = 'calc(100% - 4px)';
         this.copyButton.style.cursor = 'pointer';
         this.copyButton.style.padding = '2px';
-        this.copyButton.addEventListener('click', () => {
-            navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([this._stringifyContent()], { type: 'text/plain' }) })]).then(() => {
-                console.log('success copy to clipboard');
-            }, () => {
-                console.log('fail copy to clipboard');
-            });
+        this.copyButton.addEventListener('click', async () => {
+            if(typeof(window.ClipboardItem)!="undefined"){
+                navigator.clipboard.writeText([new ClipboardItem({ 'text/plain': new Blob([this._stringifyContent()], { type: 'text/plain' }) })]).then(() => {
+                    console.log('success copy to clipboard');
+                }, () => {
+                    console.log('fail copy to clipboard');
+                });
+            }
+            else{
+                navigator.clipboard.writeText(this._stringifyContent()).then(() => {
+                    console.log('success copy to clipboard');
+                }, () => {
+                    console.log('fail copy to clipboard');
+                });
+            }
         });
         copyButtonUI.appendChild(this.copyButton);
 
