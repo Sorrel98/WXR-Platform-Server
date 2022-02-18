@@ -403,7 +403,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 					let resultMap1 = new Map();
 					let amArray = Array.from(this.ARTracker.activeMarkers);
 					let findTargetingObj = (el) => {
-						if (!el.id) return;
+						if (!el.id || !el.components) return;
 						let targetComp = el.components['target'];
 						if (targetComp) {
 							let markerId = targetComp.data.marker.substr(1);
@@ -424,7 +424,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 
 					let resultMap2 = new Map();
 					let findBindingObj = (el) => {
-						if (!el.id) return;
+						if (!el.id || !el.components) return;
 						let binderComp = el.components['binder'];
 						if (binderComp) {
 							let targetingItem = resultMap1.get(binderComp.data.reference.substr(1));
