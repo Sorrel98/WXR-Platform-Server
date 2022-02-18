@@ -114,6 +114,6 @@ app.use(function generalErrorHandler(error, request, response, next) {
     //     console.log(error);
     // }
     response.setHeader('content-type', 'text/plain');
-    response.status(200).end();
+    response.status(error.statusCode).end();
     console.log(error);
 });
