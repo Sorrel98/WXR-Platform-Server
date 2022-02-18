@@ -71,6 +71,18 @@ class EnvPoints {
  * It also supports voice chat between session participants.
  */
 AFRAME.registerComponent('sync', {
+	createVideosphere: function () {
+		this.video360 = document.createElement('a-videosphere');
+		this.video360.setAttribute('side', 'double');
+		this.video360.setAttribute('src', '');
+		this.el.appendChild(this.video360);
+	},
+
+	destroyVideosphere: function () {
+		this.el.removeChild(thus.video360);
+		this.video360.destroy();
+	},
+
 	init: function () {
 		if (this.el.sceneEl !== this.el) return;
 		this.el.syncReady = false;
@@ -83,6 +95,11 @@ AFRAME.registerComponent('sync', {
 		this.movingObjMats = new Map(); // <key: elId, value: matrix>
 		this.userMap = new Map();
 		this.attachReceiver = this.attachReceiver.bind(this);
+
+		this.video360 = null
+
+		// 360 비디오 트랙 MediaStreamTrack를 받을 변수 (위의 커스텀 프로퍼티 대신 만듦)
+		// this.envSphericalTrack = null
 
 		/**
 		 * Create UI buttons related to WebRTC communication
@@ -111,9 +128,16 @@ AFRAME.registerComponent('sync', {
 		this.receivedAudioEl.autoplay = true;
 		rtcDiv.appendChild(this.receivedAudioEl);
 
+		this.videoasset = document.createElement('video');
+		this.videoasset.id = 'video';
+		this.videoasset.setAttribute('autoplay', true);
+		this.videoasset.setAttribute('controls', true);
+		this.videoasset.srcObject = new MediaStream();
+		this.el.appendChild(this.videoasset);
+
 		let rtcButtonCss = `
 		margin-right: 5px;
-		width: 70px;
+		width: 80px;
 		height: 40px;
 		vertical-align: top;
 		`
@@ -157,6 +181,32 @@ AFRAME.registerComponent('sync', {
 			}
 		}
 		rtcDiv.appendChild(this.videoReceiveButton);
+
+		this.video360Receiving = false;
+		this.video360ReceiveButton = document.createElement('button');
+		this.video360ReceiveButton.style.cssText = rtcButtonCss;
+		this.video360ReceiveButton.innerHTML = '360 video receive';
+		this.video360ReceiveButton.onclick = () => {
+			if (!this.video360Receiving) {
+				this.createVideosphere();
+				this.video360.setAttribute('src', '#video');
+				this.video360Receiving = true;
+				if (this.receivedArStreamPC && this.receivedArStreamPC.videoTrack) {
+					this.receivedArStreamPC.videoTrack.enabled = true;
+				}
+				this.video360ReceiveButton.innerHTML = 'stop receiving';
+			} else {
+				this.destroyVideosphere()
+				this.video360.setAttribute('src', "");
+				this.video360Receiving = false;
+				if (this.receivedArStreamPC && this.receivedArStreamPC.videoTrack) {
+					this.receivedArStreamPC.videoTrack.enabled = false;
+				}
+				this.videoReceiveButton.disabled = false;
+				this.video360ReceiveButton.innerHTML = '360 video receive';
+			}
+		}
+		rtcDiv.appendChild(this.video360ReceiveButton);
 
 		/**
 		 * Get an audio stream from the local device's microphone
@@ -353,7 +403,12 @@ AFRAME.registerComponent('sync', {
 			};
 			pc.ontrack = (event) => {
 				this.receivedArStreamPC.videoTrack = event.track;
-				this.receivedVideoEl.srcObject.addTrack(event.track);
+				// this.envSphericalTrack = this.receivedArStreamPC
+				if (event.streams[0].id == 'screen_sharing') {
+					this.receivedVideoEl.srcObject.addTrack(event.track);
+				} else if (event.streams[0].id == 'spherial_360') {
+					this.videoasset.srcObject = event.streams[0];
+				}
 			};
 			let desc = new RTCSessionDescription(sdp);
 			pc.setRemoteDescription(desc).then(() => {
@@ -378,6 +433,7 @@ AFRAME.registerComponent('sync', {
 			if (this.receivedArStreamPC.videoTrack) {
 				this.receivedArStreamPC.videoTrack.stop();
 				this.receivedVideoEl.srcObject.removeTrack(this.receivedArStreamPC.videoTrack);
+				this.videoasset.srcObject.removeTrack(this.receivedArStreamPC.videoTrack);
 			}
 			this.receivedArStreamPC = null;
 		});

@@ -207,7 +207,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 	init: function () {
 		if (this.el !== this.el.sceneEl) return;
 		let sceneEl = this.el;
-		this.callNative = (funcName, ...args) => {};	// On a desktop, this function do no actions.
+		this.callNative = (funcName, ...args) => { };	// On a desktop, this function do no actions.
 		if (window.webkit) {	// for iOS
 			this.callNative = (funcName, ...args) => {
 				argv = {}
@@ -324,6 +324,51 @@ AFRAME.registerComponent('ar-mode-controls', {
 			}
 		};
 		this.streamingUILayer.appendChild(this.videoStreamingButton);
+
+		/**
+		 * 360video sharing thorugh WebRTC.
+		 * In one workspace session, streaming rights are exclusive 
+		 * and only users who have been issued a token from the server can stream.
+		 * When the streaming ends, the token is returned to the server.
+		 */
+		this.video360StreamingStatus = false;
+		this.video360StreamingButton = document.createElement('button');
+		this.video360StreamingButton.innerHTML = 'share 360 Video';
+		this.video360StreamingButton.style = width = '100px';
+		this.video360StreamingButton.style.height = '50px';
+		this.video360StreamingButton.style.left = '15px';
+		this.video360StreamingButton.style.bottom = '5px';
+		this.video360StreamingButton.style.position = 'relative';
+		this.video360StreamingButton.onclick = () => {
+			if (this.video360StreamingStatus) {
+				this.video360StreamingStatus = false;
+				this.video360StreamingButton.innerHTML = 'share 360Video';
+				this.callNative('onRemoveStreamingChannel', 3);
+			}
+			else {
+				if (this.streamingToken !== null) {
+					this.video360StreamingStatus = true;
+					this.video360StreamingButton.innerHTML = 'unshare 360Video';
+					this.callNative('onAddStreamingChannel', 3);
+				}
+				else {
+					let syncComp = this.el.components['sync'];
+					if (syncComp) {
+						syncComp.getArStreamingToken().then((token) => {
+							this.streamingToken = token;
+							this.video360StreamingStatus = true;
+							this.video360StreamingButton.innerHTML = 'unshare 360Video';
+							this.callNative('onInitStreaming', wid, token);
+							this.callNative('onAddStreamingChannel', 3);
+						})
+							.catch(() => {
+								console.log('token is unavailable');
+							});
+					}
+				}
+			}
+		};
+		this.streamingUILayer.appendChild(this.video360StreamingButton);
 
 		/**
 		 * It is asynchronous function.
