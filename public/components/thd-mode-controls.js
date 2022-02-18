@@ -1525,7 +1525,6 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.PCDstoringButton.style.padding = '2px';
         this.PCDstoringButton.addEventListener('click', () => {
             this.loadPCDWindow();
-            console.log("PCD storing button clicked");
         });
         PCDstoringButtonUI.appendChild(this.PCDstoringButton);
 
