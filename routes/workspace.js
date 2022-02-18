@@ -9,6 +9,9 @@ const ejs = require('ejs');
 const sessionManager = require('../session').sessionManager;
 const dbPool = require('../lib/DBpool').dbPool;
 const { BadRequestError, DBError, UnauthorizedError, NotFoundError } = require('../lib/errors');
+const { TextureDataType } = require('three');
+const multiparty = require('multiparty');
+const fs = require('fs');
 
 
 router.get('/makePage', async (request, response, next) => {
@@ -624,6 +627,66 @@ router.post('/save', async (request, response, next) => {
     sessionManager.onSaved(uid, parseInt(wid));
     response.setHeader('content-type', 'text/plain');
     response.status(200).end();
+});
+
+router.post('/savePCD', async (request, response, next) => {
+    const uid = request.session.uid;
+    if (!uid) {
+        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
+    }
+
+    let wid;
+    let astName;
+    let pcdfile;
+
+    let form = new multiparty.Form();
+    form.on('field', async (name, value) => {
+        switch (name) {
+            case 'wid': wid = parseInt(value); break;
+            case 'astName': astName = value; break;
+        }
+    });
+
+    form.on('part', async (partDataStream) => {
+        if (partDataStream.name !== 'pcdFile') {
+            partDataStream.resume();
+            return;
+        }
+
+        if (!wid) {
+            partDataStream.resume();
+            return next(new BadRequestError(`The request omitted the wid field.`));
+        }
+        if (!astName) {
+            partDataStream.resume();
+            return next(new BadRequestError(`The request omitted the astName field.`));
+        }
+
+        let conn;
+        try {
+            conn = await dbPool.getConnection();
+
+            const res1 = await conn.query(`select * from t_asset_item where parent_dir is null and owner_id = ? and item_type = 0`, uid);
+            if (res1.length !== 1) {
+                throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${res1[0].id}, uid: ${uid}`);
+            }
+            await conn.beginTransaction();
+            const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, res1[0].id, res1[0].owner_id]);
+            const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, partDataStream]);
+            conn.commit();
+            conn.release();
+        }
+        catch (err) {
+            if (conn) {
+                conn.rollback();
+                conn.release();
+            }
+            return next(err);
+        }
+        response.status(200).end();
+    });
+    form.parse(request);
+
 });
 
 router.get('/workspace/sessions', async (request, response, next) => {
