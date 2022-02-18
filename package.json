@@ -31,5 +31,8 @@
     "three": "^0.127.0"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "nodemonConfig": {
+    "ignore": ["public/*", "DDL.js", "LICENSE", "README.md"]
+  }
 }

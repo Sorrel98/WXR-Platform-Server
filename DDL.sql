@@ -114,7 +114,7 @@ CREATE TABLE `t_template` (
 CREATE TABLE `t_workspace_session` (
   `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `wid` INT NOT NULL,
-  `start_time` DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  `start_time` DATETIME NOT NULL DEFAULT (UTC_TIMESTAMP),
   `end_time` DATETIME,
   `log_msgs` LONGTEXT NOT NULL DEFAULT ""
 );

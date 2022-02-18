@@ -153,7 +153,7 @@ AFRAME.registerComponent('thd-mode-controls', {
 
         this._savePCD = () => {
             let layer4 = document.querySelector('#UIGroup4');
-            layer4.style.display="block";
+            layer4.style.display = "block";
             layer4.style.left = (this.el.offsetLeft + this.el.offsetWidth - 320 - 2) + 'px';
             const sceneEl = tdModeControlsComp.el;
             sceneEl.components.screenshot.data.width = 128;
@@ -161,22 +161,11 @@ AFRAME.registerComponent('thd-mode-controls', {
             let wid = window.wid;
             let newid = document.querySelector('#PCD_id').value;
 
-            let pcd_position = document.querySelector('#root').components['sync'].envPointSet.geometry.attributes.position;
-            let pcd_color = document.querySelector('#root').components['sync'].envPointSet.geometry.attributes.color;
-            let width = document.querySelector('#root').components['sync'].envPointSet.geometry.drawRange.count;
 
-            // let pcd_position = document.querySelector('#pcd').object3D.children[0].geometry.attributes.position;
-            // let pcd_color = document.querySelector('#pcd').object3D.children[0].geometry.attributes.color;
-            // let width = pcd_position.count;
-            // let width = 2000000;
-
-            function printFile(filetemp) {
-                const reader = new FileReader();
-                reader.onload = function (evt) {
-                    console.log("printfile\n" + evt.target.result);
-                };
-                reader.readAsText(filetemp);
-            }
+            const envPointSet = document.querySelector('#root').components['sync'].envPointSet;
+            let pcd_position = envPointSet.geometry.attributes.position;
+            let pcd_color = envPointSet.geometry.attributes.color;
+            let width = envPointSet.geometry.drawRange.count;
 
             var workerBlob = new Blob(
                 [workerRunner.toString().replace(/^function .+\{?|\}$/g, '')],
@@ -189,7 +178,6 @@ AFRAME.registerComponent('thd-mode-controls', {
                 file = new File([event.data], "data.txt", {
                     type: false
                 });
-                printFile(file);
 
                 let fd = new FormData();
                 fd.append('wid', wid);
@@ -204,9 +192,6 @@ AFRAME.registerComponent('thd-mode-controls', {
                     processData: false,
                     enctype: 'multipart/form-data',
                     data: fd,
-                    headers: {
-                        'Content-Length': fd.length
-                    },
                     xhr: () => {
                         let xhrobj = $.ajaxSettings.xhr();
 
@@ -215,7 +200,6 @@ AFRAME.registerComponent('thd-mode-controls', {
                                 let percent = 0;
                                 let position = e.loaded || e.position;
                                 let total = e.total;
-                                
                                 if (e.lengthComputable) {
                                     percent = Math.ceil(position / total * 100);
                                 }
@@ -1383,7 +1367,7 @@ AFRAME.registerComponent('thd-mode-controls', {
     initSessionListWindow: function () {
         let tdModeControlsComp = this;
         this.sessionListWindow = document.createElement('div');
-        this.sessionListWindow.innerHTML = "<div id='session_list_panel' style='position:absolute; overflow:auto; width:780px; height:550px; top:10px; left:10px;'><table width=100% height=100%><tr><th>session id</th><th>start</th><th>end</th></tr></table></div><div style='position:absolute; width:780px; left:10px; top:570px; text-align:right;'><button id='session_list_close'>Close</button></div>";
+        this.sessionListWindow.innerHTML = "<div id='session_list_panel' style='position:absolute; overflow:auto; width:780px; height:550px; top:10px; left:10px;'><table width=100% height=100%><tr><th>session id</th><th>start</th><th>end</th><th>size</th><th>download</th><th>delete</th></tr></table></div><div style='position:absolute; width:780px; left:10px; top:570px; text-align:right;'><button id='session_list_close'>Close</button></div>";
         this.sessionListWindow.style.backgroundColor = 'lightblue';
         this.sessionListWindow.style.display = 'none';
         this.sessionListWindow.style.position = 'fixed';
@@ -1439,7 +1423,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             if (wasdControlsEl !== null)
                 wasdControlsEl.getAttribute('wasd-controls').enabled = false;
             tdModeControlsComp.sessionListWindowHandlerLoader();
-            tdModeControlsComp.sessionListWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (this.helpWindow.offsetWidth / 2)) + 'px'; // for dynamic resizing
+            tdModeControlsComp.sessionListWindow.style.left = ((document.querySelector('body').offsetWidth / 2) - (this.sessionListWindow.offsetWidth / 2)) + 'px'; // for dynamic resizing
 
             let table = document.querySelector('#session_list_panel table');
             table.innerHTML = "Loading...";
@@ -1449,10 +1433,10 @@ AFRAME.registerComponent('thd-mode-controls', {
                 url: '/workspace/sessions?id=' + wid,
                 type: 'GET',
                 success: (result) => {
-                    table.innerHTML = "<tr><th>session id</th><th>start</th><th>end</th></tr>";
+                    table.innerHTML = "<tr><th>session id</th><th>start</th><th>end</th><th>size</th><th>download</th><th>delete</th></tr>";
                     for (const session of result) {
                         let row = document.createElement('tr');
-                        row.innerHTML = `<td>${session.id}</td><td>${session.start_time}</td><td>${session.end_time}</td><td><a href="/workspace/sessions?id=${wid}&sid=${session.id}">download</a></td>`;
+                        row.innerHTML = `<td>${session.id}</td><td>${session.start_time}</td><td>${session.end_time}</td><td>${session.size}</td><td><a href="/workspace/sessions?id=${wid}&sid=${session.id}">download</a></td><td><a href="javascript:void(0);" onclick="$.ajax({url:'/workspace/sessions?id=${wid}&sid=${session.id}', type:'DELETE', success: (result)=>{this.closest('tr').remove();}, error: (err)=>{console.log(err);}});">delete</a></td>`;
                         table.appendChild(row);
                     }
                 },
@@ -1541,7 +1525,6 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.PCDstoringButton.style.padding = '2px';
         this.PCDstoringButton.addEventListener('click', () => {
             this.loadPCDWindow();
-            console.log("PCD storing button clicked");
         });
         PCDstoringButtonUI.appendChild(this.PCDstoringButton);
 
@@ -1769,10 +1752,9 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.UILayer4.style.height = '10px';
         this.UILayer4.style.minHeight = '10px';
         this.UILayer4.style.display = 'none';
-        this.UILayer4.style.top = (this.UILayer1.offsetHeight+2)+'px';
+        this.UILayer4.style.top = (this.UILayer1.offsetHeight + 2) + 'px';
         this.UILayer4.style.width = '320px';
         this.UILayer4.style.left = (this.el.offsetLeft + this.el.offsetWidth - 320 - 2) + 'px';
-        
         let progressBarUI = document.createElement('progress');
         progressBarUI.id = 'progressBarUI';
         $(progressBarUI).addClass('progress-bar');
@@ -1796,7 +1778,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             this.UILayer2.style.width = (this.UILayer2.offsetHeight * 4) + 'px';
             this.UILayer3.style.height = unitSize + 'px';
             this.UILayer3.style.width = (this.UILayer3.offsetHeight * 2) + 'px';
-            this.UILayer4.style.top = (this.UILayer1.offsetHeight+2)+'px';
+            this.UILayer4.style.top = (this.UILayer1.offsetHeight + 2) + 'px';
             this.UILayer4.style.width = '320px';
 
             this.UILayer1.style.left = (this.el.offsetLeft + this.el.offsetWidth - this.UILayer1.offsetWidth - 2) + 'px';

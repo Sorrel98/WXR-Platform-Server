@@ -10,7 +10,7 @@ const sessionManager = require('../session').sessionManager;
 const dbPool = require('../lib/DBpool').dbPool;
 const { BadRequestError, DBError, UnauthorizedError, NotFoundError } = require('../lib/errors');
 const { TextureDataType } = require('three');
-var multiparty = require('multiparty');
+const multiparty = require('multiparty');
 const fs = require('fs');
 
 
@@ -625,7 +625,8 @@ router.post('/save', async (request, response, next) => {
     }
 
     sessionManager.onSaved(uid, parseInt(wid));
-    response.status(200).send('ok').end();
+    response.setHeader('content-type', 'text/plain');
+    response.status(200).end();
 });
 
 router.post('/savePCD', async (request, response, next) => {
@@ -633,33 +634,33 @@ router.post('/savePCD', async (request, response, next) => {
     if (!uid) {
         next(new DBError("Session has no uid.", 401));
     }
-    
+
     let wid;
     let astName;
     let pcdfile;
-    
+
     let form = new multiparty.Form();
     form.on('field', async (name, value) => {
-        switch(name){
+        switch (name) {
             case 'wid': wid = parseInt(value); break;
             case 'astName': astName = value; break;
         }
     });
-    
-    form.on('part', async (partDataStream)=>{
-        if(partDataStream.name !== 'pcdFile'){
+
+    form.on('part', async (partDataStream) => {
+        if (partDataStream.name !== 'pcdFile') {
             partDataStream.resume();
             return;
         }
-        
-        
+
+
         if (!wid) {
             next(new DBError("Doesn't meet condition to save PCD.", 400));
         }
         let conn;
         try {
             conn = await dbPool.getConnection();
-    
+
             let parentId = 3;
             const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [parentId, uid]);
             if (res1.length !== 1) {
@@ -667,10 +668,10 @@ router.post('/savePCD', async (request, response, next) => {
             }
             await conn.beginTransaction();
             const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, parentId, res1[0].owner_id]);
-            if(pcdfile){
+            if (pcdfile) {
                 const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, pcdfile]);
             }
-            else{
+            else {
                 const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, partDataStream]);
             }
             conn.commit();
@@ -685,6 +686,68 @@ router.post('/savePCD', async (request, response, next) => {
             return next(err);
         }
         response.status(200).send('.').end();
+    });
+    form.parse(request);
+
+    response.setHeader('content-type', 'text/plain');
+    response.status(200).end();
+});
+
+router.post('/savePCD', async (request, response, next) => {
+    const uid = request.session.uid;
+    if (!uid) {
+        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
+    }
+
+    let wid;
+    let astName;
+    let pcdfile;
+
+    let form = new multiparty.Form();
+    form.on('field', async (name, value) => {
+        switch (name) {
+            case 'wid': wid = parseInt(value); break;
+            case 'astName': astName = value; break;
+        }
+    });
+
+    form.on('part', async (partDataStream) => {
+        if (partDataStream.name !== 'pcdFile') {
+            partDataStream.resume();
+            return;
+        }
+
+        if (!wid) {
+            partDataStream.resume();
+            return next(new BadRequestError(`The request omitted the wid field.`));
+        }
+        if (!astName) {
+            partDataStream.resume();
+            return next(new BadRequestError(`The request omitted the astName field.`));
+        }
+
+        let conn;
+        try {
+            conn = await dbPool.getConnection();
+
+            const res1 = await conn.query(`select * from t_asset_item where parent_dir is null and owner_id = ? and item_type = 0`, uid);
+            if (res1.length !== 1) {
+                throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${res1[0].id}, uid: ${uid}`);
+            }
+            await conn.beginTransaction();
+            const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, res1[0].id, res1[0].owner_id]);
+            const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, partDataStream]);
+            conn.commit();
+            conn.release();
+        }
+        catch (err) {
+            if (conn) {
+                conn.rollback();
+                conn.release();
+            }
+            return next(err);
+        }
+        response.status(200).end();
     });
     form.parse(request);
 
@@ -709,7 +772,7 @@ router.get('/workspace/sessions', async (request, response, next) => {
 
         if (!sid) {
 
-            const res1 = await conn.query(`select id, start_time, end_time from t_workspace_session where wid=?`, id);
+            const res1 = await conn.query(`select id, date_add(start_time, interval 9 hour) as start_time, date_add(end_time, interval 9 hour) as end_time, length(log_msgs) as size from t_workspace_session where wid=?`, id);
             response.status(200).json(res1);
 
         }
@@ -719,6 +782,8 @@ router.get('/workspace/sessions', async (request, response, next) => {
             if (res1.length !== 1) {
                 throw new NotFoundError(`Couldn't find session log. sid: ${sid}`);
             }
+
+            conn.release();
 
             response.setHeader('Content-disposition', `attachment; filename=${encodeURIComponent(res1[0].w_name + '_' + res1[0].start_time)}.log`);
             response.status(200).end(res1[0].logs, 'binary');
@@ -732,6 +797,42 @@ router.get('/workspace/sessions', async (request, response, next) => {
 
         return next(err);
     }
+
+});
+
+router.delete('/workspace/sessions', async (request, response, next) => {
+
+    const { uid } = request.session;
+    if (!uid) {
+        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
+    }
+
+    const { id, sid } = request.query;
+    if (!id | !sid) {
+        return next(new BadRequestError(`Invalid asset id. request.query: ${util.inspect(request.query, true, 2, true)}`));
+    }
+
+    // TODO: Check access validation
+    let conn;
+    try {
+        conn = await dbPool.getConnection();
+
+        const res1 = await conn.query(`delete from t_workspace_session where id=?`, sid);
+        if (res1.affectedRows !== 1) {
+            throw new BadRequestError(`The requested session log does not exist. sid: ${sid}`);
+        }
+
+        conn.release();
+
+    } catch (err) {
+        if (conn) {
+            conn.release();
+        }
+
+        return next(err);
+    }
+
+    response.status(200).end();
 
 });
 

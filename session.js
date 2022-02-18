@@ -345,7 +345,7 @@ class SessionManager {
 
 						conn = await dbPool.getConnection();
 
-						const res1 = await conn.query(`insert into t_workspace_session(wid) values(?)`, wid);
+						const res1 = await conn.query(`insert into t_workspace_session(wid, start_time) values(?, utc_timestamp())`, wid);
 
 						wsSession = new WSSession(String(wid), res1.insertId);
 						getWSSessionByWID.set(wid, wsSession);
@@ -384,10 +384,9 @@ class SessionManager {
 					wsSession.leave(socket);
 					if (wsSession.getPartNum() === 0) {
 
-						let sid = wsSession.sid;
-						let logCount = wsSession.sessionLogs.length;
-						let log_msgs = ',' + JSON.stringify(wsSession.sessionLogs).slice(1, -1);
-						let end_time = (new Date).toISOString().slice(0, -1);
+						const sid = wsSession.sid;
+						const logCount = wsSession.sessionLogs.length;
+						const log_msgs = ',' + JSON.stringify(wsSession.sessionLogs).slice(1, -1);
 
 						clearTimeout(wsSession.sessionLoggingTimer);
 
@@ -398,16 +397,18 @@ class SessionManager {
 
 							let query, params;
 							if (logCount === 0) {
-								query = `update t_workspace_session set end_time=? where id=?`;
-								params = [end_time, sid];
+								query = `update t_workspace_session set end_time=utc_timestamp() where id=?`;
+								params = [sid];
 							}
 							else {
-								query = `update t_workspace_session set end_time=?, log_msgs=concat(log_msgs, ?) where id=?`;
-								params = [end_time, log_msgs, sid];
+								query = `update t_workspace_session set end_time=utc_timestamp(), log_msgs=concat(log_msgs, ?) where id=?`;
+								params = [log_msgs, sid];
 							}
 
+							await conn.query(query, params);
+
 							console.log(`inserted ${logCount} logs`);
-							console.log("sucessfully ending a session");
+							console.log("successfully ending a session");
 
 							conn.release();
 

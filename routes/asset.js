@@ -77,7 +77,7 @@ router.get('/assetInfo', async (request, response, next) => {
 
 			case 't':
 				//feature meta data array
-				res4 = await conn.query(`select 'vuforia_feature' as feature_type, type, hex(left(dat, 4)) as signature from t_vuforia_feature where id = ? union all select 'general_feature' as feature_type, type, hex(left(bin, 4)) as signature from t_general_feature where id = ?`, [astId, astId]);
+				res4 = await conn.query(`select 'vuforia_feature' as feature_type, type, hex(left(dat, 4)) as signature, NULL as width, NULL as height, NULL as depth from t_vuforia_feature where id = ? union all select 'general_feature' as feature_type, type, hex(left(bin, 4)) as signature, width, height, depth from t_general_feature where id = ?`, [astId, astId]);
 				break;
 
 			case 'b':
