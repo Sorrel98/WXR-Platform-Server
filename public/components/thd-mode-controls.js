@@ -1502,7 +1502,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.copyButton.style.height = 'calc(100% - 4px)';
         this.copyButton.style.cursor = 'pointer';
         this.copyButton.style.padding = '2px';
-        this.copyButton.addEventListener('click', async () => {
+        this.copyButton.addEventListener('click', () => {
             if(typeof(window.ClipboardItem)!="undefined"){
                 navigator.clipboard.writeText([new ClipboardItem({ 'text/plain': new Blob([this._stringifyContent()], { type: 'text/plain' }) })]).then(() => {
                     console.log('success copy to clipboard');
