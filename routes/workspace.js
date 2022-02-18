@@ -54,9 +54,6 @@ router.post('/make', async (request, response, next) => { // todo: Check the con
     let conn;
     try {
 
-
-
-        
         conn = await dbPool.getConnection();
         await conn.beginTransaction();
 
@@ -625,6 +622,7 @@ router.post('/save', async (request, response, next) => {
     }
 
     sessionManager.onSaved(uid, parseInt(wid));
+    response.setHeader('content-type', 'text/plain');
     response.status(200).end();
 });
 

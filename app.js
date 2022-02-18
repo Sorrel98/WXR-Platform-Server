@@ -113,6 +113,7 @@ app.use(function generalErrorHandler(error, request, response, next) {
     // if (process.env.DEBUG){
     //     console.log(error);
     // }
+    response.setHeader('content-type', 'text/plain');
     response.status(error.statusCode).end();
     console.log(error);
 });
