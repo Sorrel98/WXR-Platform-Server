@@ -161,17 +161,10 @@ AFRAME.registerComponent('thd-mode-controls', {
             let wid = window.wid;
             let newid = document.querySelector('#PCD_id').value;
 
-            let pcd_position = document.querySelector('#root').components['sync'].envPointSet.geometry.attributes.position;
-            let pcd_color = document.querySelector('#root').components['sync'].envPointSet.geometry.attributes.color;
-            let width = document.querySelector('#root').components['sync'].envPointSet.geometry.drawRange.count;
-
-            function printFile(filetemp) {
-                const reader = new FileReader();
-                reader.onload = function (evt) {
-                    console.log("printfile\n" + evt.target.result);
-                };
-                reader.readAsText(filetemp);
-            }
+            const envPointSet = document.querySelector('#root').components['sync'].envPointSet;
+            let pcd_position = envPointSet.geometry.attributes.position;
+            let pcd_color = envPointSet.geometry.attributes.color;
+            let width = envPointSet.geometry.drawRange.count;
 
             var workerBlob = new Blob(
                 [workerRunner.toString().replace(/^function .+\{?|\}$/g, '')],
@@ -184,7 +177,6 @@ AFRAME.registerComponent('thd-mode-controls', {
                 file = new File([event.data], "data.txt", {
                     type: false
                 });
-                printFile(file);
 
                 let fd = new FormData();
                 fd.append('wid', wid);
@@ -199,9 +191,6 @@ AFRAME.registerComponent('thd-mode-controls', {
                     processData: false,
                     enctype: 'multipart/form-data',
                     data: fd,
-                    headers: {
-                        'Content-Length': fd.length
-                    },
                     xhr: () => {
                         let xhrobj = $.ajaxSettings.xhr();
 

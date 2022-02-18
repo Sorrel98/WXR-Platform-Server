@@ -10,7 +10,7 @@ const sessionManager = require('../session').sessionManager;
 const dbPool = require('../lib/DBpool').dbPool;
 const { BadRequestError, DBError, UnauthorizedError, NotFoundError } = require('../lib/errors');
 const { TextureDataType } = require('three');
-var multiparty = require('multiparty');
+const multiparty = require('multiparty');
 const fs = require('fs');
 
 
@@ -625,13 +625,13 @@ router.post('/save', async (request, response, next) => {
     }
 
     sessionManager.onSaved(uid, parseInt(wid));
-    response.status(200).send('ok').end();
+    response.status(200).end();
 });
 
 router.post('/savePCD', async (request, response, next) => {
     const uid = request.session.uid;
     if (!uid) {
-        next(new DBError("Session has no uid.", 401));
+        return next(new UnauthorizedError(`Session has no uid. request.session: ${util.inspect(request.session, true, 2, true)}`));
     }
 
     let wid;
@@ -653,36 +653,36 @@ router.post('/savePCD', async (request, response, next) => {
         }
 
         if (!wid) {
-            next(new DBError("Doesn't meet condition to save PCD.", 400));
+            partDataStream.resume();
+            return next(new BadRequestError(`The request omitted the wid field.`));
         }
+        if (!astName) {
+            partDataStream.resume();
+            return next(new BadRequestError(`The request omitted the astName field.`));
+        }
+
         let conn;
         try {
             conn = await dbPool.getConnection();
-    
-            const res1 = await conn.query(`select * from t_asset_item where parent_dir is null and owner_id = ${uid} and item_type = 0`);
+
+            const res1 = await conn.query(`select * from t_asset_item where parent_dir is null and owner_id = ? and item_type = 0`, uid);
             if (res1.length !== 1) {
                 throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${res1[0].id}, uid: ${uid}`);
             }
             await conn.beginTransaction();
             const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, res1[0].id, res1[0].owner_id]);
-            if (pcdfile) {
-                const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, pcdfile]);
-            }
-            else {
-                const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, partDataStream]);
-            }
+            const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, partDataStream]);
             conn.commit();
             conn.release();
         }
         catch (err) {
-            console.log(err.constructor.name);
             if (conn) {
+                conn.rollback();
                 conn.release();
             }
-            console.log('err');
             return next(err);
         }
-        response.status(200).send('.').end();
+        response.status(200).end();
     });
     form.parse(request);
 
