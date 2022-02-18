@@ -113,6 +113,5 @@ app.use(function generalErrorHandler(error, request, response, next) {
     // if (process.env.DEBUG){
     //     console.log(error);
     // }
-    response.status(error.statusCode).send('.').end();
     console.log(error);
 });
