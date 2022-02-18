@@ -659,13 +659,12 @@ router.post('/savePCD', async (request, response, next) => {
         try {
             conn = await dbPool.getConnection();
     
-            const res0 = await conn.query(`select * from t_asset_item where parent_dir is null and owner_id = 1 and item_type = 0`);
-            const res1 = await conn.query(`select * from t_asset_item where id = ? and (owner_id is NULL or owner_id = ?) and item_type = 0`, [res0[0].id, uid]);
+            const res1 = await conn.query(`select * from t_asset_item where parent_dir is null and owner_id = ${uid} and item_type = 0`);
             if (res1.length !== 1) {
-                throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${res0[0].id}, uid: ${uid}`);
+                throw new ForbiddenError(`Nonexistent or unauthorized directory access. parent asset id: ${res1[0].id}, uid: ${uid}`);
             }
             await conn.beginTransaction();
-            const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, res0[0].id, res1[0].owner_id]);
+            const res2 = await conn.query(`insert into t_asset_item(name, parent_dir, owner_id, item_type) values(?, ?, ?, 2)`, [astName, res1[0].id, res1[0].owner_id]);
             if (pcdfile) {
                 const res3 = await conn.query("insert into t_binary_data(id, data) values(?, ?)", [res2.insertId, pcdfile]);
             }
