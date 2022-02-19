@@ -79,7 +79,7 @@ AFRAME.registerComponent('sync', {
 	},
 
 	destroyVideosphere: function () {
-		this.el.removeChild(thus.video360);
+		this.el.removeChild(this.video360);
 		this.video360.destroy();
 	},
 
