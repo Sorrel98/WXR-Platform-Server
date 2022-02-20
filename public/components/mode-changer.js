@@ -122,14 +122,15 @@ AFRAME.registerComponent('mode-changer', {
                 this.layer.style.width = Math.floor(this.el.sceneEl.offsetWidth * 0.04) + 'px';
                 this.layer.style.minWidth = '40px';
                 this.layer.style.height = (this.layer.offsetWidth * 2) + 'px';
-                this.layer.style.left = this.el.sceneEl.offsetLeft + this.el.sceneEl.offsetWidth - this.layer.offsetWidth - 2 + 'px';
-                this.layer.style.top = this.el.sceneEl.offsetTop + this.el.sceneEl.offsetHeight - this.layer.offsetHeight - 2 + 'px';
+                this.layer.style.right = '2px';
+                this.layer.style.bottom = '2px';
+                this.layer.style.lineHeight = '0px';
                 this.layer.display = 'inline';
                 window.addEventListener('resize', (e) => {
                     this.layer.style.width = Math.floor(this.el.sceneEl.offsetWidth * 0.04) + 'px';
                     this.layer.style.height = (this.layer.offsetWidth * 2) + 'px';
-                    this.layer.style.left = this.el.sceneEl.offsetLeft + this.el.sceneEl.offsetWidth - this.layer.offsetWidth - 2 + 'px';
-                    this.layer.style.top = this.el.sceneEl.offsetTop + this.el.sceneEl.offsetHeight - this.layer.offsetHeight - 2 + 'px';
+                    this.layer.style.right = '2px';
+                    this.layer.style.bottom = '2px';
                 });
                 this.enter3DEl.style.cursor = 'pointer';
                 this.enter3DEl.style.padding = '2px';

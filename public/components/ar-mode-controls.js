@@ -228,7 +228,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.streamingToken = null;
 
 		this.streamingUILayer = document.createElement('div');
-		this.streamingUILayer.style.position = 'absolute';
+		this.streamingUILayer.style.position = 'fixed';
 		this.streamingUILayer.style.zIndex = 10000;
 		this.streamingUILayer.style.left = '10px';
 		this.streamingUILayer.style.bottom = '10px';
@@ -244,11 +244,11 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.envGeoStreamingStatus = false;
 		this.envGeoStreamingButton = document.createElement('button');
 		this.envGeoStreamingButton.innerHTML = 'share env';
-		this.envGeoStreamingButton.style.width = '100px';
+		this.envGeoStreamingButton.style.minWidth = '100px';
 		this.envGeoStreamingButton.style.height = '50px';
-		this.envGeoStreamingButton.style.left = '5px';
 		this.envGeoStreamingButton.style.bottom = '5px';
 		this.envGeoStreamingButton.style.position = 'relative';
+		this.envGeoStreamingButton.style.marginRight = '10px';
 		this.envGeoStreamingButton.onclick = () => {
 			if (this.envGeoStreamingStatus) {
 				this.envGeoStreamingStatus = false;
@@ -289,11 +289,11 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.videoStreamingStatus = false;
 		this.videoStreamingButton = document.createElement('button');
 		this.videoStreamingButton.innerHTML = 'share screen';
-		this.videoStreamingButton.style = width = '100px';
+		this.videoStreamingButton.style.minWidth = '100px';
 		this.videoStreamingButton.style.height = '50px';
-		this.videoStreamingButton.style.left = '15px';
 		this.videoStreamingButton.style.bottom = '5px';
 		this.videoStreamingButton.style.position = 'relative';
+		this.videoStreamingButton.style.marginRight = '10px';
 		this.videoStreamingButton.onclick = () => {
 			if (this.videoStreamingStatus) {
 				this.videoStreamingStatus = false;
@@ -333,12 +333,12 @@ AFRAME.registerComponent('ar-mode-controls', {
 		 */
 		this.video360StreamingStatus = false;
 		this.video360StreamingButton = document.createElement('button');
-		this.video360StreamingButton.innerHTML = 'share 360 Video';
-		this.video360StreamingButton.style = width = '100px';
+		this.video360StreamingButton.innerHTML = 'share 360 video';
+		this.video360StreamingButton.style.minWidth = '100px';
 		this.video360StreamingButton.style.height = '50px';
-		this.video360StreamingButton.style.left = '15px';
 		this.video360StreamingButton.style.bottom = '5px';
 		this.video360StreamingButton.style.position = 'relative';
+		this.video360StreamingButton.style.marginRight = '10px';
 		this.video360StreamingButton.onclick = () => {
 			if (this.video360StreamingStatus) {
 				this.video360StreamingStatus = false;
