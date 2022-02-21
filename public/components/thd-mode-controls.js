@@ -224,7 +224,7 @@ AFRAME.registerComponent('thd-mode-controls', {
             function workerRunner() {
                 self.onmessage = function (event) {
                     function roundToSix(num) {
-                        return +(Math.round(num + "e+5") + "e-5");
+                        return +(Math.round(num + "e+7") + "e-7");
                     }
 
                     let width = event.data[0];
