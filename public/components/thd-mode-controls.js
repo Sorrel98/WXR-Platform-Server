@@ -224,30 +224,32 @@ AFRAME.registerComponent('thd-mode-controls', {
             function workerRunner() {
                 self.onmessage = function (event) {
                     function roundToSix(num) {
-                        return +(Math.round(num + "e+5") + "e-5");
+                        return +(Math.round(num + "e+7") + "e-7");
                     }
 
                     let width = event.data[0];
+                    let points = new Array(width * 8);
                     let pcd_position = event.data[1];
                     let pcd_color = event.data[2];
                     let data = `# .PCD v.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z rgb\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\nWIDTH ${width}\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ${width}\nDATA ascii\n`;
                     let r = 0, g = 0, b = 0;
-                    for (i = 0; i < width * 3; i++) {
-                        data = data.concat(String(roundToSix(pcd_position.array[i]))) + " ";
-                        switch (i % 3) {
-                            case 0: r = (pcd_color.array[i]) * 255; break;
-                            case 1: g = (pcd_color.array[i]) * 255; break;
-                            default:
-                                b = (pcd_color.array[i]) * 255;
-                                rgb = Math.floor((r + g / 256 + b / (256 * 256)) * 256 * 256);
-                                if (i != width * 3 - 1) {
-                                    data = data.concat(String(rgb) + "\n");
-                                }
-                                else {
-                                    data = data.concat(String(rgb));
-                                }
+                    for (i = 0; i < width; i++) {
+                        points[i * 8] = roundToSix(pcd_position.array[i * 3]); //x
+                        points[i * 8 + 1] = " ";
+                        points[i * 8 + 2] = roundToSix(pcd_position.array[i * 3 + 1]); //y
+                        points[i * 8 + 3] = " ";
+                        points[i * 8 + 4] = roundToSix(pcd_position.array[i * 3 + 2]); //z
+                        points[i * 8 + 5] = " ";
+                        r = (pcd_color.array[i * 3]) * 255;
+                        g = (pcd_color.array[i * 3 + 1]) * 255;
+                        b = (pcd_color.array[i * 3 + 2]) * 255;
+                        rgb = Math.floor((r + g / 256 + b / (256 * 256)) * 256 * 256);
+                        points[i * 8 + 6] = rgb; //rgb
+                        if (i != width - 1) {
+                            points[i * 8 + 7] = "\n";
                         }
                     }
+                    data += points.join("");
                     self.postMessage(data);
                 }
             };
@@ -1503,14 +1505,14 @@ AFRAME.registerComponent('thd-mode-controls', {
         this.copyButton.style.cursor = 'pointer';
         this.copyButton.style.padding = '2px';
         this.copyButton.addEventListener('click', () => {
-            if(typeof(window.ClipboardItem)!="undefined"){
+            if (typeof (window.ClipboardItem) != "undefined") {
                 navigator.clipboard.writeText([new ClipboardItem({ 'text/plain': new Blob([this._stringifyContent()], { type: 'text/plain' }) })]).then(() => {
                     console.log('success copy to clipboard');
                 }, () => {
                     console.log('fail copy to clipboard');
                 });
             }
-            else{
+            else {
                 navigator.clipboard.writeText(this._stringifyContent()).then(() => {
                     console.log('success copy to clipboard');
                 }, () => {
