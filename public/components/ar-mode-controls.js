@@ -235,6 +235,16 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.streamingUILayer.style.display = 'none';
 		document.body.appendChild(this.streamingUILayer);
 
+		this.lidarRangeUILayer = document.createElement('div');
+		this.lidarRangeUILayer.style.position = 'fixed';
+		this.lidarRangeUILayer.style.zIndex = 10000;
+		this.lidarRangeUILayer.style.right = '2px';
+		this.lidarRangeUILayer.style.bottom = '200px';
+		this.lidarRangeUILayer.style.textAlign = 'right';
+		this.lidarRangeUILayer.style.marginRight = '5px';
+		this.lidarRangeUILayer.style.display = 'none';
+		document.body.appendChild(this.lidarRangeUILayer);
+
 		/**
 		 * Environment (point cloud or scene geometry) streaming thorugh WebRTC.
 		 * In one workspace session, streaming rights are exclusive 
@@ -370,6 +380,27 @@ AFRAME.registerComponent('ar-mode-controls', {
 		};
 		this.streamingUILayer.appendChild(this.video360StreamingButton);
 
+		this.lidarRangeSlider = document.createElement('input');
+		this.lidarRangeSlider.type = 'range';
+		this.lidarRangeSlider.min = '0';
+		this.lidarRangeSlider.max = '120';
+		this.lidarRangeSlider.value = '20';
+		this.lidarRangeSlider.orient = 'vertical';
+		this.lidarRangeSlider.style.width = '15px';
+		this.lidarRangeSlider.style.height = '300px';
+		this.lidarRangeSlider.style.webkitAppearance = 'slider-vertical';
+		this.lidarRangeSlider.oninput = () => {
+			const lidarRangeLimit = parseFloat(parseFloat(this.lidarRangeSlider.value).toFixed(3)) / 10;
+			this.lidarRangeText.innerText = lidarRangeLimit + ' m';
+			this.callNative('setLidarRangeLimit', lidarRangeLimit);
+		}
+		this.lidarRangeUILayer.appendChild(this.lidarRangeSlider);
+
+		this.lidarRangeText = document.createElement('span');
+		this.lidarRangeText.innerText = parseFloat(parseFloat(this.lidarRangeSlider.value).toFixed(3)) / 10 + ' m';
+		this.lidarRangeText.style.display = 'block';
+		this.lidarRangeUILayer.appendChild(this.lidarRangeText);
+
 		/**
 		 * It is asynchronous function.
 		 * It return a promise to be resolved when interaction mode change to AR.
@@ -399,6 +430,10 @@ AFRAME.registerComponent('ar-mode-controls', {
 					this.videoStreamingButton.innerHTML = 'share screen';
 					this.videoStreamingStatus = false;
 					this.streamingUILayer.style.display = 'block';
+					
+					const lidarRangeLimit = parseFloat(parseFloat(this.lidarRangeSlider.value).toFixed(3)) / 10;
+					this.callNative('setLidarRangeLimit', lidarRangeLimit);
+					this.lidarRangeUILayer.style.display = 'block';
 
 					let resultMap1 = new Map();
 					let amArray = Array.from(this.ARTracker.activeMarkers);
@@ -497,6 +532,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 			sceneEl.camera.el.setAttribute('look-controls', 'enabled', true);
 			this.orgCamMatrix = null;
 			this.streamingUILayer.style.display = 'none';
+			this.lidarRangeUILayer.style.display = 'none';
 			this.callNative('onExitAR');
 			sceneEl.removeState('ar-mode');
 			sceneEl.emit('exit-ar', { target: sceneEl });
