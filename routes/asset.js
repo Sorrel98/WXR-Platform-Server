@@ -582,6 +582,7 @@ router.post('/removeAsset', async (request, response, next) => {
 		return next(err);
 	}
 
+	response.setHeader('content-type', 'text/plain');
 	response.status(200).end();
 });
 
@@ -727,6 +728,7 @@ router.post('/unshareAsset', async (request, response, next) => {
 		return next(err);
 	}
 
+	response.setHeader('content-type', 'text/plain');
 	response.status(200).end();
 });
 
