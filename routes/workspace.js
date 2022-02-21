@@ -123,6 +123,7 @@ router.post('/removeWorkspace', async (request, response, next) => {
         return next(err);
     }
 
+    response.setHeader('content-type', 'text/plain');
     response.status(200).end();
 });
 
@@ -160,6 +161,7 @@ router.post('/setBookmark', async (request, response, next) => {
         return next(err);
     }
 
+    response.setHeader('content-type', 'text/plain');
     response.status(200).end();
 });
 
@@ -315,6 +317,7 @@ router.post('/join', async (request, response, next) => {
         return next(err);
     }
 
+    response.setHeader('content-type', 'text/plain');
     response.status(200).end();
 });
 
@@ -352,6 +355,7 @@ router.post('/removeInvite', async (request, response, next) => {
         return next(err);
     }
 
+    response.setHeader('content-type', 'text/plain');
     response.status(200).end();
 });
 
@@ -517,6 +521,7 @@ router.post('/leave', async (request, response, next) => {
         return next(err);
     }
 
+    response.setHeader('content-type', 'text/plain');
     response.status(200).end();
 });
 
@@ -625,6 +630,7 @@ router.post('/save', async (request, response, next) => {
     }
 
     sessionManager.onSaved(uid, parseInt(wid));
+
     response.setHeader('content-type', 'text/plain');
     response.status(200).end();
 });
@@ -683,6 +689,8 @@ router.post('/savePCD', async (request, response, next) => {
             }
             return next(err);
         }
+
+        response.setHeader('content-type', 'text/plain');
         response.status(200).end();
     });
     form.parse(request);
@@ -768,6 +776,7 @@ router.delete('/workspace/sessions', async (request, response, next) => {
         return next(err);
     }
 
+    response.setHeader('content-type', 'text/plain');
     response.status(200).end();
 
 });

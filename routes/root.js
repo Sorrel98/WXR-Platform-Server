@@ -99,6 +99,7 @@ router.post('/removeAccount', async (request, response, next) => {
         return next(err);
     }
 
+    response.setHeader('content-type', 'text/plain');
     request.session.destroy();
     response.status(200).end();
 });
@@ -146,6 +147,7 @@ router.post('/login', async (request, response, next) => {
     sess.is_admin = res1[0].is_admin;
 
     console.log(`[${id}] login`);
+    
     response.setHeader('content-type', 'text/plain');
     response.status(200).end();
 });
@@ -161,6 +163,7 @@ router.post('/logout', (request, response) => {
     // await util.promisify(request.session.destroy)();
     request.session.destroy((err) => {
         if (!err) {
+            response.setHeader('content-type', 'text/plain');
             response.status(200).end();
         }
         else {
