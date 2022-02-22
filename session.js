@@ -335,6 +335,10 @@ class SessionManager {
 			const enableSyncVRHand = (vrHandSync == 1);
 			console.log(`Socket connected : ${name}`);
 
+			socket.on('share360', (isStreaming) => {
+				io.emit('share360button', isStreaming);
+			});
+
 			socket.on('joinWS', async (wid) => {
 				// socket.userData.wsSession = getWSSessionByWID.get(wid);
 				wsSession = getWSSessionByWID.get(wid);

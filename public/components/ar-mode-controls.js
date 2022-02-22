@@ -331,6 +331,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 		 * and only users who have been issued a token from the server can stream.
 		 * When the streaming ends, the token is returned to the server.
 		 */
+		this.socket = io(window.location.origin);
 		this.video360StreamingStatus = false;
 		this.video360StreamingButton = document.createElement('button');
 		this.video360StreamingButton.innerHTML = 'share 360 video';
@@ -343,12 +344,14 @@ AFRAME.registerComponent('ar-mode-controls', {
 			if (this.video360StreamingStatus) {
 				this.video360StreamingStatus = false;
 				this.video360StreamingButton.innerHTML = 'share 360Video';
+				this.socket.emit('share360', false);
 				this.callNative('onRemoveStreamingChannel', 3);
 			}
 			else {
 				if (this.streamingToken !== null) {
 					this.video360StreamingStatus = true;
 					this.video360StreamingButton.innerHTML = 'unshare 360Video';
+					this.socket.emit('share360', true);
 					this.callNative('onAddStreamingChannel', 3);
 				}
 				else {
@@ -358,6 +361,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 							this.streamingToken = token;
 							this.video360StreamingStatus = true;
 							this.video360StreamingButton.innerHTML = 'unshare 360Video';
+							this.socket.emit('share360', true);
 							this.callNative('onInitStreaming', wid, token);
 							this.callNative('onAddStreamingChannel', 3);
 						})

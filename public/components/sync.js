@@ -208,6 +208,14 @@ AFRAME.registerComponent('sync', {
 		}
 		rtcDiv.appendChild(this.video360ReceiveButton);
 
+		this.videoRealtimeIcon = document.createElement('img');
+		this.videoRealtimeIcon.setAttribute('src', '/img/icon/gray.svg');
+		this.videoRealtimeIcon.style.height = '15px';
+		this.videoRealtimeIcon.style.width = '15px';
+		this.videoRealtimeIcon.style.marginTop = '5px';
+		this.videoRealtimeIcon.style.display = 'block';
+		rtcDiv.appendChild(this.videoRealtimeIcon);
+
 		/**
 		 * Get an audio stream from the local device's microphone
 		 */
@@ -436,6 +444,17 @@ AFRAME.registerComponent('sync', {
 				this.videoasset.srcObject.removeTrack(this.receivedArStreamPC.videoTrack);
 			}
 			this.receivedArStreamPC = null;
+		});
+
+		this.socket.on('share360button', (isStreaming) => {
+			if (isStreaming) {
+				console.log('360 streaming...');
+				this.videoRealtimeIcon.setAttribute('src', '/img/icon/green.svg');
+			}
+			else {
+				console.log('360 streaming finised');
+				this.videoRealtimeIcon.setAttribute('src', '/img/icon/gray.svg');
+			}
 		});
 
 		/**
