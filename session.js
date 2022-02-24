@@ -71,6 +71,15 @@ class WSSession {
 				this.streamerSocket.emit('newIceCandidate', socket.userData.sessionName, candidate.sdpMid, candidate.sdpMLineIndex, candidate.candidate);
 			}
 		});
+		
+		socket.on('share360', (isStreaming) => {
+			io.emit('share360button', isStreaming);
+			this.isStreaming = isStreaming;
+		});
+
+		socket.on('get360status',()=>{
+			console.log(this.streamerSocket);
+		});
 
 		//For scene synchronization
 		socket.on('work', (workUUID, elId, typeNo, data) => {
@@ -335,10 +344,6 @@ class SessionManager {
 			const enableSyncVRHand = (vrHandSync == 1);
 			console.log(`Socket connected : ${name}`);
 
-			socket.on('share360', (isStreaming) => {
-				io.emit('share360button', isStreaming);
-			});
-
 			socket.on('joinWS', async (wid) => {
 				// socket.userData.wsSession = getWSSessionByWID.get(wid);
 				wsSession = getWSSessionByWID.get(wid);
@@ -374,7 +379,7 @@ class SessionManager {
 			socket.on('joinWSasStreamer', (wid, token) => {
 				// socket.userData.wsSession = getWSSessionByWID.get(wid);
 				wsSession = getWSSessionByWID.get(wid);
-				// name = token;    // ???????????? Î≠êÏûÑ??
+				// name = token;    // ???????????? ππ¿”??
 				if (!wsSession || !wsSession.joinAsStreamer(socket, token)) {
 					socket.disconnect(true);
 					wsSession = null;

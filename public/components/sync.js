@@ -28,7 +28,7 @@ class EnvPoints {
 		this.nextPointIdx = 0;
 
 		this.mesh = new THREE.Points();
-		this.mesh.frustumCulled = false; // í¬ì¸íŠ¸ë©”ì‰¬ì˜ í”„ëŸ¬ìŠ¤í…€ì»¬ë§ì— ë²„ê·¸ê°€ ìˆì–´ì„œ ë”
+		this.mesh.frustumCulled = false; // Æ÷ÀÎÆ®¸Ş½¬ÀÇ ÇÁ·¯½ºÅÒÄÃ¸µ¿¡ ¹ö±×°¡ ÀÖ¾î¼­ ²û
 		this.mesh.material.vertexColors = THREE.VertexColors;
 		this.mesh.material.color.setRGB(1, 1, 1);
 		this.mesh.material.size = 0.01;
@@ -95,10 +95,11 @@ AFRAME.registerComponent('sync', {
 		this.movingObjMats = new Map(); // <key: elId, value: matrix>
 		this.userMap = new Map();
 		this.attachReceiver = this.attachReceiver.bind(this);
+		this.isStreaming = null;
 
 		this.video360 = null
 
-		// 360 ë¹„ë””ì˜¤ íŠ¸ë™ MediaStreamTrackë¥¼ ë°›ì„ ë³€ìˆ˜ (ìœ„ì˜ ì»¤ìŠ¤í…€ í”„ë¡œí¼í‹° ëŒ€ì‹  ë§Œë“¦)
+		// 360 ºñµğ¿À Æ®·¢ MediaStreamTrack¸¦ ¹ŞÀ» º¯¼ö (À§ÀÇ Ä¿½ºÅÒ ÇÁ·ÎÆÛÆ¼ ´ë½Å ¸¸µê)
 		// this.envSphericalTrack = null
 
 		/**
@@ -209,7 +210,14 @@ AFRAME.registerComponent('sync', {
 		rtcDiv.appendChild(this.video360ReceiveButton);
 
 		this.videoRealtimeIcon = document.createElement('img');
-		this.videoRealtimeIcon.setAttribute('src', '/img/icon/gray.svg');
+		let syncComp = this.el.components['sync'];
+		syncComp.get360status();
+		// console.log('status', status);
+		// if(status){
+		// 	this.videoRealtimeIcon.setAttribute('src', '/img/icon/green.svg');
+		// }else{
+		// 	this.videoRealtimeIcon.setAttribute('src', '/img/icon/gray.svg');
+		// }
 		this.videoRealtimeIcon.style.height = '15px';
 		this.videoRealtimeIcon.style.width = '15px';
 		this.videoRealtimeIcon.style.marginTop = '5px';
@@ -447,6 +455,7 @@ AFRAME.registerComponent('sync', {
 		});
 
 		this.socket.on('share360button', (isStreaming) => {
+			this.isStreaming = isStreaming;
 			if (isStreaming) {
 				console.log('360 streaming...');
 				this.videoRealtimeIcon.setAttribute('src', '/img/icon/green.svg');
@@ -456,6 +465,16 @@ AFRAME.registerComponent('sync', {
 				this.videoRealtimeIcon.setAttribute('src', '/img/icon/gray.svg');
 			}
 		});
+
+		// this.socket.emit('sss', ()=>{
+		// 	let el = this.userMap.get(data.sessionName);
+		// 	if(el){
+		// 		let arComp = el.components['ar-mode-controls'];
+		// 		console.log(arComp.getStatusInArmodecontrols());
+		// 	}
+		// });
+
+	
 
 		/**
 		 * When you receive your session name from the server, you prepare for all communication.
@@ -467,6 +486,7 @@ AFRAME.registerComponent('sync', {
 			this.el.emit('syncReady', null, false);
 			console.log('get session name : ' + sessionName);
 
+			
 			/**
 			 * Create a webRTC connection for voice chat with other users.
 			 */
@@ -779,6 +799,17 @@ AFRAME.registerComponent('sync', {
 			}
 		});
 	},
+
+	sharing360streaming: function (isStreaming) {
+		// this.isStreaming = isStreaming;
+		this.socket.emit('share360', isStreaming);
+	},
+
+	get360status: function (el) {
+		console.log('get360status function');
+		// this.socket.emit('get360status');
+	},
+
 	/**
 	 * If live is true, object creation is sent, if false, object deletion is sent to the server.
 	 * If the server rejects the synchronization process, the promise is rejected and the local work is also canceled.

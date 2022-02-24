@@ -40,7 +40,7 @@ app.use('/', require('./routes/asset'));
 
 //For redirect http to https, Check the redirect location
 const httpServer = http.createServer(function (request, response) {
-    response.writeHead(302, { 'Location': 'https://192.168.1.51' });
+    response.writeHead(302, { 'Location': 'https://192.168.0.34' });
     response.end();
 }).listen(80, function () {
     console.log('Redirect server running');

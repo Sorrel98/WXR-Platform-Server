@@ -1,3 +1,5 @@
+// const { Socket } = require("socket.io");
+
 /**
  * The class that ar-mode-controls has as a member.
  * The active marker or camera model matrix passed from the native module is applied to the scene.
@@ -331,7 +333,8 @@ AFRAME.registerComponent('ar-mode-controls', {
 		 * and only users who have been issued a token from the server can stream.
 		 * When the streaming ends, the token is returned to the server.
 		 */
-		this.socket = io(window.location.origin);
+
+		// let syncComp = this.el.components['sync'];
 		this.video360StreamingStatus = false;
 		this.video360StreamingButton = document.createElement('button');
 		this.video360StreamingButton.innerHTML = 'share 360 video';
@@ -340,28 +343,30 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.video360StreamingButton.style.bottom = '5px';
 		this.video360StreamingButton.style.position = 'relative';
 		this.video360StreamingButton.style.marginRight = '10px';
+		// syncComp.sharing360streaming(this.video360StreamingStatus);
+
 		this.video360StreamingButton.onclick = () => {
 			if (this.video360StreamingStatus) {
 				this.video360StreamingStatus = false;
 				this.video360StreamingButton.innerHTML = 'share 360Video';
-				this.socket.emit('share360', false);
+				// syncComp.sharing360streaming(this.video360StreamingStatus);
 				this.callNative('onRemoveStreamingChannel', 3);
 			}
 			else {
 				if (this.streamingToken !== null) {
 					this.video360StreamingStatus = true;
 					this.video360StreamingButton.innerHTML = 'unshare 360Video';
-					this.socket.emit('share360', true);
+					// syncComp.sharing360streaming(this.video360StreamingStatus);
 					this.callNative('onAddStreamingChannel', 3);
 				}
 				else {
-					let syncComp = this.el.components['sync'];
+					// let syncComp = this.el.components['sync'];
 					if (syncComp) {
 						syncComp.getArStreamingToken().then((token) => {
 							this.streamingToken = token;
 							this.video360StreamingStatus = true;
 							this.video360StreamingButton.innerHTML = 'unshare 360Video';
-							this.socket.emit('share360', true);
+							// syncComp.sharing360streaming(this.video360StreamingStatus);
 							this.callNative('onInitStreaming', wid, token);
 							this.callNative('onAddStreamingChannel', 3);
 						})
@@ -510,12 +515,18 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.callNative('onEnterWorkspace');
 	},
 	update: function (oldData) {
+		// let syncComp = this.el.components['sync'];
+		// syncComp.sharing360streaming(this.video360StreamingStatus);
 	},
 	play: function () {
 	},
 	pause: function () {
 	},
 	tick: function () {
+
+	},
+	getStatusInArmodecont: function(){
+		return this.video360StreamingStatus;
 	},
 	remove: function () {
 		this.ARTracker = null;
