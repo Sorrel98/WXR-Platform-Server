@@ -696,6 +696,11 @@ AFRAME.registerComponent('sync', {
 		});
 
 		this.socket.emit('joinWS', wid);
+
+	//send 360 status to session server from ar-mode-controls as signal color changed for realtime
+	sharing360streaming: function (isStreaming) {
+		this.socket.emit('share360', isStreaming);
+	},
 	},
 
 	play: function () {
