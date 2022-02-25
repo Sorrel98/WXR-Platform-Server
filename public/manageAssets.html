@@ -79,7 +79,7 @@
                     assetNavOl.innerHTML = "";
                     let lastIdx = node.pathArr.length - 1;
                     for (let idx = 0; idx < lastIdx; ++idx) {
-                        assetNavOl.innerHTML += "<li class='breadcrumb-item'><a href='javascript:getAssetInfo(" + node.pathArr[idx].id + ");'>" + node.pathArr[idx].name + "</a></li>";
+                        assetNavOl.innerHTML += "<li class='breadcrumb-item'><a href='javascript:getAssetInfo(" + node.pathArr[idx].id + ");void(0);'>" + node.pathArr[idx].name + "</a></li>";
                     }
                     assetNavOl.innerHTML += "<li class='breadcrumb-item active' aria-current='page'>" + node.pathArr[lastIdx].name + "</li>";
                     let assetNameInput = document.getElementById('assetName');
@@ -277,7 +277,7 @@
                     td.style.textAlign = 'center';
                     tr.appendChild(td);
                     td = document.createElement('td');
-                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");void(0);'>" + child.name + "</a>";
                     tr.appendChild(td);
                     td = document.createElement('td');
                     td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
@@ -313,7 +313,7 @@
                     td.style.textAlign = 'center';
                     tr.appendChild(td);
                     td = document.createElement('td');
-                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");void(0);'>" + child.name + "</a>";
                     tr.appendChild(td);
                     td = document.createElement('td');
                     td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
@@ -458,7 +458,7 @@
                     td.style.textAlign = 'center';
                     tr.appendChild(td);
                     td = document.createElement('td');
-                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");void(0);'>" + child.name + "</a>";
                     tr.appendChild(td);
                     td = document.createElement('td');
                     td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
@@ -514,7 +514,7 @@
                     td.style.textAlign = 'center';
                     tr.appendChild(td);
                     td = document.createElement('td');
-                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");void(0);'>" + child.name + "</a>";
                     tr.appendChild(td);
                     td = document.createElement('td');
                     td.innerHTML = (child.owner_id !== null ? 'private' : 'public');
@@ -550,7 +550,7 @@
                     td.style.textAlign = 'center';
                     tr.appendChild(td);
                     td = document.createElement('td');
-                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");'>" + child.name + "</a>";
+                    td.innerHTML = "<a href='javascript:getAssetInfo(" + child.id + ");void(0);'>" + child.name + "</a>";
                     tr.appendChild(td);
                     td = document.createElement('td');
                     td.innerHTML = (child.owner_id !== null ? 'private' : 'public');

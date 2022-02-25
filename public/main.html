@@ -137,10 +137,10 @@
                         else {
                             $(pi).removeClass('d-none');
                             if (pn === wsListPage) {
-                                pi.innerHTML = "<b><a class='page-link' href='javascript:getPage(" + pn + ");'>" + pn + "</a></b>";
+                                pi.innerHTML = "<b><a class='page-link' href='javascript:getPage(" + pn + ");void(0);'>" + pn + "</a></b>";
                             }
                             else {
-                                pi.innerHTML = "<a class='page-link' href='javascript:getPage(" + pn + ");'>" + pn + "</a>";
+                                pi.innerHTML = "<a class='page-link' href='javascript:getPage(" + pn + ");void(0);'>" + pn + "</a>";
                             }
                         }
                     }
@@ -151,7 +151,7 @@
                         tr.className = 'wsInform';
 
                         let td = document.createElement('td');
-                        td.innerHTML = "<div class='btn-group' role='group'><button id='btnGroupDrop" + ws.id + "' type='button' class='btn btn-secondary dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>〓</button><div class='dropdown-menu' aria-labelledby='btnGroupDrop" + ws.id + "'><a class='dropdown-item' href='javascript:setBookmark(" + ws.id + ", " + (1 - ws.bookmark.data[0]) + ");'>" + (ws.bookmark.data[0] === 1 ? "un" : "") + "Set bookmark</a><a class='dropdown-item' href='javascript:showInvDiv(" + ws.id + ");'>Invite</a><a class='dropdown-item' href='/manage?id=" + ws.id + "'>Manage</a><a class='dropdown-item' href='javascript:postLeaveWorkspace(" + ws.id + ");'>Leave</a></div></div>";
+                        td.innerHTML = "<div class='btn-group' role='group'><button id='btnGroupDrop" + ws.id + "' type='button' class='btn btn-secondary dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>〓</button><div class='dropdown-menu' aria-labelledby='btnGroupDrop" + ws.id + "'><a class='dropdown-item' href='javascript:setBookmark(" + ws.id + ", " + (1 - ws.bookmark.data[0]) + ");void(0);'>" + (ws.bookmark.data[0] === 1 ? "un" : "") + "Set bookmark</a><a class='dropdown-item' href='javascript:showInvDiv(" + ws.id + ");void(0);'>Invite</a><a class='dropdown-item' href='/manage?id=" + ws.id + "'>Manage</a><a class='dropdown-item' href='javascript:postLeaveWorkspace(" + ws.id + ");void(0);'>Leave</a></div></div>";
                         tr.appendChild(td);
 
                         td = document.createElement('td');
