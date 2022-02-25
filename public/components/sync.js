@@ -209,8 +209,9 @@ AFRAME.registerComponent('sync', {
 		}
 		rtcDiv.appendChild(this.video360ReceiveButton);
 
-		this.videoRealtimeIcon = document.createElement('img');
-		this.videoRealtimeIcon.setAttribute('src', '/img/icon/gray.svg');
+		this.videoRealtimeIcon = document.createElement('div');
+		this.videoRealtimeIcon.style.borderRadius = '100px';
+		this.videoRealtimeIcon.style.backgroundColor = '#808080';
 		this.videoRealtimeIcon.style.height = '15px';
 		this.videoRealtimeIcon.style.width = '15px';
 		this.videoRealtimeIcon.style.marginTop = '5px';
@@ -453,11 +454,11 @@ AFRAME.registerComponent('sync', {
 		this.socket.on('share360button', (isStreaming) => {
 			if (isStreaming) {
 				console.log('360 streaming...');
-				this.videoRealtimeIcon.setAttribute('src', '/img/icon/green.svg');
+				this.videoRealtimeIcon.style.backgroundColor = '#008000';
 			}
 			else {
 				console.log('360 streaming finised');
-				this.videoRealtimeIcon.setAttribute('src', '/img/icon/gray.svg');
+				this.videoRealtimeIcon.style.backgroundColor = '#808080';
 			}
 		});
 
@@ -705,10 +706,10 @@ AFRAME.registerComponent('sync', {
 		this.socket.on('send360statusToClient', (isStreaming) => {
 			this.video360streamingstatus = isStreaming;
 			if (this.video360streamingstatus == true) {
-				this.videoRealtimeIcon.setAttribute('src', '/img/icon/green.svg');
+				this.videoRealtimeIcon.style.backgroundColor = '#008000';
 			}
-			else{
-				this.videoRealtimeIcon.setAttribute('src', '/img/icon/gray.svg');
+			else {
+				this.videoRealtimeIcon.style.backgroundColor = '#808080';
 			}
 		});
 	},
