@@ -336,14 +336,14 @@ class SessionManager {
 			const enableSyncVRHand = (vrHandSync == 1);
 			console.log(`Socket connected : ${name}`);
 
-			socket.on('share360', (isStreaming) => {
+			socket.on('streaming360StatusChanged', (isStreaming) => {
 				//request all client change signal color as changed 360 streaming status in ar-mode-controls
 				status360 = isStreaming;
 				io.emit('share360button', isStreaming);
 			});
 
 			//new client want to know 360 status and answer to the client
-			socket.on('want360status', () => {
+			socket.on('streaming360Status', () => {
 				socket.emit('send360statusToClient', status360);
 			})
 
