@@ -2,6 +2,7 @@ const uuidv4 = require('uuid').v4;
 
 const dbPool = require('./lib/DBpool').dbPool;
 
+var status360 = null;
 
 class WSSession {
 	constructor(wid, sid) {
@@ -336,8 +337,15 @@ class SessionManager {
 			console.log(`Socket connected : ${name}`);
 
 			socket.on('share360', (isStreaming) => {
+				//request all client change signal color as changed 360 streaming status in ar-mode-controls
+				status360 = isStreaming;
 				io.emit('share360button', isStreaming);
 			});
+
+			//new client want to know 360 status and answer to the client
+			socket.on('want360status', () => {
+				socket.emit('send360statusToClient', status360);
+			})
 
 			socket.on('joinWS', async (wid) => {
 				// socket.userData.wsSession = getWSSessionByWID.get(wid);

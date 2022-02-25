@@ -95,6 +95,7 @@ AFRAME.registerComponent('sync', {
 		this.movingObjMats = new Map(); // <key: elId, value: matrix>
 		this.userMap = new Map();
 		this.attachReceiver = this.attachReceiver.bind(this);
+		this.video360streamingstatus = null;
 
 		this.video360 = null
 
@@ -253,6 +254,9 @@ AFRAME.registerComponent('sync', {
 	 */
 	attachReceiver: function () {
 		this.socket = io(window.location.origin);
+
+		//first at all, this new session want to know whether 360 video is streaming or not for first signal color
+		this.firstget360status();
 
 		/**
 		 * When a newly entered user sends a voiceOffer, a webRTC connection for voice chat is created.
@@ -697,10 +701,26 @@ AFRAME.registerComponent('sync', {
 
 		this.socket.emit('joinWS', wid);
 
+		//give 360 status value from session server
+		this.socket.on('send360statusToClient', (isStreaming) => {
+			this.video360streamingstatus = isStreaming;
+			if (this.video360streamingstatus == true) {
+				this.videoRealtimeIcon.setAttribute('src', '/img/icon/green.svg');
+			}
+			else{
+				this.videoRealtimeIcon.setAttribute('src', '/img/icon/gray.svg');
+			}
+		});
+	},
+
 	//send 360 status to session server from ar-mode-controls as signal color changed for realtime
 	sharing360streaming: function (isStreaming) {
 		this.socket.emit('share360', isStreaming);
 	},
+
+	//new client request status value to session server
+	firstget360status: function () {
+		this.socket.emit('want360status');
 	},
 
 	play: function () {
