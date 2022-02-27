@@ -33,6 +33,11 @@
   "author": "",
   "license": "ISC",
   "nodemonConfig": {
-    "ignore": ["public/*", "DDL.js", "LICENSE", "README.md"]
+    "ignore": [
+      "public/*",
+      "DDL.js",
+      "LICENSE",
+      "README.md"
+    ]
   }
 }
