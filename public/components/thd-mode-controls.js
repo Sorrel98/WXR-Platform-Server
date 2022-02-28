@@ -223,10 +223,6 @@ AFRAME.registerComponent('thd-mode-controls', {
 
             function workerRunner() {
                 self.onmessage = function (event) {
-                    function roundToSix(num) {
-                        return +(Math.round(num + "e+7") + "e-7");
-                    }
-
                     let width = event.data[0];
                     let points = new Array(width * 8);
                     let pcd_position = event.data[1];
@@ -234,11 +230,11 @@ AFRAME.registerComponent('thd-mode-controls', {
                     let data = `# .PCD v.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z rgb\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\nWIDTH ${width}\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ${width}\nDATA ascii\n`;
                     let r = 0, g = 0, b = 0;
                     for (i = 0; i < width; i++) {
-                        points[i * 8] = roundToSix(pcd_position.array[i * 3]); //x
+                        points[i * 8] = parseFloat((pcd_position.array[i * 3]).toFixed(6)); //x
                         points[i * 8 + 1] = " ";
-                        points[i * 8 + 2] = roundToSix(pcd_position.array[i * 3 + 1]); //y
+                        points[i * 8 + 2] = parseFloat((pcd_position.array[i * 3 + 1]).toFixed(6)); //y
                         points[i * 8 + 3] = " ";
-                        points[i * 8 + 4] = roundToSix(pcd_position.array[i * 3 + 2]); //z
+                        points[i * 8 + 4] = parseFloat((pcd_position.array[i * 3 + 2]).toFixed(6)); //z
                         points[i * 8 + 5] = " ";
                         r = (pcd_color.array[i * 3]) * 255;
                         g = (pcd_color.array[i * 3 + 1]) * 255;
