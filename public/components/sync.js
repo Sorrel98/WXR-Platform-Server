@@ -452,6 +452,7 @@ AFRAME.registerComponent('sync', {
 		});
 
 		this.socket.on('share360button', (isStreaming) => {
+			this.video360streamingstatus = isStreaming;
 			if (isStreaming) {
 				console.log('360 streaming...');
 				this.videoRealtimeIcon.style.backgroundColor = '#008000';

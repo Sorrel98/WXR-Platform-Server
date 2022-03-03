@@ -2,7 +2,7 @@ const uuidv4 = require('uuid').v4;
 
 const dbPool = require('./lib/DBpool').dbPool;
 
-var status360 = null;
+var status360 = false;
 
 class WSSession {
 	constructor(wid, sid) {

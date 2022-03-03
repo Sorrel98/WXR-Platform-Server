@@ -556,12 +556,42 @@ AFRAME.registerComponent('vr-mode-controls', {
 		}
 	},
 
+	makeArUI: function () {
+		this.el.removeEventListener('enter-vr', this.makeArUI);
+		this.el.addEventListener('exit-vr', this.destroyArUI);
+		let syncComp = this.el.sceneEl.components['sync'];
+		this.video360streamingstatus = syncComp.video360streamingstatus; //correct
+		console.log(this.video360streamingstatus);
+		this.arUI.setAttribute('id', 'signal');
+		this.arUI.setAttribute('radius','0.005');
+		this.arUI.setAttribute('metalness','0');
+		if(this.video360streamingstatus == true){
+			this.arUI.setAttribute('color','green');
+		}
+		else{
+			this.arUI.setAttribute('color','gray');
+		}
+		this.camera.appendChild(this.arUI);
+		this.arUI.object3D.position.set(-0.07,0.07, -0.2); //좌우, 아래위, 앞뒤
+
+		console.log(this.arUI.object3D.position);
+
+	},
+
+	destroyArUI: function () {
+		this.el.addEventListener('enter-vr', this.makeArUI);
+		if (this.arUI) {
+			this.arUI.remove();
+		}
+	},
+
 	init: function () {
 		if (this.el !== this.el.sceneEl) return;
 		this.move3DMode = true;
 		this.rotationMode = false;
 		this.scaleMode = false;
 		this.rig = document.querySelector('[camera]').parentEl;
+		this.camera = document.querySelector('[camera]')
 		this.rig.controls = this;
 		this.arScreen = null;
 		this.leftController = null;
@@ -570,13 +600,20 @@ AFRAME.registerComponent('vr-mode-controls', {
 		this.destroyController = this.destroyController.bind(this);
 		this.makeArScreen = this.makeArScreen.bind(this);
 		this.destroyArScreen = this.destroyArScreen.bind(this);
+		this.arUI = document.createElement('a-sphere');
+		this.makeArUI = this.makeArUI.bind(this);
+		this.destroyArUI = this.destroyArUI.bind(this);
 		this.controllerReady = false;
+		this.video360streamingstatus = false;
 		this.el.addEventListener('enter-vr', this.makeController);
 		this.el.addEventListener('enter-vr', this.makeArScreen);
+		this.el.addEventListener('enter-vr', this.makeArUI);
 		this.el.addEventListener('exit-vr', this.destroyArScreen);
+		this.el.addEventListener('exit-vr', this.destroyArUI);
 	},
 
 	tick: function () {
+		// this.arUI.object3D.position.set(this.rig.object3D.position);
 		if (!this.controllerReady) return;
 		let interactionManagerComp = this.el.sceneEl.components['interaction-manager'];
 
@@ -730,6 +767,8 @@ AFRAME.registerComponent('vr-mode-controls', {
 		this.el.removeEventListener('exit-vr', this.destroyController);
 		this.el.removeEventListener('enter-vr', this.makeArScreen);
 		this.el.removeEventListener('exit-vr', this.destroyArScreen);
+		this.el.removeEventListener('enter-vr', this.makeArUI);
+		this.el.removeEventListener('exit-vr', this.destroyArUI);
 	}
 });
 
