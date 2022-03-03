@@ -4,8 +4,8 @@
   "description": "",
   "main": "./app.js",
   "scripts": {
-    "start": "nodemon ./",
-    "debug": "set DEBUG=express:* & nodemon ./",
+    "start": "set NODE_OPTIONS='--max-old-space-size=4076' & nodemon ./",
+    "debug": "set DEBUG=express:* & set NODE_OPTIONS='--max-old-space-size=4076' & nodemon ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
