@@ -2,7 +2,7 @@
 USE wxr_server;
 
 ########################################################
-/* Paste here exported sql from a erd tool */
+/* Paste here the exported sql from a erd tool */
 CREATE TABLE `t_avatar` (
   `id` INT PRIMARY KEY NOT NULL,
   `name` VARCHAR(45) NOT NULL,
@@ -102,7 +102,8 @@ CREATE TABLE `t_vuforia_feature` (
 
 CREATE TABLE `t_binary_data` (
   `id` INT PRIMARY KEY NOT NULL,
-  `data` LONGBLOB NOT NULL
+  `data` LONGBLOB NOT NULL,
+  `path` TINYTEXT
 );
 
 CREATE TABLE `t_template` (

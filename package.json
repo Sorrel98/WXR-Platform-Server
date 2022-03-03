@@ -6,7 +6,8 @@
   "scripts": {
     "start": "nodemon ./",
     "debug": "set DEBUG=express:* & nodemon ./",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "export_binary": "node utils/export_binary_asset.js"
   },
   "dependencies": {
     "aframe-watcher": "^1.2.0",

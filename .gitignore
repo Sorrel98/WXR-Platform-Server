@@ -88,3 +88,5 @@ typings/
 # certificate
 cert/
 
+# database
+binary_assets/
