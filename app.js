@@ -8,7 +8,6 @@ const http = require('http');
 const https = require('https');
 
 const SqlError = require('mariadb').SqlError;
-const DBError = require('./lib/errors').DBError;
 
 
 // httpsOptions
@@ -58,20 +57,7 @@ const sessionManager = require('./session').sessionManager.init(io);
 // Error Handling
 // **************************************************************************** //
 
-app.use(function dbErrorHandler(error, request, response, next) {
-
-    if (!(error instanceof DBError)) {
-        return next(error);
-    }
-
-    response.status(error.statusCode).end(error.message);
-    // if (process.env.DEBUG){
-    //     console.log(error);
-    // }
-    console.log(error);
-})
-
-app.use(function dbPoolAPIErrorHandler(error, request, response, next) {
+app.use(function sqlErrorHandler(error, request, response, next) {
 
     if (!(error instanceof SqlError)) {
         return next(error);
