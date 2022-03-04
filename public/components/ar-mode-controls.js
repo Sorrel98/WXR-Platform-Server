@@ -332,7 +332,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 		 * When the streaming ends, the token is returned to the server.
 		 */
 		let syncComp = this.el.components['sync'];
-		this.video360StreamingStatus = null;
+		this.video360StreamingStatus = false;
 		this.video360StreamingButton = document.createElement('button');
 		this.video360StreamingButton.innerHTML = 'share 360 video';
 		this.video360StreamingButton.style.minWidth = '100px';
