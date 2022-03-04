@@ -711,11 +711,18 @@ AFRAME.registerComponent('sync', {
 
 		//give 360 status value from session server
 		this.socket.on('send360statusToClient', (isStreaming) => {
+			let el = document.querySelector('#signal');
 			if (isStreaming) {
 				this.videoRealtimeIcon.style.backgroundColor = '#008000';
+				if (el) {
+					el.setAttribute('color', '#008000');
+				}
 			}
 			else {
 				this.videoRealtimeIcon.style.backgroundColor = '#808080';
+				if (el) {
+					el.setAttribute('color', '#808080');
+				}
 			}
 		});
 	},

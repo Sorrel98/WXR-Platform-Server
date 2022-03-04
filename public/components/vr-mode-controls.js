@@ -560,12 +560,13 @@ AFRAME.registerComponent('vr-mode-controls', {
 		this.el.removeEventListener('enter-vr', this.makeStreamingUI);
 		this.el.addEventListener('exit-vr', this.destroyStreamingUI);
 		let syncComp = this.el.sceneEl.components['sync'];
-		this.video360streamingstatus = syncComp.video360streamingstatus; //correct
+		this.video360streamingstatus = syncComp.getStreaming360Status();
 		console.log(this.video360streamingstatus);
+		this.streamingUI = document.createElement('a-sphere');
 		this.streamingUI.setAttribute('id', 'signal');
 		this.streamingUI.setAttribute('radius', '0.005');
 		this.streamingUI.setAttribute('metalness', '0');
-		if (this.video360streamingstatus == true) {
+		if (this.video360streamingstatus) {
 			this.streamingUI.setAttribute('color', 'green');
 		}
 		else {
@@ -598,7 +599,6 @@ AFRAME.registerComponent('vr-mode-controls', {
 		this.destroyController = this.destroyController.bind(this);
 		this.makeArScreen = this.makeArScreen.bind(this);
 		this.destroyArScreen = this.destroyArScreen.bind(this);
-		this.streamingUI = document.createElement('a-sphere');
 		this.makeStreamingUI = this.makeStreamingUI.bind(this);
 		this.destroyStreamingUI = this.destroyStreamingUI.bind(this);
 		this.controllerReady = false;
