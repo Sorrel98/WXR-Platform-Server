@@ -95,7 +95,6 @@ AFRAME.registerComponent('sync', {
 		this.movingObjMats = new Map(); // <key: elId, value: matrix>
 		this.userMap = new Map();
 		this.attachReceiver = this.attachReceiver.bind(this);
-		this.video360streamingstatus = null;
 
 		this.video360 = null
 
@@ -453,7 +452,6 @@ AFRAME.registerComponent('sync', {
 		});
 
 		this.socket.on('share360statusToAll', (isStreaming) => {
-			this.video360streamingstatus = isStreaming;
 			let el = document.querySelector('#signal');
 			if (isStreaming) {
 				console.log('360 streaming...');
@@ -713,8 +711,7 @@ AFRAME.registerComponent('sync', {
 
 		//give 360 status value from session server
 		this.socket.on('send360statusToClient', (isStreaming) => {
-			this.video360streamingstatus = isStreaming;
-			if (this.video360streamingstatus == true) {
+			if (isStreaming) {
 				this.videoRealtimeIcon.style.backgroundColor = '#008000';
 			}
 			else {
