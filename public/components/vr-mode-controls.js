@@ -556,32 +556,30 @@ AFRAME.registerComponent('vr-mode-controls', {
 		}
 	},
 
-	makeArUI: function () {
-		this.el.removeEventListener('enter-vr', this.makeArUI);
-		this.el.addEventListener('exit-vr', this.destroyArUI);
+	makeStreamingUI: function () {
+		this.el.removeEventListener('enter-vr', this.makeStreamingUI);
+		this.el.addEventListener('exit-vr', this.destroyStreamingUI);
 		let syncComp = this.el.sceneEl.components['sync'];
 		this.video360streamingstatus = syncComp.video360streamingstatus; //correct
 		console.log(this.video360streamingstatus);
-		this.arUI.setAttribute('id', 'signal');
-		this.arUI.setAttribute('radius','0.005');
-		this.arUI.setAttribute('metalness','0');
+		this.streamingUI.setAttribute('id', 'signal');
+		this.streamingUI.setAttribute('radius','0.005');
+		this.streamingUI.setAttribute('metalness','0');
 		if(this.video360streamingstatus == true){
-			this.arUI.setAttribute('color','green');
+			this.streamingUI.setAttribute('color','green');
 		}
 		else{
-			this.arUI.setAttribute('color','gray');
+			this.streamingUI.setAttribute('color','gray');
 		}
-		this.camera.appendChild(this.arUI);
-		this.arUI.object3D.position.set(-0.07,0.07, -0.2); //좌우, 아래위, 앞뒤
-
-		console.log(this.arUI.object3D.position);
+		this.camera.appendChild(this.streamingUI);
+		this.streamingUI.object3D.position.set(-0.07,0.07, -0.2); //좌우, 아래위, 앞뒤
 
 	},
 
-	destroyArUI: function () {
-		this.el.addEventListener('enter-vr', this.makeArUI);
-		if (this.arUI) {
-			this.arUI.remove();
+	destroyStreamingUI: function () {
+		this.el.addEventListener('enter-vr', this.makeStreamingUI);
+		if (this.streamingUI) {
+			this.streamingUI.remove();
 		}
 	},
 
@@ -600,16 +598,16 @@ AFRAME.registerComponent('vr-mode-controls', {
 		this.destroyController = this.destroyController.bind(this);
 		this.makeArScreen = this.makeArScreen.bind(this);
 		this.destroyArScreen = this.destroyArScreen.bind(this);
-		this.arUI = document.createElement('a-sphere');
-		this.makeArUI = this.makeArUI.bind(this);
-		this.destroyArUI = this.destroyArUI.bind(this);
+		this.streamingUI = document.createElement('a-sphere');
+		this.makeStreamingUI = this.makeStreamingUI.bind(this);
+		this.destroyStreamingUI = this.destroyStreamingUI.bind(this);
 		this.controllerReady = false;
 		this.video360streamingstatus = false;
 		this.el.addEventListener('enter-vr', this.makeController);
 		this.el.addEventListener('enter-vr', this.makeArScreen);
-		this.el.addEventListener('enter-vr', this.makeArUI);
+		this.el.addEventListener('enter-vr', this.makeStreamingUI);
 		this.el.addEventListener('exit-vr', this.destroyArScreen);
-		this.el.addEventListener('exit-vr', this.destroyArUI);
+		this.el.addEventListener('exit-vr', this.destroyStreamingUI);
 	},
 
 	tick: function () {
@@ -767,8 +765,8 @@ AFRAME.registerComponent('vr-mode-controls', {
 		this.el.removeEventListener('exit-vr', this.destroyController);
 		this.el.removeEventListener('enter-vr', this.makeArScreen);
 		this.el.removeEventListener('exit-vr', this.destroyArScreen);
-		this.el.removeEventListener('enter-vr', this.makeArUI);
-		this.el.removeEventListener('exit-vr', this.destroyArUI);
+		this.el.removeEventListener('enter-vr', this.makeStreamingUI);
+		this.el.removeEventListener('exit-vr', this.destroyStreamingUI);
 	}
 });
 
