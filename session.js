@@ -339,7 +339,7 @@ class SessionManager {
 			socket.on('streaming360StatusChanged', (isStreaming) => {
 				//request all client change signal color as changed 360 streaming status in ar-mode-controls
 				status360 = isStreaming;
-				io.emit('share360button', isStreaming);
+				io.emit('share360statusToAll', isStreaming);
 			});
 
 			//new client want to know 360 status and answer to the client

@@ -451,7 +451,7 @@ AFRAME.registerComponent('sync', {
 			this.receivedArStreamPC = null;
 		});
 
-		this.socket.on('share360button', (isStreaming) => {
+		this.socket.on('share360statusToAll', (isStreaming) => {
 			this.video360streamingstatus = isStreaming;
 			let el = document.querySelector('#signal');
 			if (isStreaming) {
