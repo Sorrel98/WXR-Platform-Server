@@ -40,6 +40,19 @@ class WSSession {
 	}
 
 	async join(socket, name, avatarPath, enableSyncVRHand) {
+		//For sending streaming status
+		socket.on('streaming360StatusChanged', (isStreaming) => {
+			//request all client change signal color as changed 360 streaming status in ar-mode-controls
+			this.status360 = isStreaming;
+			socket.to(this.wid).emit('send360status', isStreaming);
+			socket.emit('send360status', isStreaming);
+		});
+
+		//new client want to know 360 status and answer to the client
+		socket.on('streaming360Status', () => {
+			socket.emit('send360status', this.status360);
+		})
+
 		//For voice chat
 		socket.on('voiceAnswer', (target, sdp) => {
 			let receiverSocket = this.participantSocketsFromSessionName.get(target);
@@ -334,17 +347,6 @@ class SessionManager {
 			const { name, avatarPath, vrHandSync } = res1[0];
 			const enableSyncVRHand = (vrHandSync == 1);
 			console.log(`Socket connected : ${name}`);
-
-			socket.on('streaming360StatusChanged', (isStreaming) => {
-				//request all client change signal color as changed 360 streaming status in ar-mode-controls
-				this.status360 = isStreaming;
-				socket.to(this.wid).emit('send360status', isStreaming);
-			});
-
-			//new client want to know 360 status and answer to the client
-			socket.on('streaming360Status', () => {
-				socket.emit('send360status', this.status360);
-			})
 
 			socket.on('joinWS', async (wid) => {
 				// socket.userData.wsSession = getWSSessionByWID.get(wid);

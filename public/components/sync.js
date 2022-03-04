@@ -210,7 +210,6 @@ AFRAME.registerComponent('sync', {
 
 		this.videoRealtimeIcon = document.createElement('div');
 		this.videoRealtimeIcon.style.borderRadius = '100px';
-		this.videoRealtimeIcon.style.backgroundColor = '#808080';
 		this.videoRealtimeIcon.style.height = '15px';
 		this.videoRealtimeIcon.style.width = '15px';
 		this.videoRealtimeIcon.style.marginTop = '5px';
@@ -451,24 +450,6 @@ AFRAME.registerComponent('sync', {
 			this.receivedArStreamPC = null;
 		});
 
-		this.socket.on('share360statusToAll', (isStreaming) => {
-			let el = document.querySelector('#signal');
-			if (isStreaming) {
-				console.log('360 streaming...');
-				this.videoRealtimeIcon.style.backgroundColor = '#008000';
-				if (el) {
-					el.setAttribute('color', '#008000');
-				}
-			}
-			else {
-				console.log('360 streaming finised');
-				this.videoRealtimeIcon.style.backgroundColor = '#808080';
-				if (el) {
-					el.setAttribute('color', '#808080');
-				}
-			}
-		});
-
 		/**
 		 * When you receive your session name from the server, you prepare for all communication.
 		 */
@@ -478,6 +459,8 @@ AFRAME.registerComponent('sync', {
 			this.el.syncReady = true;
 			this.el.emit('syncReady', null, false);
 			console.log('get session name : ' + sessionName);
+
+			this.getStreaming360Status();
 
 			/**
 			 * Create a webRTC connection for voice chat with other users.
@@ -713,12 +696,14 @@ AFRAME.registerComponent('sync', {
 		this.socket.on('send360status', (isStreaming) => {
 			let el = document.querySelector('#signal');
 			if (isStreaming) {
+				console.log('360 streaming...');
 				this.videoRealtimeIcon.style.backgroundColor = '#008000';
 				if (el) {
 					el.setAttribute('color', '#008000');
 				}
 			}
 			else {
+				console.log('360 streaming finised');
 				this.videoRealtimeIcon.style.backgroundColor = '#808080';
 				if (el) {
 					el.setAttribute('color', '#808080');
