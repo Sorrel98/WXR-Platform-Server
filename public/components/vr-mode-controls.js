@@ -567,10 +567,10 @@ AFRAME.registerComponent('vr-mode-controls', {
 		this.streamingUI.setAttribute('radius', '0.005');
 		this.streamingUI.setAttribute('metalness', '0');
 		if (this.video360streamingstatus) {
-			this.streamingUI.setAttribute('color', 'green');
+			this.streamingUI.setAttribute('color', '#008000');
 		}
 		else {
-			this.streamingUI.setAttribute('color', 'gray');
+			this.streamingUI.setAttribute('color', '#808080');
 		}
 		this.camera.appendChild(this.streamingUI);
 		this.streamingUI.object3D.position.set(-0.07, 0.07, -0.2); //좌우, 아래위, 앞뒤
