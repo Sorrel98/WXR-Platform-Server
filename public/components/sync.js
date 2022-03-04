@@ -457,12 +457,12 @@ AFRAME.registerComponent('sync', {
 			if (isStreaming) {
 				console.log('360 streaming...');
 				this.videoRealtimeIcon.style.backgroundColor = '#008000';
-				el.setAttribute('color','#008000');
+				el.setAttribute('color', '#008000');
 			}
 			else {
 				console.log('360 streaming finised');
 				this.videoRealtimeIcon.style.backgroundColor = '#808080';
-				el.setAttribute('color','#808080');
+				el.setAttribute('color', '#808080');
 			}
 		});
 

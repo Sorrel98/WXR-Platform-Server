@@ -563,16 +563,16 @@ AFRAME.registerComponent('vr-mode-controls', {
 		this.video360streamingstatus = syncComp.video360streamingstatus; //correct
 		console.log(this.video360streamingstatus);
 		this.streamingUI.setAttribute('id', 'signal');
-		this.streamingUI.setAttribute('radius','0.005');
-		this.streamingUI.setAttribute('metalness','0');
-		if(this.video360streamingstatus == true){
-			this.streamingUI.setAttribute('color','green');
+		this.streamingUI.setAttribute('radius', '0.005');
+		this.streamingUI.setAttribute('metalness', '0');
+		if (this.video360streamingstatus == true) {
+			this.streamingUI.setAttribute('color', 'green');
 		}
-		else{
-			this.streamingUI.setAttribute('color','gray');
+		else {
+			this.streamingUI.setAttribute('color', 'gray');
 		}
 		this.camera.appendChild(this.streamingUI);
-		this.streamingUI.object3D.position.set(-0.07,0.07, -0.2); //좌우, 아래위, 앞뒤
+		this.streamingUI.object3D.position.set(-0.07, 0.07, -0.2); //좌우, 아래위, 앞뒤
 
 	},
 
