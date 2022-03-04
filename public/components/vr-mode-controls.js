@@ -559,9 +559,9 @@ AFRAME.registerComponent('vr-mode-controls', {
 	makeStreamingUI: function () {
 		this.el.removeEventListener('enter-vr', this.makeStreamingUI);
 		this.el.addEventListener('exit-vr', this.destroyStreamingUI);
+		console.log('make streaming UI');
 		let syncComp = this.el.sceneEl.components['sync'];
 		this.video360streamingstatus = syncComp.getStreaming360Status();
-		console.log(this.video360streamingstatus);
 		this.streamingUI = document.createElement('a-sphere');
 		this.streamingUI.setAttribute('id', 'signal');
 		this.streamingUI.setAttribute('radius', '0.005');
@@ -579,6 +579,7 @@ AFRAME.registerComponent('vr-mode-controls', {
 
 	destroyStreamingUI: function () {
 		this.el.addEventListener('enter-vr', this.makeStreamingUI);
+		console.log('destroy streaming UI');
 		if (this.streamingUI) {
 			this.streamingUI.remove();
 		}
