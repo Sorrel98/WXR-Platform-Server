@@ -356,6 +356,7 @@ AFRAME.registerComponent('sync', {
 					}
 				};
 				channel.onclose = (e) => {
+					this.updateStreaming360Status(false);
 					console.log(channel.label + ' strings channel close');
 					if (channel.label === "envPoints") {
 						this.envPoints.destroy();

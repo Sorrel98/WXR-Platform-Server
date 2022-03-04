@@ -504,6 +504,9 @@ AFRAME.registerComponent('ar-mode-controls', {
 			this.callNative('onExitAR');
 			sceneEl.removeState('ar-mode');
 			sceneEl.emit('exit-ar', { target: sceneEl });
+			this.video360StreamingStatus = false;
+			let syncComp = this.el.components['sync'];
+			syncComp.updateStreaming360Status(this.video360StreamingStatus);
 			return Promise.resolve();
 		};
 
