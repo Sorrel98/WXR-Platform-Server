@@ -710,7 +710,7 @@ AFRAME.registerComponent('sync', {
 		this.socket.emit('joinWS', wid);
 
 		//give 360 status value from session server
-		this.socket.on('send360statusToClient', (isStreaming) => {
+		this.socket.on('send360status', (isStreaming) => {
 			let el = document.querySelector('#signal');
 			if (isStreaming) {
 				this.videoRealtimeIcon.style.backgroundColor = '#008000';
