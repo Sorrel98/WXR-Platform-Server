@@ -208,6 +208,14 @@ AFRAME.registerComponent('sync', {
 		}
 		rtcDiv.appendChild(this.video360ReceiveButton);
 
+		this.videoRealtimeIcon = document.createElement('div');
+		this.videoRealtimeIcon.style.borderRadius = '100px';
+		this.videoRealtimeIcon.style.height = '15px';
+		this.videoRealtimeIcon.style.width = '15px';
+		this.videoRealtimeIcon.style.marginTop = '5px';
+		this.videoRealtimeIcon.style.display = 'block';
+		rtcDiv.appendChild(this.videoRealtimeIcon);
+
 		/**
 		 * Get an audio stream from the local device's microphone
 		 */
@@ -245,6 +253,9 @@ AFRAME.registerComponent('sync', {
 	 */
 	attachReceiver: function () {
 		this.socket = io(window.location.origin);
+
+		//first at all, this new session want to know whether 360 video is streaming or not for first signal color
+		this.getStreaming360Status();
 
 		/**
 		 * When a newly entered user sends a voiceOffer, a webRTC connection for voice chat is created.
@@ -343,6 +354,7 @@ AFRAME.registerComponent('sync', {
 					}
 				};
 				channel.onclose = (e) => {
+					this.updateStreaming360Status(false);
 					console.log(channel.label + ' strings channel close');
 					if (channel.label === "envPoints") {
 						this.envPoints.destroy();
@@ -447,6 +459,8 @@ AFRAME.registerComponent('sync', {
 			this.el.syncReady = true;
 			this.el.emit('syncReady', null, false);
 			console.log('get session name : ' + sessionName);
+
+			this.getStreaming360Status();
 
 			/**
 			 * Create a webRTC connection for voice chat with other users.
@@ -677,6 +691,35 @@ AFRAME.registerComponent('sync', {
 		});
 
 		this.socket.emit('joinWS', wid);
+
+		//give 360 status value from session server
+		this.socket.on('send360status', (isStreaming) => {
+			let el = document.querySelector('#signal');
+			if (isStreaming) {
+				console.log('360 streaming...');
+				this.videoRealtimeIcon.style.backgroundColor = '#008000';
+				if (el) {
+					el.setAttribute('color', '#008000');
+				}
+			}
+			else {
+				console.log('360 streaming finised');
+				this.videoRealtimeIcon.style.backgroundColor = '#808080';
+				if (el) {
+					el.setAttribute('color', '#808080');
+				}
+			}
+		});
+	},
+
+	//send 360 status to session server from ar-mode-controls as signal color changed for realtime
+	updateStreaming360Status: function (isStreaming) {
+		this.socket.emit('streaming360StatusChanged', isStreaming);
+	},
+
+	//new client request status value to session server
+	getStreaming360Status: function () {
+		this.socket.emit('streaming360Status');
 	},
 
 	play: function () {
