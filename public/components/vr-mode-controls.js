@@ -611,7 +611,6 @@ AFRAME.registerComponent('vr-mode-controls', {
 	},
 
 	tick: function () {
-		// this.arUI.object3D.position.set(this.rig.object3D.position);
 		if (!this.controllerReady) return;
 		let interactionManagerComp = this.el.sceneEl.components['interaction-manager'];
 
