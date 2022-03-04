@@ -2,6 +2,7 @@ const uuidv4 = require('uuid').v4;
 
 const dbPool = require('./lib/DBpool').dbPool;
 
+
 class WSSession {
 	constructor(wid, sid) {
 		console.log(`New WSSession on ${wid}`);
