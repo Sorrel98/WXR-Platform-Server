@@ -166,22 +166,26 @@ AFRAME.registerComponent('thd-mode-controls', {
             let pcd_color = envPointSet.geometry.attributes.color;
             let width = envPointSet.geometry.drawRange.count;
 
-            var workerBlob = new Blob(
+            let workerBlob = new Blob(
                 [workerRunner.toString().replace(/^function .+\{?|\}$/g, '')],
                 { type: 'text/javascript' }
             );
-            var worker = new Worker(URL.createObjectURL(workerBlob));
+            let worker = new Worker(URL.createObjectURL(workerBlob));
 
             let file;
+            let cnt = 1;
             worker.onmessage = function (event) {
-                file = new File([event.data], "data.txt", {
+                file = new File([event.data.data], "data.txt", {
                     type: false
                 });
 
                 let fd = new FormData();
+                let name = null;
+                name = newid + '(' + cnt + ')';
                 fd.append('wid', wid);
-                fd.append('astName', newid);
+                fd.append('astName', name);
                 fd.append('pcdFile', file);
+                cnt += 1;
 
                 $.ajax({
                     url: '/savePCD',
@@ -209,11 +213,15 @@ AFRAME.registerComponent('thd-mode-controls', {
                         return xhrobj;
                     },
                     success: (result) => {
-                        layer4.style.display = "none";
-                        alert("Point Cloud is stored in asset manager");
+                        if (event.data.progressFlag) {
+                            layer4.style.display = "none";
+                            alert("Point Cloud is stored in asset manager");
+                        }
                     },
                     error: (err) => {
-                        layer4.style.display = "none";
+                        if (event.data.progressFlag) {
+                            layer4.style.display = "none";
+                        }
                         alert("Code: " + err.status + "\n" + err.responseText);
                         console.log(err);
                     }
@@ -223,30 +231,39 @@ AFRAME.registerComponent('thd-mode-controls', {
 
             function workerRunner() {
                 self.onmessage = function (event) {
+                    let progressFlag = false;
+
                     let width = event.data[0];
-                    let points = new Array(width * 8);
                     let pcd_position = event.data[1];
                     let pcd_color = event.data[2];
-                    let data = `# .PCD v.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z rgb\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\nWIDTH ${width}\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ${width}\nDATA ascii\n`;
-                    let r = 0, g = 0, b = 0;
-                    for (i = 0; i < width; i++) {
-                        points[i * 8] = parseFloat((pcd_position.array[i * 3]).toFixed(6)); //x
-                        points[i * 8 + 1] = " ";
-                        points[i * 8 + 2] = parseFloat((pcd_position.array[i * 3 + 1]).toFixed(6)); //y
-                        points[i * 8 + 3] = " ";
-                        points[i * 8 + 4] = parseFloat((pcd_position.array[i * 3 + 2]).toFixed(6)); //z
-                        points[i * 8 + 5] = " ";
-                        r = (pcd_color.array[i * 3]) * 255;
-                        g = (pcd_color.array[i * 3 + 1]) * 255;
-                        b = (pcd_color.array[i * 3 + 2]) * 255;
-                        rgb = Math.floor((r + g / 256 + b / (256 * 256)) * 256 * 256);
-                        points[i * 8 + 6] = rgb; //rgb
-                        if (i != width - 1) {
-                            points[i * 8 + 7] = "\n";
+                    let count = 2000000;
+                    for (j = 0; j < parseInt(width / 2000000) + 1; j++) {
+                        if (j == parseInt(width / 2000000)) {
+                            progressFlag = true;
+                            count = width % 2000000;
                         }
+                        let points = new Array(count * 8);
+                        let data = `# .PCD v.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z rgb\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\nWIDTH ${count}\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ${count}\nDATA ascii\n`;
+                        let r = 0, g = 0, b = 0;
+                        for (i = j * 2000000; i < (j * 2000000) + count; i++) {
+                            points[i * 8] = parseFloat((pcd_position.array[i * 3]).toFixed(6)); //x
+                            points[i * 8 + 1] = " ";
+                            points[i * 8 + 2] = parseFloat((pcd_position.array[i * 3 + 1]).toFixed(6)); //y
+                            points[i * 8 + 3] = " ";
+                            points[i * 8 + 4] = parseFloat((pcd_position.array[i * 3 + 2]).toFixed(6)); //z
+                            points[i * 8 + 5] = " ";
+                            r = (pcd_color.array[i * 3]) * 255;
+                            g = (pcd_color.array[i * 3 + 1]) * 255;
+                            b = (pcd_color.array[i * 3 + 2]) * 255;
+                            rgb = Math.floor((r + g / 256 + b / (256 * 256)) * 256 * 256);
+                            points[i * 8 + 6] = rgb; //rgb
+                            if (i != width - 1) {
+                                points[i * 8 + 7] = "\n";
+                            }
+                        }
+                        data += points.join("");
+                        self.postMessage({ data, progressFlag });
                     }
-                    data += points.join("");
-                    self.postMessage(data);
                 }
             };
         };
