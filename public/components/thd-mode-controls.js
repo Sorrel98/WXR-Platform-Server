@@ -213,13 +213,13 @@ AFRAME.registerComponent('thd-mode-controls', {
                         return xhrobj;
                     },
                     success: (result) => {
-                        if(event.data.progressFlag){
+                        if (event.data.progressFlag) {
                             layer4.style.display = "none";
                             alert("Point Cloud is stored in asset manager");
                         }
                     },
                     error: (err) => {
-                        if(event.data.progressFlag){
+                        if (event.data.progressFlag) {
                             layer4.style.display = "none";
                         }
                         alert("Code: " + err.status + "\n" + err.responseText);
@@ -237,7 +237,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                     let pcd_position = event.data[1];
                     let pcd_color = event.data[2];
                     var count = 2000000;
-                    for (j = 0; j < parseInt(width / 2000000) +1; j++) {
+                    for (j = 0; j < parseInt(width / 2000000) + 1; j++) {
                         if (j == parseInt(width / 2000000)) {
                             progressFlag = true;
                             count = width % 2000000;
@@ -248,9 +248,9 @@ AFRAME.registerComponent('thd-mode-controls', {
                         for (i = j * 2000000; i < (j * 2000000) + count; i++) {
                             points[i * 8] = parseFloat((pcd_position.array[i * 3]).toFixed(6)); //x
                             points[i * 8 + 1] = " ";
-                            points[i * 8 + 2] = parseFloat((pcd_position.array[i * 3 + 1]).toFixed(6)); //x
+                            points[i * 8 + 2] = parseFloat((pcd_position.array[i * 3 + 1]).toFixed(6)); //y
                             points[i * 8 + 3] = " ";
-                            points[i * 8 + 4] = parseFloat((pcd_position.array[i * 3 + 2]).toFixed(6)); //x
+                            points[i * 8 + 4] = parseFloat((pcd_position.array[i * 3 + 2]).toFixed(6)); //z
                             points[i * 8 + 5] = " ";
                             r = (pcd_color.array[i * 3]) * 255;
                             g = (pcd_color.array[i * 3 + 1]) * 255;
@@ -262,7 +262,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                             }
                         }
                         data += points.join("");
-                        self.postMessage({data, progressFlag});
+                        self.postMessage({ data, progressFlag });
                     }
                 }
             };
