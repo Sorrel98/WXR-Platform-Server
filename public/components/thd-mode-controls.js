@@ -152,7 +152,7 @@ AFRAME.registerComponent('thd-mode-controls', {
         };
 
         this._savePCD = () => {
-            var layer4 = document.querySelector('#UIGroup4');
+            let layer4 = document.querySelector('#UIGroup4');
             layer4.style.display = "block";
             layer4.style.left = (this.el.offsetLeft + this.el.offsetWidth - 320 - 2) + 'px';
             const sceneEl = tdModeControlsComp.el;
@@ -166,14 +166,14 @@ AFRAME.registerComponent('thd-mode-controls', {
             let pcd_color = envPointSet.geometry.attributes.color;
             let width = envPointSet.geometry.drawRange.count;
 
-            var workerBlob = new Blob(
+            let workerBlob = new Blob(
                 [workerRunner.toString().replace(/^function .+\{?|\}$/g, '')],
                 { type: 'text/javascript' }
             );
-            var worker = new Worker(URL.createObjectURL(workerBlob));
+            let worker = new Worker(URL.createObjectURL(workerBlob));
 
             let file;
-            var cnt = 1;
+            let cnt = 1;
             worker.onmessage = function (event) {
                 file = new File([event.data.data], "data.txt", {
                     type: false
@@ -231,12 +231,12 @@ AFRAME.registerComponent('thd-mode-controls', {
 
             function workerRunner() {
                 self.onmessage = function (event) {
-                    var progressFlag = false;
+                    let progressFlag = false;
 
                     let width = event.data[0];
                     let pcd_position = event.data[1];
                     let pcd_color = event.data[2];
-                    var count = 2000000;
+                    let count = 2000000;
                     for (j = 0; j < parseInt(width / 2000000) + 1; j++) {
                         if (j == parseInt(width / 2000000)) {
                             progressFlag = true;
