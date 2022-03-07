@@ -243,7 +243,7 @@ AFRAME.registerComponent('thd-mode-controls', {
                             count = width % 2000000;
                         }
                         let points = new Array(count * 8);
-                        let data = `# .PCD v.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z rgb\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\nWIDTH ${width}\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ${width}\nDATA ascii\n`;
+                        let data = `# .PCD v.7 - Point Cloud Data file format\nVERSION .7\nFIELDS x y z rgb\nSIZE 4 4 4 4\nTYPE F F F F\nCOUNT 1 1 1 1\nWIDTH ${count}\nHEIGHT 1\nVIEWPOINT 0 0 0 1 0 0 0\nPOINTS ${count}\nDATA ascii\n`;
                         let r = 0, g = 0, b = 0;
                         for (i = j * 2000000; i < (j * 2000000) + count; i++) {
                             points[i * 8] = parseFloat((pcd_position.array[i * 3]).toFixed(6)); //x
