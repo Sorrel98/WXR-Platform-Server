@@ -237,6 +237,14 @@ AFRAME.registerComponent('interaction-manager', {
             }
         };
 
+        this.writeActiveMarkerDetected = (targetEl) => {
+            if (this.interactionMode !== 2) return;
+            let syncComp = this.el.components['sync'];
+            if (syncComp) {
+                syncComp.writeActiveMarkerDetected(targetEl);
+            }
+        };
+
         this.writeVRHandTransform = (leftHandMatrix, rightHandMatrix) => {
             if (this.interactionMode !== 1) return;
             let syncComp = this.el.components['sync'];

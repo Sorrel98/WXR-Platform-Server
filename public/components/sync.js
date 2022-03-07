@@ -710,6 +710,11 @@ AFRAME.registerComponent('sync', {
 				}
 			}
 		});
+
+		this.socket.on('activeMarkerDetected', (elId) => {
+			let el = document.querySelector('#' + elId);
+			el.emit('markerDetected');
+		});
 	},
 
 	//send 360 status to session server from ar-mode-controls as signal color changed for realtime
@@ -1049,5 +1054,12 @@ AFRAME.registerComponent('sync', {
 	writeVRHandGesture: function (handSide, gesture) {
 		if (!this.needToSyncVRHand) return;
 		this.socket.emit('vrHandGestureChanged', handSide, gesture);
+	},
+
+	/**
+	 * In AR mode, inform the server that the active marker is detected.
+	 */
+	writeActiveMarkerDetected: function (el) {
+		this.socket.emit('activeMarkerDetected', el.id);
 	}
 });

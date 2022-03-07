@@ -67,6 +67,7 @@ class ARTracker {
 						am.el.emit('transformChanged');
 						if (interactionManagerComp) {
 							interactionManagerComp.writeInteraction(am.el, 'transform', 'total');
+							interactionManagerComp.writeActiveMarkerDetected(am.el);
 						}
 					}
 				}
@@ -88,6 +89,9 @@ class ARTracker {
 					let cam = this.arModeComp.el.camera.parent;
 					newCameraModel.decompose(cam.position, cam.quaternion, cam.scale);
 					cam.updateMatrix();
+					if (interactionManagerComp) {
+						interactionManagerComp.writeActiveMarkerDetected(targetAMC.el);
+					}
 					this.setVisible(true);
 				}
 			}
@@ -434,7 +438,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 					this.videoStreamingButton.innerHTML = 'share screen';
 					this.videoStreamingStatus = false;
 					this.streamingUILayer.style.display = 'block';
-					
+
 					const lidarRangeLimit = parseFloat(parseFloat(this.lidarRangeSlider.value).toFixed(3)) / 10;
 					this.callNative('setLidarRangeLimit', lidarRangeLimit);
 					this.lidarRangeUILayer.style.display = 'block';

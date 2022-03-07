@@ -102,6 +102,9 @@ class WSSession {
 				this.broadcast(socket, elementId, 4, tfm);
 			}
 		});
+		socket.on('activeMarkerDetected', (elementId) => {
+			socket.to(this.wid).emit('activeMarkerDetected', elementId);
+		});
 
 		//For synchronize someone else's avatar
 		socket.on('changeInteractionMode', (mode) => {
