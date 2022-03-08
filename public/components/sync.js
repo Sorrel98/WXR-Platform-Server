@@ -26,6 +26,7 @@ class EnvPoints {
 		this.maxNumber = 20_000_000;
 		this.pointCount = 0;
 		this.nextPointIdx = 0;
+		this.discarded = 0;
 
 		this.mesh = new THREE.Points();
 		this.mesh.frustumCulled = false; // 포인트메쉬의 프러스텀컬링에 버그가 있어서 끔
@@ -43,6 +44,10 @@ class EnvPoints {
 		parent.add(this.mesh);
 	}
 	addPoint(x, y, z, r, g, b) {
+		if (x == 0 && y == 0 && z == 0) {
+			++this.discarded;
+			return;
+		}
 		this.positions[3 * this.nextPointIdx] = x;
 		this.positions[3 * this.nextPointIdx + 1] = y;
 		this.positions[3 * this.nextPointIdx + 2] = z;
@@ -63,6 +68,7 @@ class EnvPoints {
 	destroy() {
 		this.mesh.parent.remove(this.mesh);
 		this.mesh = null;
+		this.discarded = 0;
 	}
 };
 
