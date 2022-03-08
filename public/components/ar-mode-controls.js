@@ -239,15 +239,15 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.streamingUILayer.style.display = 'none';
 		document.body.appendChild(this.streamingUILayer);
 
-		this.lidarRangeUILayer = document.createElement('div');
-		this.lidarRangeUILayer.style.position = 'fixed';
-		this.lidarRangeUILayer.style.zIndex = 10000;
-		this.lidarRangeUILayer.style.right = '2px';
-		this.lidarRangeUILayer.style.bottom = '200px';
-		this.lidarRangeUILayer.style.textAlign = 'right';
-		this.lidarRangeUILayer.style.marginRight = '5px';
-		this.lidarRangeUILayer.style.display = 'none';
-		document.body.appendChild(this.lidarRangeUILayer);
+		this.scanningQualityControlUILayer = document.createElement('div');
+		this.scanningQualityControlUILayer.style.position = 'fixed';
+		this.scanningQualityControlUILayer.style.zIndex = 10000;
+		this.scanningQualityControlUILayer.style.right = '2px';
+		this.scanningQualityControlUILayer.style.bottom = '150px';
+		this.scanningQualityControlUILayer.style.textAlign = 'right';
+		this.scanningQualityControlUILayer.style.marginRight = '5px';
+		this.scanningQualityControlUILayer.style.display = 'none';
+		document.body.appendChild(this.scanningQualityControlUILayer);
 
 		/**
 		 * Environment (point cloud or scene geometry) streaming thorugh WebRTC.
@@ -388,6 +388,51 @@ AFRAME.registerComponent('ar-mode-controls', {
 		};
 		this.streamingUILayer.appendChild(this.video360StreamingButton);
 
+
+		const lidarConfidenceSelectorTitle = document.createElement('span');
+		lidarConfidenceSelectorTitle.innerText = 'Confidence\nValue';
+		lidarConfidenceSelectorTitle.style.display = 'block';
+		this.scanningQualityControlUILayer.appendChild(lidarConfidenceSelectorTitle);
+
+		const lidarConfidenceSelectorHandler = (ev) => {
+			this.callNative('setlidarConfidence', Number(ev.target.value));
+		}
+		this.lidarConfidenceSelectorHigh = document.createElement('input');
+		this.lidarConfidenceSelectorHigh.id = 'lidarConfidenceSelectorHigh';
+		this.lidarConfidenceSelectorHigh.type = 'radio';
+		this.lidarConfidenceSelectorHigh.name = 'lidarConfidenceSelector';
+		this.lidarConfidenceSelectorHigh.value = '2'; // high
+		this.lidarConfidenceSelectorHigh.oninput = lidarConfidenceSelectorHandler;
+		const lidarConfidenceSelectorHighLabel = document.createElement('label');
+		lidarConfidenceSelectorHighLabel.setAttribute('for', 'lidarConfidenceSelectorHigh');
+		lidarConfidenceSelectorHighLabel.textContent = 'High';
+		this.scanningQualityControlUILayer.appendChild(this.lidarConfidenceSelectorHigh);
+		this.scanningQualityControlUILayer.appendChild(lidarConfidenceSelectorHighLabel);
+		this.scanningQualityControlUILayer.appendChild(document.createElement('br'));
+
+		this.lidarConfidenceSelectorMedium = this.lidarConfidenceSelectorHigh.cloneNode();
+		this.lidarConfidenceSelectorMedium.id = 'lidarConfidenceSelectorMedium';
+		this.lidarConfidenceSelectorMedium.value = '1' // medium
+		this.lidarConfidenceSelectorMedium.oninput = lidarConfidenceSelectorHandler;
+		this.lidarConfidenceSelectorMedium.checked = true;
+		const lidarConfidenceSelectorMediumLabel = document.createElement('label');
+		lidarConfidenceSelectorMediumLabel.setAttribute('for', 'lidarConfidenceSelectorMedium');
+		lidarConfidenceSelectorMediumLabel.textContent = 'Medium';
+		this.scanningQualityControlUILayer.appendChild(this.lidarConfidenceSelectorMedium);
+		this.scanningQualityControlUILayer.appendChild(lidarConfidenceSelectorMediumLabel);
+		this.scanningQualityControlUILayer.appendChild(document.createElement('br'));
+
+		this.lidarConfidenceSelectorLow = this.lidarConfidenceSelectorHigh.cloneNode();
+		this.lidarConfidenceSelectorLow.id = 'lidarConfidenceSelectorLow';
+		this.lidarConfidenceSelectorLow.value = '0' // medium
+		this.lidarConfidenceSelectorLow.oninput = lidarConfidenceSelectorHandler;
+		const lidarConfidenceSelectorLowLabel = document.createElement('label');
+		lidarConfidenceSelectorLowLabel.setAttribute('for', 'lidarConfidenceSelectorLow');
+		lidarConfidenceSelectorLowLabel.textContent = 'Low';
+		this.scanningQualityControlUILayer.appendChild(this.lidarConfidenceSelectorLow);
+		this.scanningQualityControlUILayer.appendChild(lidarConfidenceSelectorLowLabel);
+		this.scanningQualityControlUILayer.appendChild(document.createElement('br'));
+
 		this.lidarRangeSlider = document.createElement('input');
 		this.lidarRangeSlider.type = 'range';
 		this.lidarRangeSlider.min = '0';
@@ -402,12 +447,12 @@ AFRAME.registerComponent('ar-mode-controls', {
 			this.lidarRangeText.innerText = lidarRangeLimit + ' m';
 			this.callNative('setLidarRangeLimit', lidarRangeLimit);
 		}
-		this.lidarRangeUILayer.appendChild(this.lidarRangeSlider);
+		this.scanningQualityControlUILayer.appendChild(this.lidarRangeSlider);
 
 		this.lidarRangeText = document.createElement('span');
 		this.lidarRangeText.innerText = parseFloat(parseFloat(this.lidarRangeSlider.value).toFixed(3)) / 10 + ' m';
 		this.lidarRangeText.style.display = 'block';
-		this.lidarRangeUILayer.appendChild(this.lidarRangeText);
+		this.scanningQualityControlUILayer.appendChild(this.lidarRangeText);
 
 		/**
 		 * It is asynchronous function.
@@ -439,9 +484,14 @@ AFRAME.registerComponent('ar-mode-controls', {
 					this.videoStreamingStatus = false;
 					this.streamingUILayer.style.display = 'block';
 
+					// Trigger oninput event for the selected confidence (default is medium)
+					[this.lidarConfidenceSelectorHigh,
+						this.lidarConfidenceSelectorMedium,
+						this.lidarConfidenceSelectorLow].find(e=> e.checked).dispatchEvent(new Event('input'));
+
 					const lidarRangeLimit = parseFloat(parseFloat(this.lidarRangeSlider.value).toFixed(3)) / 10;
 					this.callNative('setLidarRangeLimit', lidarRangeLimit);
-					this.lidarRangeUILayer.style.display = 'block';
+					this.scanningQualityControlUILayer.style.display = 'block';
 
 					let resultMap1 = new Map();
 					let amArray = Array.from(this.ARTracker.activeMarkers);
@@ -540,7 +590,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 			sceneEl.camera.el.setAttribute('look-controls', 'enabled', true);
 			this.orgCamMatrix = null;
 			this.streamingUILayer.style.display = 'none';
-			this.lidarRangeUILayer.style.display = 'none';
+			this.scanningQualityControlUILayer.style.display = 'none';
 			this.callNative('onExitAR');
 			sceneEl.removeState('ar-mode');
 			sceneEl.emit('exit-ar', { target: sceneEl });
