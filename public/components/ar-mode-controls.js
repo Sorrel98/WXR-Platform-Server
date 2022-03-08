@@ -392,7 +392,7 @@ AFRAME.registerComponent('ar-mode-controls', {
 		this.lidarRangeSlider.type = 'range';
 		this.lidarRangeSlider.min = '0';
 		this.lidarRangeSlider.max = '120';
-		this.lidarRangeSlider.value = '20';
+		this.lidarRangeSlider.value = '120';
 		this.lidarRangeSlider.orient = 'vertical';
 		this.lidarRangeSlider.style.width = '15px';
 		this.lidarRangeSlider.style.height = '300px';
