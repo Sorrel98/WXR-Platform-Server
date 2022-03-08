@@ -4,6 +4,7 @@
  */
 
 AFRAME.registerComponent('event-capturer', {
+	multiple: true,
 	schema: {
 		targetEvent: { type: 'string' } // Multiple events can be listed, separated by commas.
 	},
