@@ -10,6 +10,10 @@ var ENTER_VR_BTN_CLASS = 'a-enter-vr-button';
 var HIDDEN_CLASS = 'a-hidden';
 var ORIENTATION_MODAL_CLASS = 'a-orientation-modal';
 
+var MODE_3D = 'for3D';
+var MODE_VR = 'forVR';
+var MODE_AR = 'forAR';
+
 AFRAME.registerComponent('mode-changer', {
     dependencies: ['canvas'],
 
@@ -69,6 +73,7 @@ AFRAME.registerComponent('mode-changer', {
             tdModeControlsComp.transformControls.detach();
             tdModeControlsComp.el.emit('target-detached', { el: oldTarget }, false);
         }
+        this.updateModeVisibility(MODE_AR);
         this.el._enterAR();
     },
 
@@ -82,6 +87,7 @@ AFRAME.registerComponent('mode-changer', {
             tdModeControlsComp.transformControls.detach();
             tdModeControlsComp.el.emit('target-detached', { el: oldTarget }, false);
         }
+        this.updateModeVisibility(MODE_VR);
         this.el.enterVR();
     },
 
@@ -92,6 +98,7 @@ AFRAME.registerComponent('mode-changer', {
         else if (this.el.is('ar-mode')) {
             this.el.exitAR();
         }
+        this.updateModeVisibility(MODE_3D);
     },
 
     update: function (oldData) {
@@ -181,6 +188,11 @@ AFRAME.registerComponent('mode-changer', {
         this.enterVREl.classList.add(HIDDEN_CLASS);
         this.enterAREl.classList.remove(HIDDEN_CLASS);
     },
+
+    updateModeVisibility: function (mode) {
+        const transpElList = document.querySelectorAll('[transparency]');
+        transpElList.forEach(el => el.components['transparency'].apply(el.object3D, mode));
+    }
 });
 
 /**
