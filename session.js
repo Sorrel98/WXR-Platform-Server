@@ -346,7 +346,7 @@ class SessionManager {
 
 			let wsSession = null;
 			const { name, avatarPath, vrHandSync } = res1[0];
-			const enableSyncVRHand = (vrHandSync == 1);
+			const enableSyncVRHand = (vrHandSync[0] == 1);
 			console.log(`Socket connected : ${name}`);
 
 			socket.on('joinWS', async (wid) => {
