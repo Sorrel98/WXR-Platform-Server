@@ -63,7 +63,7 @@ AFRAME.registerComponent('transparency', {
 			object3D.material.opacity = this.data.value * this.data[mode];
 		}
 		for (let child of object3D.children) {
-			if (child.el == this.el)
+			if (!child.el.components['transparency'])
 				this.apply(child, mode);
 		}
 	},
