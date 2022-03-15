@@ -33,9 +33,12 @@
                 url: '/profile',
                 type: 'GET',
                 success: (profile) => {
-                    document.getElementById('new_name').placeholder = profile.name;
-                    document.getElementById('new_email').placeholder = profile.email;
-                    document.getElementById('new_avatar').options.selectedIndex = profile.avatar_id;
+                    let newNameEl = document.getElementById('new_name');
+                    let newEmailEl = document.getElementById('new_email');
+                    let newAvatarEl = document.getElementById('new_avatar');
+                    newNameEl.value = newNameEl.placeholder = profile.name;
+                    newEmailEl.value = newEmailEl.placeholder = profile.email;
+                    newAvatarEl.options.selectedIndex = profile.avatar_id;
                     let activedRadio;
                     if (profile.vr_hand_sync.data[0] == true) {
                         activedRadio = document.getElementById('vrHandGestureSyncRadio').children[0];
@@ -64,6 +67,7 @@
                     type: fm.method,
                     data: params,
                     success: () => {
+                        window.alert("Your profile is successfully updated.");
                         location.href = '/main';
                     },
                     error: (err) => {
@@ -75,8 +79,7 @@
         };
 
         function onLeave() {
-            const confirmationText = `You chose "leaving the WXR." Are you sure?`;
-            const decideLeave = window.confirm(confirmationText);
+            const decideLeave = window.confirm(`You chose "leaving the WXR." Are you sure?`);
             if (decideLeave === true) {
                 $.ajax({
                     url: '/removeAccount',
