@@ -266,7 +266,7 @@ router.post('/alterUser', async (request, response, next) => {
             params = [name, email, new_pw, avatar_id, uid];
         }
         else {
-            query = `update t_user set name=?, email=?, avatar_id=?, vr_hand_sync=b'${vrHandSync}' where id=?`;
+            query = `update t_user set name=?, email=?, avatar_id=? where id=?`;
             params = [name, email, avatar_id, uid];
         }
         await conn.query(query, params);
