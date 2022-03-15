@@ -262,12 +262,12 @@ router.post('/alterUser', async (request, response, next) => {
 
         let query, params;
         if (new_pw) {
-            query = `update t_user set name=?, email=?, passwd=SHA2(?, 256), avatar_id=?, vr_hand_sync=b'${vrHandSync}' where id=?`;
-            params = [name, email, new_pw, avatar_id, uid];
+            query = `update t_user set name=?, email=?, passwd=SHA2(?, 256), avatar_id=?, vr_hand_sync=? where id=?`;
+            params = [name, email, new_pw, avatar_id, vrHandSync, uid];
         }
         else {
-            query = `update t_user set name=?, email=?, avatar_id=? where id=?`;
-            params = [name, email, avatar_id, uid];
+            query = `update t_user set name=?, email=?, avatar_id=?, vr_hand_sync=? where id=?`;
+            params = [name, email, avatar_id, vrHandSync, uid];
         }
         await conn.query(query, params);
 
