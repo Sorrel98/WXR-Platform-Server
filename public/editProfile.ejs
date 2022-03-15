@@ -75,17 +75,25 @@
         };
 
         function onLeave() {
-            $.ajax({
-                url: '/removeAccount',
-                type: 'POST',
-                success: () => {
-                    location.href = '/loginPage';
-                },
-                error: (err) => {
-                    alert("Code: " + err.status + "\n" + err.responseText);
-                }
-            });
+            const confirmationText = `You chose "leaving the WXR." Are you sure?`;
+            const decideLeave = window.confirm(confirmationText);
+            if (decideLeave === true) {
+                $.ajax({
+                    url: '/removeAccount',
+                    type: 'POST',
+                    success: () => {
+                        location.href = '/loginPage';
+                    },
+                    error: (err) => {
+                        alert("Code: " + err.status + "\n" + err.responseText);
+                    }
+                });
+            }
         };
+
+        function onCancel() {
+            location.href = '/main';
+        }
     </script>
     <style>
         html,
@@ -172,7 +180,7 @@
                     </script>
                 </select>
             </div>
-            <div class="row mb-4 justify-content-between">
+            <div class="row mb-2 justify-content-between">
                 <label for="vrHandGestureSyncRadio">VR hand gesture</label>
                 <div class="btn-group btn-group-toggle" id="vrHandGestureSyncRadio" data-toggle="buttons">
                     <label class="btn btn-sm btn-secondary">
@@ -183,9 +191,17 @@
                     </label>
                 </div>
             </div>
-            <button class="btn btn-sm btn-danger m-1" type="button" onclick="onLeave()"
-                style="float:right;">Leave</button>
-            <button class="btn btn-sm btn-primary m-1" type="submit" style="float:right;">Submit</button>
+            <div class="row mb-4 justify-content-end">
+                <button class="btn btn-sm btn-primary m-1" type="submit" style="float:right;">Submit</button>
+                <button class="btn btn-sm btn-danger m-1" type="button" onclick="onCancel()" style="float:right;">Cancel</button>
+            </div>
+            <div class="row mb-4">
+                <div class="d-flex flex-column w-100">
+                    <label for="">Leave WXR</label>
+                    <button class="btn btn-sm btn-danger" type="button" onclick="onLeave()"
+                    style="float:right;">I confirm to leave the WXR</button>
+                </div>
+            </div>
         </fieldset>
     </form>
 </body>
